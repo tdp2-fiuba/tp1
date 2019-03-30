@@ -1,9 +1,7 @@
 import Express from "express";
 
-function getUsers(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
-  console.log("6");
-  res.send("pepe6");
-  next();
+function getUsers(req: Express.Request, res: Express.Response) {
+  res.send([]);
 }
 
 export default { getUsers };
