@@ -4,10 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const usersController_1 = __importDefault(require("./controllers/usersController"));
+const controllers_1 = require("./controllers");
 const app = express_1.default();
 const port = process.env.PORT || 3000;
-app.get("/users", usersController_1.default.getUsers);
+// Users endpoints
+app.get("/users", controllers_1.usersController.getUsers);
+// Trips endpoints
+// TODO
+// Status endpoints
+app.get("/ping", controllers_1.statusController.ping);
+app.get("/ready", controllers_1.statusController.ready);
+app.get("/status", controllers_1.statusController.status);
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
 });

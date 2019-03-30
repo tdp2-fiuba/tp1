@@ -1,0 +1,18 @@
+{
+  "name": "Eukanuber",
+  "buildpacks": [
+    {
+      "url": "https://github.com/timanovsky/subdir-heroku-buildpack"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs#v142"
+    }
+  ],
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "bundle exec rake test"
+      }
+    }
+  }
+}
