@@ -3,7 +3,6 @@ before_script:
   - cd eukanuber-backend
   - npm install
   - npm run build
-  - npm run test
 deploy:
   provider: heroku
   api_key:
