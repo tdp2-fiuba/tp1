@@ -14,4 +14,5 @@ deploy:
   app: tdp2-backend
   on:
     repo: tdp2-fiuba/tp1
+    travis: tdp2-backend
 
