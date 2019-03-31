@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - '11'
+before_install:
+  - npm install -g typescript
+before_script:
+  - cd eukanuber-backend
+  - npm i
+  - npm run build
