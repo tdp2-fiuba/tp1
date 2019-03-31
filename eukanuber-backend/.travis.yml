@@ -1,3 +1,7 @@
+language: node_js
+script:
+  - cd eukanuber-backend
+  - npm run build
 deploy:
   provider: heroku
   api_key:
@@ -5,3 +9,4 @@ deploy:
   app: tdp2-backend
   on:
     repo: tdp2-fiuba/tp1
+
