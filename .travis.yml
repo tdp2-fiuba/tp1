@@ -3,6 +3,7 @@ before_install:
   - npm install -g typescript
 before_script:
   - cd eukanuber-backend
+  - npm i
   - npm install -g n
   - npm run build
 deploy:
