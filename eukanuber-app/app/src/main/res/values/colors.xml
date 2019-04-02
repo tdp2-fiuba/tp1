@@ -5,4 +5,7 @@
     <color name="colorSecondary">#00A6FF</color>
     <color name="colorSuccess">#32CD32</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorBlackSemitransparent">#B2000000</color>
+    <color name="colorWhite">#fafafa</color>
+
 </resources>

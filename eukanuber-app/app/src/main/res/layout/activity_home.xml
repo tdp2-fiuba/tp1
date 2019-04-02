@@ -32,6 +32,27 @@
 
         <include layout="@layout/content_home" />
 
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/menu_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            app:fab_labelStyle="@style/AppTheme.FloatingButtonLabels"
+            app:fab_addButtonColorNormal="@color/colorSuccess"
+            app:fab_addButtonColorPressed="@color/colorSuccess"
+            app:fab_addButtonSize="normal"
+            app:fab_labelsPosition="left">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/newTripButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/colorSecondary"
+                app:fab_icon="@drawable/ic_fab_trip"
+                app:fab_size="mini"
+                app:fab_title="Nuevo viaje" />
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
     </android.support.design.widget.CoordinatorLayout>
 

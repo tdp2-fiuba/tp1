@@ -8,13 +8,16 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
 import com.fi.uba.ar.tdp2.eukanuber.model.Post;
 import com.fi.uba.ar.tdp2.eukanuber.service.PostService;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -67,6 +70,16 @@ public class HomeActivity extends MenuActivity
             }
         };
         this.checkPermissionsLocation();
+
+        FloatingActionButton newTripButton = findViewById(R.id.newTripButton);
+        newTripButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Go to Nuevo Viaje!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
     }
 
     private void checkPermissionsLocation() {
