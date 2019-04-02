@@ -8,7 +8,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -16,7 +15,7 @@ import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
 import com.fi.uba.ar.tdp2.eukanuber.model.Post;
-import com.fi.uba.ar.tdp2.eukanuber.service.PostService;
+import com.fi.uba.ar.tdp2.eukanuber.provider.PostProvider;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,7 +23,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.util.List;
 
 import retrofit2.Call;
@@ -49,10 +47,10 @@ public class HomeActivity extends MenuActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         Intent intent = getIntent();
         String user = intent.getStringExtra("user");
         System.out.print("user is: " + user);
+
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -71,12 +69,13 @@ public class HomeActivity extends MenuActivity
         };
         this.checkPermissionsLocation();
 
+
         FloatingActionButton newTripButton = findViewById(R.id.newTripButton);
         newTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Go to Nuevo Viaje!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(HomeActivity.this, NewTripActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -123,6 +122,11 @@ public class HomeActivity extends MenuActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
         updateMapLocation();
         getPosts();
     }
@@ -135,7 +139,7 @@ public class HomeActivity extends MenuActivity
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(currentPosition).title("Marker in current position"));
+       // mMap.addMarker(new MarkerOptions().position(currentPosition).title("Marker in current position"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
     }
@@ -145,7 +149,7 @@ public class HomeActivity extends MenuActivity
                 .baseUrl(getString(R.string.rest_api_path))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        PostService postService = retrofit.create(PostService.class);
+        PostProvider postService = retrofit.create(PostProvider.class);
         Call<List<Post>> call = postService.getPost();
 
         call.enqueue(new Callback<List<Post>>() {
