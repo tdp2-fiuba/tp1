@@ -55,15 +55,15 @@ public class HomeActivity extends MenuActivity
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
+                LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                if(mMap != null){
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                }
             }
-
             public void onStatusChanged(String provider, int status, Bundle extras) {
             }
-
             public void onProviderEnabled(String provider) {
-
             }
-
             public void onProviderDisabled(String provider) {
             }
         };
@@ -99,13 +99,7 @@ public class HomeActivity extends MenuActivity
             case PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-                    updateMapLocation();
+                    initMapLocation();
                 } else {
                     Toast.makeText(
                             getApplicationContext(),
@@ -122,24 +116,20 @@ public class HomeActivity extends MenuActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
-        updateMapLocation();
+        initMapLocation();
         getPosts();
     }
 
-    private void updateMapLocation() {
+    private void initMapLocation() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        mMap.setMyLocationEnabled(true);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-       // mMap.addMarker(new MarkerOptions().position(currentPosition).title("Marker in current position"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
     }
