@@ -27,9 +27,18 @@
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
-
+    <style name="AppTheme.Button.Secondary" parent="AppTheme.Button">
+        <item name="android:background">@color/colorSecondary</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
     <style name="AppTheme.Button.Success" parent="AppTheme.Button">
         <item name="android:background">@color/colorSuccess</item>
         <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="AppTheme.LoginHeaderText">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">45dp</item>
     </style>
 </resources>

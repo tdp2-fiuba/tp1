@@ -4,31 +4,53 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/login_background"
     tools:context=".activity.LoginActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
         android:padding="50dp">
 
-        <Button
-            android:id="@+id/buttonEnterClient"
-            style="@style/AppTheme.Button.Primary"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="goHomeClient"
-            android:text="@string/login_button_client" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="35dp"
+            android:gravity="top"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/buttonEnterDriver"
-            style="@style/AppTheme.Button.Success"
+            <TextView
+                style="@style/AppTheme.LoginHeaderText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Eukanuber" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:onClick="goHomeDriver"
-            android:text="@string/login_button_driver" />
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/buttonEnterClient"
+                style="@style/AppTheme.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="goHomeClient"
+                android:text="@string/login_button_client" />
+
+            <Button
+                android:id="@+id/buttonEnterDriver"
+                style="@style/AppTheme.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:onClick="goHomeDriver"
+                android:text="@string/login_button_driver" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>
