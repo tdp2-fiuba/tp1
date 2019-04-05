@@ -1,5 +1,5 @@
 import express from "express";
-import { usersController, statusController } from "./controllers";
+import { statusController, usersController } from "./controllers";
 
 const app = express();
 const port = process.env.PORT || 3000;

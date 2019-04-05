@@ -4,19 +4,36 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
+    "lint": "tslint -c tslint.json -p tsconfig.json",
     "build": "tsc",
     "debug": "tsnd --respawn --transpileOnly --debug --inspect=9229 --nolazy -- ./src/app.ts",
     "prestart": "npm run build",
     "start": "node .",
     "test": "mocha -r ts-node/register src/init-tests.ts src/**/*.test.ts",
-    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register src/**/*.test.ts && nyc report"
+    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register src/**/*.test.ts && nyc report",
+    "db:migrate": "node ./dist/db/cli.js --migrate",
+    "db:rollback": "node ./dist/db/cli.js --rollback",
+    "db:seed": "node ./dist/db/cli.js --seed"
   },
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "config": "^3.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "knex": "^0.16.3",
+    "pg": "^7.9.0"
+  },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/chai": "^4.1.7",
+    "@types/config": "0.0.34",
+    "@types/cors": "^2.8.4",
     "@types/express": "^4.16.1",
+    "@types/knex": "^0.16.1",
     "@types/mocha": "^5.2.6",
+    "@types/pg": "^7.4.14",
     "@types/sinon": "^7.0.11",
     "@types/sinon-chai": "^3.2.2",
     "@types/sinon-express-mock": "^1.3.7",
@@ -27,9 +44,8 @@
     "sinon-chai": "^3.3.0",
     "sinon-express-mock": "^2.2.0",
     "ts-node-dev": "^1.0.0-pre.32",
+    "tslint": "^5.15.0",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.4.1"
-  },
-  "dependencies": {
-    "express": "^4.16.4"
   }
 }

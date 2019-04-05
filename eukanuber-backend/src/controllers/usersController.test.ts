@@ -1,6 +1,6 @@
+import { expect } from "chai";
 import Express from "express";
 import { before } from "mocha";
-import { expect } from "chai";
 import { mockReq, mockRes } from "sinon-express-mock";
 import usersController from "./usersController";
 
