@@ -47,4 +47,7 @@
         <item name="android:background">@drawable/background_label_floating_button</item>
         <item name="android:textColor">@color/colorWhite</item>
     </style>
+    <style name="popup_window_animation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+    </style>
 </resources>

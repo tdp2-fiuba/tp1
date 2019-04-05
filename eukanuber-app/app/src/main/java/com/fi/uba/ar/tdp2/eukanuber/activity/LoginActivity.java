@@ -17,12 +17,12 @@ public class LoginActivity extends AppCompatActivity {
 
     public void goHomeClient(View view) {
         Intent intent = new Intent(this, HomeActivity.class);
-        intent.putExtra("user", "client");
+        intent.putExtra("userType", "client");
         startActivity(intent);
     }
     public void goHomeDriver(View view) {
         Intent intent = new Intent(this, HomeActivity.class);
-        intent.putExtra("user", "driver");
+        intent.putExtra("userType", "driver");
         startActivity(intent);
     }
 
