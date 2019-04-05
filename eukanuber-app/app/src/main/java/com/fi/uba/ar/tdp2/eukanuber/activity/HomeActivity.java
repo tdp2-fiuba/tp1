@@ -23,10 +23,12 @@ import android.widget.Toast;
 import com.fi.uba.ar.tdp2.eukanuber.R;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 public class HomeActivity extends MenuActivity
@@ -154,11 +156,28 @@ public class HomeActivity extends MenuActivity
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
         mMap.setMyLocationEnabled(true);
+        mMap.setMinZoomPreference(14.0f);
+        mMap.setMaxZoomPreference(20.0f);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+
+        if (location != null)
+        {
+            LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+
+            //mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+            //mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Centra el mapa en locacion del usuario
+                    .zoom(18.0f)                   // seteo el zoom
+                    //.bearing(90)                // Orientacion de la camara al este - no queda bien
+                    .tilt(40)                   // tiltea la camara 40 grados
+                    .build();                   // builder
+
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
+        }
     }
 }
