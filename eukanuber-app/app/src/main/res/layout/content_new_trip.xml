@@ -26,7 +26,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Origen"
-                    android:textSize="18dp" />
+                    android:textSize="18dp"
+                    />
+
 
                 <RelativeLayout
                     android:id="@+id/layout_input_search_from"
@@ -39,9 +41,26 @@
                         android:layout_height="match_parent"
                         android:hint="Ingrese un origen"
                         android:imeOptions="actionSearch"
-                        android:singleLine="true" />
-                </RelativeLayout>
+                        android:singleLine="true"
+                        android:paddingRight="40dp"/>
+                    <ImageView
+                        android:id="@+id/input_search_from_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="6dp"
+                        android:src="@drawable/ic_clear_black"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true" />
 
+                </RelativeLayout>
+                <TextView
+                    android:id="@+id/input_search_from_current_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ubicacion actual"
+                    android:textSize="14dp"
+                    android:textColor="@color/quantum_lightblue"/>
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/list_search_from"
                     android:layout_width="match_parent"
@@ -55,7 +74,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -66,7 +86,8 @@
                 <RelativeLayout
                     android:id="@+id/layout_input_search_to"
                     android:layout_width="fill_parent"
-                    android:layout_height="50dp">
+                    android:layout_height="50dp"
+                    >
 
                     <EditText
                         android:id="@+id/input_search_to"
@@ -74,7 +95,17 @@
                         android:layout_height="match_parent"
                         android:hint="Ingrese un destino"
                         android:imeOptions="actionSearch"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:paddingRight="40dp"/>
+                    <ImageView
+                        android:id="@+id/input_search_to_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="6dp"
+                        android:src="@drawable/ic_clear_black"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true" />
                 </RelativeLayout>
 
                 <android.support.v7.widget.RecyclerView

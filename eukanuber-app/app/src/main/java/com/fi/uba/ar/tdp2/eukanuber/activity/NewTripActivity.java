@@ -1,18 +1,27 @@
 package com.fi.uba.ar.tdp2.eukanuber.activity;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
 import com.fi.uba.ar.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
@@ -34,13 +43,16 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAdapter.PlaceAutoCompleteInterface {
+public class NewTripActivity extends MenuActivity implements
+        PlaceAutocompleteAdapter.PlaceAutoCompleteInterface,
+        PlaceAutocompleteAdapter.ShowMessageInterface {
 
     private PlacesClient placesClient;
     private RectangularBounds rectangularBounds;
     private Map<Integer, String> pets = new HashMap<>();
     private Integer rowPets;
     private String payment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,11 +81,14 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
         LinearLayoutManager llm = new LinearLayoutManager(NewTripActivity.this);
         mRecyclerView.setLayoutManager(llm);
 
-        EditText mSearchEdittext = findViewById(R.id.input_search_from);
+        EditText inputFrom = findViewById(R.id.input_search_from);
+        ImageView inputFromClear = findViewById(R.id.input_search_from_clear);
+
         PlaceAutocompleteAdapter mAdapter = new PlaceAutocompleteAdapter(this, R.layout.view_placesearch,
-                placesClient, rectangularBounds, mSearchEdittext, mRecyclerView);
+                placesClient, rectangularBounds, inputFrom, mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
-        mSearchEdittext.addTextChangedListener(new TextWatcher() {
+        mAdapter.setCurrentLocation();
+        inputFrom.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -96,7 +111,12 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
             public void afterTextChanged(Editable s) {
             }
         });
+        TextView inputFromCurrentLocation = findViewById(R.id.input_search_from_current_location);
+        inputFromCurrentLocation.setOnClickListener(v -> mAdapter.setCurrentLocation());
+        inputFromClear.setOnClickListener(v -> inputFrom.setText(""));
+
     }
+
     private void initToInput() {
         RecyclerView mRecyclerView = findViewById(R.id.list_search_to);
         mRecyclerView.setHasFixedSize(true);
@@ -131,6 +151,7 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
             }
         });
     }
+
     private void initAnimals() {
         initAnimalBlock(0, R.id.button_pet_small_0, R.id.button_pet_medium_0, R.id.button_pet_big_0);
         initAnimalBlock(1, R.id.button_pet_small_1, R.id.button_pet_medium_1, R.id.button_pet_big_1);
@@ -146,26 +167,26 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
         rowPets = 1;
         pets.put(0, "S");
         addPet.setOnClickListener(v -> {
-            if(rowPets == 1){
+            if (rowPets == 1) {
                 petRow1.setVisibility(View.VISIBLE);
                 removePet.setVisibility(View.VISIBLE);
                 rowPets++;
                 return;
             }
-            if(rowPets == 2){
+            if (rowPets == 2) {
                 petRow2.setVisibility(View.VISIBLE);
                 rowPets++;
                 return;
             }
         });
         removePet.setOnClickListener(v -> {
-            if(rowPets == 3){
+            if (rowPets == 3) {
                 petRow2.setVisibility(View.GONE);
                 cleanAnimalBlock(2, R.id.button_pet_small_2, R.id.button_pet_medium_2, R.id.button_pet_big_2);
                 rowPets--;
                 return;
             }
-            if(rowPets == 2){
+            if (rowPets == 2) {
                 petRow1.setVisibility(View.GONE);
                 removePet.setVisibility(View.GONE);
                 cleanAnimalBlock(1, R.id.button_pet_small_1, R.id.button_pet_medium_1, R.id.button_pet_big_1);
@@ -175,6 +196,7 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
         });
 
     }
+
     private void initAnimalBlock(int row, int rSmall, int rMedium, int rBig) {
         ImageButton buttonPetSmall = findViewById(rSmall);
         ImageButton buttonPetMedium = findViewById(rMedium);
@@ -198,6 +220,7 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
             pets.put(row, "B");
         });
     }
+
     private void cleanAnimalBlock(int row, int rSmall, int rMedium, int rBig) {
         ImageButton buttonPetSmall = findViewById(rSmall);
         ImageButton buttonPetMedium = findViewById(rMedium);
@@ -207,8 +230,11 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
         buttonPetBig.setBackgroundColor(getResources().getColor(R.color.colorLightTertiary));
         pets.remove(row);
     }
-    private void initEscort(){}
-    private void initPayment(){
+
+    private void initEscort() {
+    }
+
+    private void initPayment() {
         ImageButton paymentCash = findViewById(R.id.button_payment_cash);
         ImageButton paymentCard = findViewById(R.id.button_payment_card);
         paymentCash.setBackgroundColor(getResources().getColor(R.color.colorSecondary));
@@ -227,7 +253,8 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
         });
 
     }
-    private void initSubmit(){
+
+    private void initSubmit() {
         EditText inputFrom = findViewById(R.id.input_search_from);
         EditText inputTo = findViewById(R.id.input_search_to);
         Switch switchEscort = findViewById(R.id.switch_escort);
@@ -267,9 +294,20 @@ public class NewTripActivity extends MenuActivity implements PlaceAutocompleteAd
                 final String description = String.valueOf(mResultList.get(position).description);
                 editTextInput.setText(description);
                 recyclerView.setVisibility(View.GONE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
             } catch (Exception e) {
             }
         }
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
     }
 
 }

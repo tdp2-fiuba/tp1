@@ -39,6 +39,7 @@ public class HomeActivity extends MenuActivity
 
         Intent intent = getIntent();
         String user = intent.getStringExtra("user");
+
         System.out.print("user is: " + user);
 
 

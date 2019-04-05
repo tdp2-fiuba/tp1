@@ -1,6 +1,13 @@
 package com.fi.uba.ar.tdp2.eukanuber.adapter;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,28 +18,40 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
+import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocompleteAdapter.PlaceViewHolder> implements Filterable {
 
     public interface PlaceAutoCompleteInterface {
         public void onPlaceClick(ArrayList<PlaceAutocomplete> mResultList, int position, EditText editText, RecyclerView recyclerView);
     }
+    public interface ShowMessageInterface {
+        public void showMessage(String message);
+    }
 
     private String TAG = "PlaceAutocompleteAdapter";
     Context mContext;
     PlaceAutoCompleteInterface mListener;
+    ShowMessageInterface mListenerMessage;
+
     ArrayList<PlaceAutocomplete> mResultList;
     private PlacesClient mPlacesClient;
     private RectangularBounds mBounds;
@@ -40,6 +59,7 @@ public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocomp
     private AutocompleteSessionToken autocompleteSessionToken;
     private EditText mEditText;
     private RecyclerView mRecyclerView;
+
     public PlaceAutocompleteAdapter(Context context, int resource, PlacesClient placesClient,
                                     RectangularBounds bounds, EditText editText, RecyclerView recyclerView) {
         this.mContext = context;
@@ -47,8 +67,10 @@ public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocomp
         mPlacesClient = placesClient;
         mBounds = bounds;
         this.mListener = (PlaceAutoCompleteInterface) mContext;
+        this.mListenerMessage = (ShowMessageInterface) mContext;
+
         autocompleteSessionToken = AutocompleteSessionToken.newInstance();
-        mEditText= editText;
+        mEditText = editText;
         mRecyclerView = recyclerView;
 
     }
@@ -101,6 +123,43 @@ public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocomp
         return resultList;
     }
 
+    public void setCurrentLocation() {
+        AsyncTask asyncTask = new AsyncTask() {
+
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                List<Place.Field> placeFields = Arrays.asList(Place.Field.ADDRESS);
+
+                FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(placeFields).build();
+                FindCurrentPlaceResponse response = null;
+                try {
+                    if (ContextCompat.checkSelfPermission(mContext,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        return false;
+                    }
+                    response = Tasks.await(mPlacesClient.findCurrentPlace(request));
+                } catch (Exception ex) {
+                    Log.v(TAG, ex.getMessage());
+                    return false;
+                }
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                super.onPostExecute(o);
+                if(o.equals(false)){
+                    mListenerMessage.showMessage("No se ha podido obtener su ubicación actual.");
+                    return;
+                }
+                FindCurrentPlaceResponse response = (FindCurrentPlaceResponse) o;
+                mEditText.setText(response.getPlaceLikelihoods().get(0).getPlace().getAddress());
+            }
+        };
+        asyncTask.execute();
+    }
+
     @Override
     public PlaceViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -143,6 +202,7 @@ public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocomp
         try {
             response = Tasks.await(mPlacesClient.findAutocompletePredictions(request));
         } catch (Exception ex) {
+            mListenerMessage.showMessage("No se ha podido encontrar la dirección buscada.");
             Log.v(TAG, ex.getMessage());
         }
         return response;
