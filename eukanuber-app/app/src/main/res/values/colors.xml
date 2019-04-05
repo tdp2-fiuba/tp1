@@ -4,8 +4,13 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorSecondary">#00A6FF</color>
     <color name="colorSuccess">#32CD32</color>
+
     <color name="colorAccent">#D81B60</color>
     <color name="colorBlackSemitransparent">#B2000000</color>
     <color name="colorWhite">#fafafa</color>
+    <color name="colorLightGreen">#78EB78</color>
+    <color name="colorLightSecondary">#74CCFF</color>
+    <color name="colorTertiary">#FF8000</color>
+    <color name="colorLightTertiary">#FFB266</color>
 
 </resources>

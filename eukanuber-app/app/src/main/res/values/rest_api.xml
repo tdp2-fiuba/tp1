@@ -1,3 +1,3 @@
 <resources>
-    <string name="rest_api_path" templateMergeStrategy="preserve" translatable="false">https://jsonplaceholder.typicode.com</string>
+    <string name="rest_api_path" templateMergeStrategy="preserve" translatable="false">https://virtserver.swaggerhub.com/nanovazquez/eucanuber/1.0.0/</string>
 </resources>

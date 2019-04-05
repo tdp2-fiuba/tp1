@@ -14,22 +14,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
-import com.fi.uba.ar.tdp2.eukanuber.model.Post;
-import com.fi.uba.ar.tdp2.eukanuber.provider.PostProvider;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HomeActivity extends MenuActivity
         implements OnMapReadyCallback {
@@ -117,7 +107,6 @@ public class HomeActivity extends MenuActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         initMapLocation();
-        getPosts();
     }
 
     private void initMapLocation() {
@@ -133,8 +122,7 @@ public class HomeActivity extends MenuActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
     }
-
-    private void getPosts() {
+/*   private void getPosts() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.rest_api_path))
                 .addConverterFactory(GsonConverterFactory.create())
@@ -153,5 +141,5 @@ public class HomeActivity extends MenuActivity
             }
         });
     }
-
+*/
 }
