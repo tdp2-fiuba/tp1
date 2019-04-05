@@ -1,11 +1,14 @@
 import express from "express";
-import { statusController, tripsController, usersController } from "./controllers";
+import { quoteController, statusController, tripsController, usersController } from "./controllers";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Users endpoints
 app.get("/users", usersController.getUsers);
+
+// Quotes endpoints
+app.post("/quote/trip", quoteController.quoteTrip);
 
 // Trips endpoints
 app.get("/trips", tripsController.getAll);
