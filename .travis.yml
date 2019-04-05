@@ -1,9 +1,13 @@
 language: node_js
-node_js:
-  - '11'
+node_js: 10
+cache: npm
+
 before_install:
-  - npm install -g typescript
-before_script:
   - cd eukanuber-backend
-  - npm i
+
+install:
+  - npm ci
+
+script:
   - npm run build
+  - npm run coverage
