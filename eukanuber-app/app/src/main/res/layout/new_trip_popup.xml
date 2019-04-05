@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@color/colorWhite"
     android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,6 +15,7 @@
             android:layout_height="wrap_content"
             android:text="Desde"/>
         <TextView
+            android:id="@+id/tripOriginText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Coronel Diaz 12932"/>
@@ -27,6 +29,7 @@
             android:layout_height="wrap_content"
             android:text="Hasta"/>
         <TextView
+            android:id="@+id/tripDestinationText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Santa Fe y Entre Rios 2850"/>
@@ -40,6 +43,7 @@
             android:layout_height="wrap_content"
             android:text="Precio"/>
         <TextView
+            android:id="@+id/tripPriceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="$34323"/>
@@ -53,6 +57,7 @@
             android:layout_height="wrap_content"
             android:text="Tiempo estimado"/>
         <TextView
+            android:id="@+id/tripDurationText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1h 30m"/>
@@ -66,5 +71,14 @@
             android:layout_alignParentBottom="true"
             android:background="@color/colorPrimaryDark" />
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:id="@+id/listPets"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+        </ListView>
+    </LinearLayout>
 </LinearLayout>

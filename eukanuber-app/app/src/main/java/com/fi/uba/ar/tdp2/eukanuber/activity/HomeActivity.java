@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
+import com.fi.uba.ar.tdp2.eukanuber.model.Trip;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,6 +29,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class HomeActivity extends MenuActivity
         implements OnMapReadyCallback {
@@ -96,18 +100,39 @@ public class HomeActivity extends MenuActivity
         findViewById(R.id.menu_fab).setVisibility(View.GONE);
         TextView driverStatusView = findViewById(R.id.driverStatus);
         driverStatusView.setOnClickListener(view -> {
-            // inflate the layout of the popup window
-            LayoutInflater inflater = (LayoutInflater)
-                    getSystemService(LAYOUT_INFLATER_SERVICE);
-            View popupView = inflater.inflate(R.layout.new_trip_popup, null);
-            final PopupWindow popupWindow = new PopupWindow(popupView,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    false);
-            popupWindow.setAnimationStyle(R.style.popup_window_animation);
-            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+            openPopupNewTripDriver(view);
+
+
         });
 
+    }
+    private void openPopupNewTripDriver(View v){
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.new_trip_popup, null);
+        final PopupWindow popupWindow = new PopupWindow(popupView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                false);
+        popupWindow.setAnimationStyle(R.style.popup_window_animation);
+        popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+
+        Trip trip = new Trip();
+        trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
+        trip.setOrigin("Paseo Colon 850 Esquina Independencia");
+        trip.setDuration("1h 04m");
+        trip.setEscort(true);
+        trip.setPrice("456,90");
+        trip.setPayment("cash");
+        Collection<String> pets = new ArrayList<>();
+        pets.add("S");
+        pets.add("M");
+        pets.add("B");
+        trip.setPets(pets);
+        ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
+        ((TextView) popupView.findViewById(R.id.tripDestinationText)).setText(trip.getDestination());
+        ((TextView) popupView.findViewById(R.id.tripDurationText)).setText(trip.getDuration());
+        ((TextView) popupView.findViewById(R.id.tripPriceText)).setText(trip.getPrice());
     }
 
     private void checkPermissionsLocation() {
