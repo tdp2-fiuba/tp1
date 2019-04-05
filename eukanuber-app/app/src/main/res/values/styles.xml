@@ -50,4 +50,17 @@
     <style name="popup_window_animation">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
     </style>
+    <style name="NewTripDriver">
+    </style>
+    <style name="NewTripDriver.Label">
+        <item name="android:textSize">16dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+    </style>
+    <style name="NewTripDriver.Value">
+        <item name="android:textSize">16dp</item>
+        <item name="android:textColor">@color/colorBlack</item>
+    </style>
+    <style name="NewTripDriver.Value.Price">
+        <item name="android:textSize">24dp</item>
+    </style>
 </resources>

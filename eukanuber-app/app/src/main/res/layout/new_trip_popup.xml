@@ -4,81 +4,132 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/colorWhite"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <LinearLayout
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Precio"
+                style="@style/NewTripDriver.Label"/>
+            <TextView
+                android:id="@+id/tripPriceText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/NewTripDriver.Value.Price"/>
+        </LinearLayout>
+
+        <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Desde"/>
+        android:text="Desde"
+        style="@style/NewTripDriver.Label"/>
+
         <TextView
             android:id="@+id/tripOriginText"
-            android:layout_width="wrap_content"
+            style="@style/NewTripDriver.Value"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Coronel Diaz 12932"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            android:text="ACAAA" />
+
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hasta"/>
+            android:text="Hasta"
+            style="@style/NewTripDriver.Label"/>
         <TextView
             android:id="@+id/tripDestinationText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Santa Fe y Entre Rios 2850"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            style="@style/NewTripDriver.Value"/>
+
+
+
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Precio"/>
-        <TextView
-            android:id="@+id/tripPriceText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="$34323"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tiempo estimado"/>
+            android:text="Tiempo estimado"
+            style="@style/NewTripDriver.Label"/>
         <TextView
             android:id="@+id/tripDurationText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1h 30m"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            style="@style/NewTripDriver.Value"/>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_alignParentBottom="true"
-            android:background="@color/colorPrimaryDark" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ListView
-            android:id="@+id/listPets"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:background="@color/colorPrimaryDark"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
 
-        </ListView>
-    </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mascotas"
+            style="@style/NewTripDriver.Label"/>
+        <TextView
+            android:id="@+id/petsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/NewTripDriver.Value"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Con acompañante"
+            style="@style/NewTripDriver.Label"/>
+        <TextView
+            android:id="@+id/escortText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/NewTripDriver.Value"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                        <ImageButton
+                            android:id="@+id/buttonCancelTrip"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginRight="5dp"
+                            android:padding="10dp"
+                            android:background="@color/colorSecondary"
+                            android:src="@drawable/ic_cancel_white" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                        <ImageButton
+                            android:id="@+id/buttonConfirmTrip"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="5dp"
+                            android:padding="10dp"
+                            android:background="@color/colorSuccess"
+                            android:src="@drawable/ic_confirm_white" />
+                </LinearLayout>
+
+
+
+        </LinearLayout>
+
 </LinearLayout>

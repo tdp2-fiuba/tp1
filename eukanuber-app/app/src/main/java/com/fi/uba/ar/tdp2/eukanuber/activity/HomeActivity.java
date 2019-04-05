@@ -10,15 +10,18 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.fi.uba.ar.tdp2.eukanuber.R;
 import com.fi.uba.ar.tdp2.eukanuber.model.Trip;
@@ -27,13 +30,19 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.checkerframework.checker.linear.qual.Linear;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class HomeActivity extends MenuActivity
         implements OnMapReadyCallback {
@@ -103,8 +112,6 @@ public class HomeActivity extends MenuActivity
         TextView driverStatusView = findViewById(R.id.driverStatus);
         driverStatusView.setOnClickListener(view -> {
             openPopupNewTripDriver(view);
-
-
         });
 
     }
@@ -117,24 +124,42 @@ public class HomeActivity extends MenuActivity
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
-        popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+        popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
 
+        // Llega id del trip en el push para ir a buscar info del trip
         Trip trip = new Trip();
         trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
         trip.setOrigin("Paseo Colon 850 Esquina Independencia");
         trip.setDuration("1h 04m");
         trip.setEscort(true);
-        trip.setPrice("456,90");
+        trip.setPrice("$456,90");
         trip.setPayment("cash");
         Collection<String> pets = new ArrayList<>();
         pets.add("S");
         pets.add("M");
         pets.add("B");
         trip.setPets(pets);
+        String petsString = "Chica: 1, Mediana: 1, Grande: 1" ;
+        String escortText = "No";
+        if(trip.getEscort()){
+           escortText = "Si";
+        }
+
         ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
         ((TextView) popupView.findViewById(R.id.tripDestinationText)).setText(trip.getDestination());
         ((TextView) popupView.findViewById(R.id.tripDurationText)).setText(trip.getDuration());
         ((TextView) popupView.findViewById(R.id.tripPriceText)).setText(trip.getPrice());
+        ((TextView) popupView.findViewById(R.id.petsText)).setText(petsString);
+        ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
+        ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
+        ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
+        buttonCancel.setOnClickListener(view -> {
+            popupWindow.dismiss();
+        });
+        buttonConfirm.setOnClickListener(view -> {
+            popupWindow.dismiss();
+        });
+
     }
 
     private void checkPermissionsLocation() {
