@@ -2,7 +2,7 @@ import { expect } from "chai";
 import Express from "express";
 import { before } from "mocha";
 import { mockReq, mockRes } from "sinon-express-mock";
-import usersController from "./usersController";
+import usersController from "../../controllers/usersController";
 
 describe("usersController", () => {
   let request: Express.Request;

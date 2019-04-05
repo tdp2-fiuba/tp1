@@ -1,14 +1,13 @@
 openapi: 3.0.0
 info:
-  version: "1.0.1"
+  version: "1.0.0"
   title: The EucanUber API
   description: This is the API for the EucanUber app
 externalDocs:
-  url: https://app.swaggerhub.com/apis/nanovazquez/eucanuber/1.0.0
-
+  url: "https://app.swaggerhub.com/apis/nanovazquez/eucanuber/1.0.0"
 servers:
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/nanovazquez/eucanuber/1.0.1
+    url: "https://virtserver.swaggerhub.com/nanovazquez/eucanuber/1.0.0"
 
 paths:
   /users:
@@ -28,7 +27,7 @@ paths:
           description: The radius of the circunference of the search (in meters)
           example: "1000"
       responses:
-        200:
+        "200":
           description: All drivers that match the criteria
           content:
             application/json:
@@ -46,7 +45,7 @@ paths:
                 - $ref: "#/components/schemas/newPassengerData"
                 - $ref: "#/components/schemas/newDriverData"
       responses:
-        201:
+        "201":
           description: OK
           content:
             application/json:
@@ -54,7 +53,7 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/user"
                   - $ref: "#/components/schemas/driver"
-        400:
+        "400":
           description: Invalid user data.
         default:
           description: Internal server error.
@@ -63,10 +62,10 @@ paths:
     get:
       summary: Returns a user
       parameters:
-        - id:
+        - id: null
           $ref: "#/components/parameters/idParameter"
       responses:
-        200:
+        "200":
           description: The user requested
           content:
             application/json:
@@ -74,16 +73,16 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/user"
                   - $ref: "#/components/schemas/driver"
-        400:
+        "400":
           description: The specified user ID is invalid (e.g. not a number).
-        404:
+        "404":
           description: A user with the specified ID was not found.
         default:
           description: Unexpected error
     put:
       summary: Updates a user
       parameters:
-        - id:
+        - id: null
           $ref: "#/components/parameters/idParameter"
       requestBody:
         content:
@@ -93,7 +92,7 @@ paths:
                 - $ref: "#/components/schemas/user"
                 - $ref: "#/components/schemas/driver"
       responses:
-        200:
+        "200":
           description: The user updated
           content:
             application/json:
@@ -101,9 +100,9 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/user"
                   - $ref: "#/components/schemas/driver"
-        400:
+        "400":
           description: The specified user ID is invalid (e.g. not a number).
-        404:
+        "404":
           description: A user with the specified ID was not found.
         default:
           description: Unexpected error
@@ -117,11 +116,11 @@ paths:
             type: string
           description: The ID of the driver
       responses:
-        201:
+        "201":
           description: Ok
-        400:
+        "400":
           description: The specified user ID is invalid (e.g. not a number).
-        404:
+        "404":
           description: A user with the specified ID was not found.
         default:
           description: Unexpected error
@@ -130,24 +129,23 @@ paths:
     get:
       summary: Gets the user current position
       parameters:
-        - id:
+        - id: null
           $ref: "#/components/parameters/idParameter"
       responses:
-        200:
-          description: The user current position (lat, long)
+        "200":
+          description: "The user current position (lat, long)"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/userPosition"
-
     put:
       summary: Updates the user current position
       parameters:
-        - id:
+        - id: null
           $ref: "#/components/parameters/idParameter"
       responses:
-        200:
-          description: The user new position (lat, long)
+        "200":
+          description: "The user new position (lat, long)"
           content:
             application/json:
               schema:
@@ -162,9 +160,9 @@ paths:
             schema:
               $ref: "#/components/schemas/trip"
       responses:
-        200:
+        "200":
           description: OK.
-        400:
+        "400":
           description: Invalid trip data.
         default:
           description: Internal server error.
@@ -173,24 +171,42 @@ paths:
     get:
       summary: Get trip by id.
       parameters:
-        - id:
+        - id: null
           $ref: "#/components/parameters/idParameter"
       responses:
-        200:
+        "200":
           description: The new trip
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/trip"
-        400:
+        "400":
           description: The specified trip ID is invalid (e.g. not a number).
-        404:
+        "404":
           description: A trip with the specified ID was not found.
         default:
           description: Unexpected error.
 
+  /quote/trip:
+    post:
+      summary: Quote a trip based on the information sent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/quoteTripData"
+
+      responses:
+        "200":
+          description: The quote of the trip sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/quoteTripDataResult"
+        default:
+          description: Unexpected error.
+
 components:
-  # Reusable schemas (data models)
   schemas:
     newPassengerData:
       $ref: "#/components/schemas/user"
@@ -207,16 +223,32 @@ components:
       $ref: "#/components/schemas/newPassengerData"
       properties:
         license:
-          type: object #file
+          type: object
         insurance:
-          type: object #file
+          type: object
         car:
           $ref: "#/components/schemas/car"
+
+    quoteTripData:
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        pets:
+          type: string
+
+    quoteTripDataResult:
+      properties:
+        price:
+          type: string
+        routes:
+          type: string
 
     userPosition:
       properties:
         position:
-          description: The position of the user (lat, long)
+          description: "The position of the user (lat, long)"
           type: string
           example: "-33.8696, 151.2094"
 
@@ -234,7 +266,11 @@ components:
               type: integer
         state:
           type: string
-          enum: [Unconfirmed, PickUp, InProgress, Arrived]
+          enum:
+            - Unconfirmed
+            - PickUp
+            - InProgress
+            - Arrived
         route:
           $ref: "#/components/schemas/tripRoute"
 
@@ -250,14 +286,16 @@ components:
 
     userType:
       type: string
-      enum: [Passenger, Driver]
+      enum:
+        - Passenger
+        - Driver
       example: Passenger
 
     user:
       properties:
         id:
           type: string
-          example: "4e994db0-d847-42fc-9929-e738c8aca2e3"
+          example: 4e994db0-d847-42fc-9929-e738c8aca2e3
         userType:
           $ref: "#/components/schemas/userType"
         firstName:
@@ -286,7 +324,7 @@ components:
       properties:
         id:
           type: string
-          example: "4e994db0-d847-42fc-9929-e738c8aca2e3"
+          example: 4e994db0-d847-42fc-9929-e738c8aca2e3
         plate:
           type: string
           example: ABC123

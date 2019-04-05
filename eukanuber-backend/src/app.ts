@@ -1,5 +1,5 @@
 import express from "express";
-import { statusController, usersController } from "./controllers";
+import { quoteController, statusController, tripsController, usersController } from "./controllers";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -7,8 +7,12 @@ const port = process.env.PORT || 3000;
 // Users endpoints
 app.get("/users", usersController.getUsers);
 
+// Quotes endpoints
+app.post("/quote/trip", quoteController.quoteTrip);
+
 // Trips endpoints
-// TODO
+app.get("/trips", tripsController.getAll);
+app.get("/trips/:id", tripsController.getById);
 
 // Status endpoints
 app.get("/ping", statusController.ping);
