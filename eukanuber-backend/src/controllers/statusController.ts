@@ -11,11 +11,8 @@ function ready(req: Express.Request, res: Express.Response, next: Express.NextFu
 }
 
 function status(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
-  const status = {
-    version: "TBD"
-  };
-
-  res.json(status);
+  const statusInfo = { version: "TBD" };
+  res.json(statusInfo);
   next();
 }
 

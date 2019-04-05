@@ -1,5 +1,9 @@
 # EukanUber Backend
 
+- [![Build Status](https://travis-ci.org/tdp2-fiuba/tp1.svg?branch=master)](https://travis-ci.org/tdp2-fiuba/tp1)
+- [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+- Database: TBC
+
 ## Getting started
 
 Install all dependencies by running:
@@ -8,7 +12,14 @@ Install all dependencies by running:
 npm i
 ```
 
-Execute the app by running:
+Set up your database by [starting a Postgres service](https://www.postgresql.org/download/) locally. Then create an **Eukanuber** database and, finally, run migrations and seed:
+
+```
+npm run db:migrate
+npm run db:seed
+```
+
+Finally, run the backend server with:
 
 ```
 npm start
@@ -23,8 +34,3 @@ npm run debug
 ```
 
 And then, attach your IDE to the port `9229`.
-
-### Deployment 
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-
