@@ -1,4 +1,4 @@
-package com.fi.uba.ar.tdp2.eukanuber.activity;
+package com.tdp2.eukanuber.activity;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,13 +8,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -23,11 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.fi.uba.ar.tdp2.eukanuber.R;
-import com.fi.uba.ar.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.model.Trip;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -44,8 +41,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class HomeActivity extends MenuActivity
-        implements OnMapReadyCallback {
+public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private final int PERMISSION_FINE_LOCATION = 1;
     private final String DRIVER_TYPE = "driver";
@@ -59,8 +55,7 @@ public class HomeActivity extends MenuActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         this.createMenu();
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
@@ -96,7 +91,8 @@ public class HomeActivity extends MenuActivity
 
     private void initClientHome() {
         LinearLayout layoutMap = findViewById(R.id.layoutMap);
-        layoutMap.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 10f));
+        layoutMap.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 10f));
         FloatingActionButton newTripButton = findViewById(R.id.newTripButton);
         FloatingActionsMenu fam = findViewById(R.id.menu_fab);
         findViewById(R.id.driverStatus).setVisibility(View.GONE);
@@ -115,14 +111,12 @@ public class HomeActivity extends MenuActivity
         });
 
     }
-    private void openPopupNewTripDriver(View v){
-        LayoutInflater inflater = (LayoutInflater)
-                getSystemService(LAYOUT_INFLATER_SERVICE);
+
+    private void openPopupNewTripDriver(View v) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.new_trip_popup, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                false);
+        final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
 
@@ -139,10 +133,10 @@ public class HomeActivity extends MenuActivity
         pets.add("M");
         pets.add("B");
         trip.setPets(pets);
-        String petsString = "Chica: 1, Mediana: 1, Grande: 1" ;
+        String petsString = "Chica: 1, Mediana: 1, Grande: 1";
         String escortText = "No";
-        if(trip.getEscort()){
-           escortText = "Si";
+        if (trip.getEscort()) {
+            escortText = "Si";
         }
 
         ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
@@ -164,11 +158,9 @@ public class HomeActivity extends MenuActivity
 
     private void checkPermissionsLocation() {
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                     PERMISSION_FINE_LOCATION);
             return;
         }
@@ -177,19 +169,15 @@ public class HomeActivity extends MenuActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case PERMISSION_FINE_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initMapLocation();
-                } else {
-                    Toast.makeText(
-                            getApplicationContext(),
-                            "Sin permisos necesarios para utilizar la aplicacion",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-                return;
+        case PERMISSION_FINE_LOCATION: {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initMapLocation();
+            } else {
+                Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
+                        Toast.LENGTH_SHORT).show();
             }
+            return;
+        }
         }
 
     }
@@ -202,8 +190,7 @@ public class HomeActivity extends MenuActivity
 
     private void initMapLocation() {
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -213,19 +200,21 @@ public class HomeActivity extends MenuActivity
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-        if (location != null)
-        {
+        if (location != null) {
             LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
 
-            //mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-            //mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+            // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+            // mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Centra el mapa en locacion del usuario
-                    .zoom(18.0f)                   // seteo el zoom
-                    //.bearing(90)                // Orientacion de la camara al este - no queda bien
-                    .tilt(40)                   // tiltea la camara 40 grados
-                    .build();                   // builder
+                    // Centra el mapa en locacion del usuario
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
+                    // seteo el zoom
+                    .zoom(18.0f)
+                    // Orientacion de la camara al este - no queda bien
+                    // .bearing(90)
+                    // tiltea la camara 40 grados
+                    .tilt(40).build();
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
         }

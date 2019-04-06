@@ -1,4 +1,4 @@
-package com.fi.uba.ar.tdp2.eukanuber.activity;
+package com.tdp2.eukanuber.activity;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -8,8 +8,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-
-import com.fi.uba.ar.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.R;
 
 abstract class MenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

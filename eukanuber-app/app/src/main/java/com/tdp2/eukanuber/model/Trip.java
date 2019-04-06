@@ -1,17 +1,18 @@
-package com.fi.uba.ar.tdp2.eukanuber.model;
+package com.tdp2.eukanuber.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-public class NewTripRequest {
+public class Trip {
     private String origin;
     private String destination;
     private Collection<String> pets;
     private Boolean escort;
     private String payment;
+    private String duration;
+    private String price;
 
-    public NewTripRequest() {
+    public Trip() {
         pets = new ArrayList<>();
     }
 
@@ -53,5 +54,21 @@ public class NewTripRequest {
 
     public void setPayment(String payment) {
         this.payment = payment;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 }

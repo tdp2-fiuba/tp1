@@ -1,11 +1,10 @@
-package com.fi.uba.ar.tdp2.eukanuber.activity;
+package com.tdp2.eukanuber.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import com.fi.uba.ar.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.R;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -20,11 +19,10 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra("userType", "client");
         startActivity(intent);
     }
+
     public void goHomeDriver(View view) {
         Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra("userType", "driver");
         startActivity(intent);
     }
-
-
 }

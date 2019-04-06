@@ -1,12 +1,6 @@
-package com.fi.uba.ar.tdp2.eukanuber.activity;
+package com.tdp2.eukanuber.activity;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -23,25 +17,22 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fi.uba.ar.tdp2.eukanuber.R;
-import com.fi.uba.ar.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
-import com.fi.uba.ar.tdp2.eukanuber.model.NewTripRequest;
-import com.fi.uba.ar.tdp2.eukanuber.model.Trip;
-import com.fi.uba.ar.tdp2.eukanuber.provider.TripProvider;
+import com.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.tdp2.eukanuber.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.tdp2.eukanuber.model.NewTripRequest;
+import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.services.TripService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NewTripActivity extends MenuActivity implements
         PlaceAutocompleteAdapter.PlaceAutoCompleteInterface,
@@ -217,7 +208,7 @@ public class NewTripActivity extends MenuActivity implements
             buttonPetSmall.setBackgroundColor(getResources().getColor(R.color.colorLightTertiary));
             buttonPetMedium.setBackgroundColor(getResources().getColor(R.color.colorLightTertiary));
             buttonPetBig.setBackgroundColor(getResources().getColor(R.color.colorTertiary));
-            pets.put(row, "B");
+            pets.put(row, "L");
         });
     }
 
@@ -266,12 +257,10 @@ public class NewTripActivity extends MenuActivity implements
             newTripRequest.setEscort(switchEscort.isChecked());
             newTripRequest.setPayment(payment);
             newTripRequest.setPets(pets.values());
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(getString(R.string.rest_api_path))
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            TripProvider postService = retrofit.create(TripProvider.class);
-            Call<Trip> call = postService.createTrip(newTripRequest);
+
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.createTrip(newTripRequest);
+
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
