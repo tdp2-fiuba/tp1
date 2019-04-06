@@ -10,7 +10,7 @@
     "prestart": "npm run build",
     "start": "node .",
     "test": "mocha -r ts-node/register src/tests/init-tests.ts src/**/*.test.ts",
-    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register src/**/*.test.ts && nyc report",
+    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test && nyc report",
     "db:migrate": "node ./dist/db/cli.js --migrate",
     "db:rollback": "node ./dist/db/cli.js --rollback",
     "db:seed": "node ./dist/db/cli.js --seed"

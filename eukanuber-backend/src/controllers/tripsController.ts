@@ -21,7 +21,7 @@ async function createTrip(req: Express.Request, res: Express.Response) {
 async function updateTrip(req: Express.Request, res: Express.Response) {
   const { body } = req; // This is object deconstruction, equivalent to "const body = req.body"
 
-  const updatedTrip = await tripsService.createTrip(body);
+  const updatedTrip = await tripsService.updateTrip(body);
   res.json(updatedTrip);
 }
 
