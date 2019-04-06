@@ -6,10 +6,11 @@ async function seed(knex: Knex) {
   const newTrip = {
     origin: "43.138092,-89.747988",
     destination: "43.017218,-89.831479",
-    pets: "XS, S, M",
-    status: "1",
     clientId: "abc123",
     driverId: "def456",
+    pets: "S, M, L",
+    status: "0",
+    payment: "cash",
     price: "100 USD"
   };
 

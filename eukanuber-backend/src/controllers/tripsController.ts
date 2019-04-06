@@ -1,30 +1,33 @@
 import Express from "express";
 import { tripsService } from "../services";
 
-async function getAll(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+async function getAll(req: Express.Request, res: Express.Response) {
   const trips = await tripsService.getTrips();
   res.json(trips);
-  next();
 }
 
-async function getById(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
-  const { id } = req.params; // This is object reconstruction, similar to "const id = req.params.id;"
+async function getById(req: Express.Request, res: Express.Response) {
+  const { id } = req.params; // This is object deconstruction, equivalent to "const id = req.params.id;"
   const trip = await tripsService.getTripById(id);
   res.json(trip);
-  next();
 }
 
-async function createTrip(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
-  const { body } = req; // This is object reconstruction, similar to "const body = req.body"
-
-  console.log("received", body);
+async function createTrip(req: Express.Request, res: Express.Response) {
+  const { body } = req; // This is object deconstruction, equivalent to "const body = req.body"
   const newTrip = await tripsService.createTrip(body);
   res.json(newTrip);
-  next();
+}
+
+async function updateTrip(req: Express.Request, res: Express.Response) {
+  const { body } = req; // This is object deconstruction, equivalent to "const body = req.body"
+
+  const updatedTrip = await tripsService.createTrip(body);
+  res.json(updatedTrip);
 }
 
 export default {
   getAll,
   getById,
-  createTrip
+  createTrip,
+  updateTrip
 };
