@@ -115,8 +115,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
     private void openPopupNewTripDriver(View v) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.new_trip_popup, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT, false);
+        final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
 
@@ -134,10 +133,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         pets.add("B");
         trip.setPets(pets);
         String petsString = "Chica: 1, Mediana: 1, Grande: 1";
-        String escortText = "No";
-        if (trip.getEscort()) {
-            escortText = "Si";
-        }
+        String escortText = trip.getEscort() ? "Si" : "No";
 
         ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
         ((TextView) popupView.findViewById(R.id.tripDestinationText)).setText(trip.getDestination());

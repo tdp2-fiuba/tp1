@@ -63,7 +63,8 @@ public class NewTripActivity extends MenuActivity implements
         placesClient = Places.createClient(this);
         rectangularBounds = RectangularBounds.newInstance(
                 new LatLng(-34.409003, -58.753123),
-                new LatLng(-34.338157, -57.942612));
+                new LatLng(-34.338157, -57.942612)
+        );
     }
 
     private void initFromInput() {
@@ -75,8 +76,7 @@ public class NewTripActivity extends MenuActivity implements
         EditText inputFrom = findViewById(R.id.input_search_from);
         ImageView inputFromClear = findViewById(R.id.input_search_from_clear);
 
-        PlaceAutocompleteAdapter mAdapter = new PlaceAutocompleteAdapter(this, R.layout.view_placesearch,
-                placesClient, rectangularBounds, inputFrom, mRecyclerView);
+        PlaceAutocompleteAdapter mAdapter = new PlaceAutocompleteAdapter(this, R.layout.view_placesearch, placesClient, rectangularBounds, inputFrom, mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setCurrentLocation();
         inputFrom.addTextChangedListener(new TextWatcher() {
@@ -114,11 +114,10 @@ public class NewTripActivity extends MenuActivity implements
         LinearLayoutManager llm = new LinearLayoutManager(NewTripActivity.this);
         mRecyclerView.setLayoutManager(llm);
 
-        EditText mSearchEdittext = findViewById(R.id.input_search_to);
-        PlaceAutocompleteAdapter mAdapter = new PlaceAutocompleteAdapter(this, R.layout.view_placesearch,
-                placesClient, rectangularBounds, mSearchEdittext, mRecyclerView);
+        EditText mSearchEditText = findViewById(R.id.input_search_to);
+        PlaceAutocompleteAdapter mAdapter = new PlaceAutocompleteAdapter(this, R.layout.view_placesearch, placesClient, rectangularBounds, mSearchEditText, mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
-        mSearchEdittext.addTextChangedListener(new TextWatcher() {
+        mSearchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -166,6 +165,7 @@ public class NewTripActivity extends MenuActivity implements
             }
             if (rowPets == 2) {
                 petRow2.setVisibility(View.VISIBLE);
+                removePet.setVisibility(View.VISIBLE);
                 rowPets++;
                 return;
             }
