@@ -1,19 +1,16 @@
 import Express from "express";
 
-function ping(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+function ping(req: Express.Request, res: Express.Response) {
   res.sendStatus(200);
-  next();
 }
 
-function ready(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+function ready(req: Express.Request, res: Express.Response) {
   res.sendStatus(200);
-  next();
 }
 
-function status(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+function status(req: Express.Request, res: Express.Response) {
   const statusInfo = { version: "TBD" };
   res.json(statusInfo);
-  next();
 }
 
 export default {

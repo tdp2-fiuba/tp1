@@ -1,18 +1,17 @@
 import bodyParser from "body-parser";
 import Express from "express";
-import { quoteController, statusController, tripsController, usersController } from "./controllers";
+import { statusController, tripsController, usersController } from "./controllers";
+import { requestLoggerMiddleware } from "./middlewares";
 
 const app = Express();
 const port = process.env.PORT || 3000;
 
 // Initial setup
 app.use(bodyParser.json());
+app.use(requestLoggerMiddleware);
 
 // Users endpoints
 app.get("/users", usersController.getUsers);
-
-// Quotes endpoints
-app.post("/quote/trip", quoteController.quoteTrip);
 
 // Trips endpoints
 app.get("/trips", tripsController.getAll);
