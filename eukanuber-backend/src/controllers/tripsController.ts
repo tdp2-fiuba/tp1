@@ -14,7 +14,17 @@ async function getById(req: Express.Request, res: Express.Response, next: Expres
   next();
 }
 
+async function createTrip(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+  const { body } = req; // This is object reconstruction, similar to "const body = req.body"
+
+  console.log("received", body);
+  const newTrip = await tripsService.createTrip(body);
+  res.json(newTrip);
+  next();
+}
+
 export default {
   getAll,
-  getById
+  getById,
+  createTrip
 };

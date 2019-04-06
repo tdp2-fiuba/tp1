@@ -1,4 +1,5 @@
 import db from "../db/db";
+import { ITrip } from "../models";
 
 async function getTrips() {
   return await db.table("trips").select();
@@ -12,4 +13,8 @@ async function getTripById(id: string) {
     .first();
 }
 
-export default { getTrips, getTripById };
+async function createTrip(trip: ITrip) {
+  return Promise.resolve(trip);
+}
+
+export default { getTrips, getTripById, createTrip };
