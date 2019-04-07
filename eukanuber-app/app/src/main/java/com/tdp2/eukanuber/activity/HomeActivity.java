@@ -3,6 +3,7 @@ package com.tdp2.eukanuber.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.model.ChangeTripStatusRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -32,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.tdp2.eukanuber.services.TripService;
 
 import org.checkerframework.checker.linear.qual.Linear;
 
@@ -41,11 +45,20 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private final int PERMISSION_FINE_LOCATION = 1;
     private final String DRIVER_TYPE = "driver";
     private final String CLIENT_TYPE = "client";
+    private final Integer TRIP_ACCEPTED = 1;
+    private final Integer TRIP_CANCELLED = 4;
+
+
+
     private LocationListener locationListener;
     private LocationManager locationManager;
     private String userType;
@@ -66,7 +79,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
             public void onLocationChanged(Location location) {
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 if (mMap != null) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                   // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
                 }
             }
 
@@ -107,51 +120,95 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         findViewById(R.id.menu_fab).setVisibility(View.GONE);
         TextView driverStatusView = findViewById(R.id.driverStatus);
         driverStatusView.setOnClickListener(view -> {
-            openPopupNewTripDriver(view);
+            // Llega id del trip en el push para ir a buscar info del trip
+            SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
+            String newTripId = settings.getString("newTripId", "58ce748f-d68b-40db-a5b7-9598806a1d9a");
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.get(newTripId);
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    Trip trip = response.body();
+                    if(trip == null){
+                        trip = new Trip();
+                        trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
+                        trip.setOrigin("Paseo Colon 850 Esquina Independencia");
+                        trip.setEscort(true);
+                        trip.setPayment("cash");
+                        Collection<String> pets = new ArrayList<>();
+                        pets.add("S");
+                        pets.add("M");
+                        pets.add("B");
+                        trip.setPets(pets);
+                    }
+                    openPopupNewTripDriver(view, trip);
+                }
+
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    Log.v("TRIP", t.getMessage());
+                    showMessage("Ha ocurrido un error al solicitar el viaje.");
+                }
+            });
         });
 
     }
 
-    private void openPopupNewTripDriver(View v) {
+    private void openPopupNewTripDriver(View v, Trip trip) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.new_trip_popup, null);
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-
-        // Llega id del trip en el push para ir a buscar info del trip
-        Trip trip = new Trip();
-        trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
-        trip.setOrigin("Paseo Colon 850 Esquina Independencia");
-        trip.setDuration("1h 04m");
-        trip.setEscort(true);
-        trip.setPrice("$456,90");
-        trip.setPayment("cash");
-        Collection<String> pets = new ArrayList<>();
-        pets.add("S");
-        pets.add("M");
-        pets.add("B");
-        trip.setPets(pets);
         String petsString = "Chica: 1, Mediana: 1, Grande: 1";
         String escortText = trip.getEscort() ? "Si" : "No";
-
+        trip.setDuration("1h 04m");
+        trip.setPrice("$456,90");
         ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
         ((TextView) popupView.findViewById(R.id.tripDestinationText)).setText(trip.getDestination());
         ((TextView) popupView.findViewById(R.id.tripDurationText)).setText(trip.getDuration());
         ((TextView) popupView.findViewById(R.id.tripPriceText)).setText(trip.getPrice());
+
         ((TextView) popupView.findViewById(R.id.petsText)).setText(petsString);
         ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
         ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
             popupWindow.dismiss();
+
+            showMessage("El viaje ha sido cancelado.");
         });
         buttonConfirm.setOnClickListener(view -> {
+
+            TripService tripService = new TripService();
+            ChangeTripStatusRequest changeTripStatusRequest = new ChangeTripStatusRequest();
+            changeTripStatusRequest.setId(trip.getId());
+            changeTripStatusRequest.setStatus(TRIP_ACCEPTED);
+           /* Call<Trip> call = tripService.updateStatus(changeTripStatusRequest);
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    popupWindow.dismiss();
+                    showMessage("El viaje ha sido confirmado.");
+                }
+
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    popupWindow.dismiss();
+                    showMessage("Ha ocurrido un error al confirmar el viaje.");
+                }
+            });*/
             popupWindow.dismiss();
+            showMessage("El viaje ha sido confirmado.");
         });
-
     }
-
+    public void showMessage(String message) {
+        Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
+    }
     private void checkPermissionsLocation() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

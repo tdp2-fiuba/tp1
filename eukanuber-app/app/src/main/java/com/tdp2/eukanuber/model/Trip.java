@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Trip {
+
+    private String id;
     private String origin;
     private String destination;
     private Collection<String> pets;
@@ -11,6 +13,14 @@ public class Trip {
     private String payment;
     private String duration;
     private String price;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Trip() {
         pets = new ArrayList<>();

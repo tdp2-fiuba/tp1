@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +38,9 @@ import retrofit2.Response;
 public class NewTripActivity extends MenuActivity implements
         PlaceAutocompleteAdapter.PlaceAutoCompleteInterface,
         PlaceAutocompleteAdapter.ShowMessageInterface {
+    private final String PAYMENT_CASH = "cash";
+    private final String PAYMENT_CARD = "card";
+    public static final String PREFS_NAME = "NewTrip";
 
     private PlacesClient placesClient;
     private RectangularBounds rectangularBounds;
@@ -230,17 +234,17 @@ public class NewTripActivity extends MenuActivity implements
         ImageButton paymentCard = findViewById(R.id.button_payment_card);
         paymentCash.setBackgroundColor(getResources().getColor(R.color.colorSecondary));
         paymentCard.setBackgroundColor(getResources().getColor(R.color.colorLightSecondary));
-        payment = "cash";
+        payment = PAYMENT_CASH;
 
         paymentCash.setOnClickListener(v -> {
             paymentCash.setBackgroundColor(getResources().getColor(R.color.colorSecondary));
             paymentCard.setBackgroundColor(getResources().getColor(R.color.colorLightSecondary));
-            payment = "cash";
+            payment = PAYMENT_CASH;
         });
         paymentCard.setOnClickListener(v -> {
             paymentCash.setBackgroundColor(getResources().getColor(R.color.colorLightSecondary));
             paymentCard.setBackgroundColor(getResources().getColor(R.color.colorSecondary));
-            payment = "card";
+            payment = PAYMENT_CARD;
         });
 
     }
@@ -259,17 +263,24 @@ public class NewTripActivity extends MenuActivity implements
             newTripRequest.setPets(pets.values());
 
             TripService tripService = new TripService();
-            Call<Trip> call = tripService.createTrip(newTripRequest);
+            Call<Trip> call = tripService.create(newTripRequest);
 
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
-                    response.body();
+                    Trip trip = response.body();
+                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString("newTripId", trip.getId());
+                    editor.commit();
+
+                    showMessage("El viaje ha sido solicitado.");
                 }
 
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     Log.v("TRIP", t.getMessage());
+                    showMessage("Ha ocurrido un error al solicitar el viaje.");
                 }
             });
         });

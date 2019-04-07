@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class TripService {
 
-    public Call<Trip> createTrip(NewTripRequest newTripRequest) {
+    public Call<Trip> create(NewTripRequest newTripRequest) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -17,5 +17,15 @@ public class TripService {
 
         BackendService postService = retrofit.create(BackendService.class);
         return postService.createTrip(newTripRequest);
+    }
+
+    public Call<Trip> get(String tripId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.get(tripId);
     }
 }
