@@ -7,7 +7,6 @@
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "build": "tsc",
     "debug": "tsnd --respawn --transpileOnly --debug --inspect=9229 --nolazy -- ./src/app.ts",
-    "prestart": "npm run build",
     "start": "node .",
     "test": "mocha -r ts-node/register src/tests/init-tests.ts src/**/*.test.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test && nyc report",

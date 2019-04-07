@@ -11,3 +11,9 @@ install:
 script:
   - npm run build
   - npm run coverage
+
+deploy:
+  provider: heroku
+  app: quiet-ravine-53171
+  api_key:
+    secure: Exc+3FgdQUuXNqwHEwnv4qoyzeqR53BaR2m1WbzsQaLLdxQXTWAbzWu3ZXFK8/m3nVT0vWIgK16fgSG54mBZf+d8JCzJHz8077FV6Zk9KF7CrWDdiN/p37AGwA5m2P7jIaD8fxDeNgJDH3S6T7xwgonQusaYnnRB+BO1tLQvlSgI848tCsqVeCdJmYAzKCXF7+GamPjs8Qs6Gmea6j/m5dbZJp+wrc5dBR5DeQvFaUN5X614vcBg5naIrt0AgBHHznmr0SY7uzOwbrkLPSXTI3T2aRTnIVCZh8zN+G4LAATaO/XP0BD5stvD5cM3acZ3msdLuIbVLloNGA/Ui3U9IMtdZAOXm+xSgBhnNEtd7cgTblTCKsz+HNIpO6NASxP4AKPunpxua9nDrsTtxFT7tuBU9Vs4cDE96mHyRkePDBKuWQ0mF+kDlI8k7pGdxMAilhrFB5DyHMRgu9AgqL4krtKcUm8iwJid0Q9v1EjqioxXuDmU9VIuhYD+ngLxXJMGfUWlT+6UtLYx0TZo8dKt9amJlYL96g3H5VKEEOw+hQYpWArIhr/vK3N+FjIxTXjv0boEovk/jXk+kNijD5/2gr7tECX6j+atkAtyo6NJkQ4xcrWvhbF6EQue6noXUMxoN08tkPQI/4n/Vx/vRe36m6gSiwrhugOc9tIvHzjsE8s=
