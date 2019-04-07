@@ -17,6 +17,7 @@ app.get("/users", usersController.getUsers);
 app.get("/trips", tripsController.getAll);
 app.get("/trips/:id", tripsController.getById);
 app.post("/trips", tripsController.createTrip);
+app.put("/trips", tripsController.updateTrip);
 
 // Status endpoints
 app.get("/ping", statusController.ping);
