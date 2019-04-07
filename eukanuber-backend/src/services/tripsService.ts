@@ -25,11 +25,15 @@ async function getTripById(id: string): Promise<ITrip> {
 
 async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   // Move to controller
+  const originCoordinates = await googleMapsService.getGeocode(trip.origin);
+  const destinationCoordinates = await googleMapsService.getGeocode(trip.destination);
+  const routes = await googleMapsService.getDirections(originCoordinates, destinationCoordinates);
   const newTrip = {
     ...trip,
-    originCoordinates: await googleMapsService.getGeocode(trip.origin),
-    destinationCoordinates: await googleMapsService.getGeocode(trip.destination),
     pets: trip.pets.join(",").replace(/\s/g, ""),
+    originCoordinates,
+    destinationCoordinates,
+    routes,
     // TODO: remove
     clientId: "dummyClientId"
   };

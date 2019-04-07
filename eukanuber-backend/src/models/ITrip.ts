@@ -12,6 +12,7 @@ export default interface ITrip {
   destination: string;
   originCoordinates: string;
   destinationCoordinates: string;
+  routes: string | any[];
   clientId: string;
   driverId: string;
   pets: string[];
