@@ -21,24 +21,72 @@ describe("tripsController", () => {
     tripsServiceMock.restore();
   });
 
-  describe("getAll", () => {
+  describe("updateTrip", () => {
     before(() => {
       // This section should be similar as createTrip, except that
-      // you need to mock the tripsService.getTrips instead
+      // you need to mock the tripsService.updateTrip instead
     });
 
     it("should call the trips service with the proper parameters", () => {});
-    it("should return all trips", () => {});
+    it("should return the updated trip", () => {});
   });
 
   describe("getById", () => {
-    before(() => {
+    let trip: any;
+    let tripId: any;
+    let getTripByIdStub: Sinon.SinonStub;
+    let responseJsonSpy: any;
+
+    before(async () => {
       // This section should be similar as createTrip, except that
       // you need to mock the tripsService.getTripById instead
+      tripId = { id: "ankhmp12" }
+      trip = { id:"ankhmp12", origin: "ankhmp", destination: "circleSea" }
+
+      getTripByIdStub = tripsServiceMock.expects("getTripById").returns(Promise.resolve(trip));
+
+      responseJsonSpy = Sinon.spy();
+
+      request = mockReq<Express.Request>( {params: tripId} as any);
+      response = mockRes<Express.Response>({json : responseJsonSpy} as any);
+
+      await tripsController.getById(request, response);
     });
 
-    it("should call the trips service", () => {});
-    it("should get a trip", () => {});
+    it("should call the trips service", () => {
+      expect(getTripByIdStub).calledOnceWith(tripId.id);
+    });
+    it("should get a trip", () => {
+      expect(responseJsonSpy).calledOnceWith(trip)
+    });
+  });
+
+  describe("getAll", () => {
+    let trips: any;
+    let getAllTripsStub: Sinon.SinonStub;
+    let responseJsonSpy: any;
+
+    before(async () => {
+      trips = [{ origin: "abc", destination: "bcd" }, { origin: "def", destination: "ghi" }];
+
+      // This section should be similar as createTrip, except that
+      // you need to mock the tripsService.getTrips instead
+      getAllTripsStub = tripsServiceMock.expects("getTrips").returns(Promise.resolve(trips));
+
+      responseJsonSpy = Sinon.spy();
+
+      request = mockReq<Express.Request>();
+      response = mockRes<Express.Response>({json : responseJsonSpy} as any);
+
+      await tripsController.getAll(request, response);
+    });
+
+    it("should call the trips service with the proper parameters", () => {
+      expect(getAllTripsStub).to.have.been.calledOnce;
+    });
+    it("should return all trips", () => {
+      expect(responseJsonSpy).calledOnceWith(trips);
+    });
   });
 
   describe("createTrip", () => {
@@ -70,15 +118,5 @@ describe("tripsController", () => {
     it("should return the newly created trip", () => {
       expect(responseJsonSpy).calledOnceWith(trip);
     });
-  });
-
-  describe("updateTrip", () => {
-    before(() => {
-      // This section should be similar as createTrip, except that
-      // you need to mock the tripsService.updateTrip instead
-    });
-
-    it("should call the trips service with the proper parameters", () => {});
-    it("should return the updated trip", () => {});
   });
 });
