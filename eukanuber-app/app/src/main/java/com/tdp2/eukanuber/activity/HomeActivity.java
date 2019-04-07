@@ -180,11 +180,11 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         });
         buttonConfirm.setOnClickListener(view -> {
 
-            TripService tripService = new TripService();
+            /*TripService tripService = new TripService();
             ChangeTripStatusRequest changeTripStatusRequest = new ChangeTripStatusRequest();
             changeTripStatusRequest.setId(trip.getId());
             changeTripStatusRequest.setStatus(TRIP_ACCEPTED);
-           /* Call<Trip> call = tripService.updateStatus(changeTripStatusRequest);
+            Call<Trip> call = tripService.updateStatus(changeTripStatusRequest);
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {

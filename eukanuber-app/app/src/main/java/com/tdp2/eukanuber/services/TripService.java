@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.services;
 
+import com.tdp2.eukanuber.model.ChangeTripStatusRequest;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 
@@ -28,4 +29,15 @@ public class TripService {
         BackendService postService = retrofit.create(BackendService.class);
         return postService.get(tripId);
     }
+
+    public Call<Trip> updateStatus(ChangeTripStatusRequest changeTripStatusRequest) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.updateStatusTrip(changeTripStatusRequest);
+    }
+
 }
