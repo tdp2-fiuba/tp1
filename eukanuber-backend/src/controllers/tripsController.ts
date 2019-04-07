@@ -1,5 +1,5 @@
 import Express from "express";
-import { ICreateTripData } from "../models";
+import { ICreateTripData, TripStatus } from "../models";
 import { tripsService } from "../services";
 
 async function getAll(req: Express.Request, res: Express.Response) {
@@ -26,9 +26,24 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
   res.json(updatedTrip);
 }
 
+async function confirmTrip(req: Express.Request, res: Express.Response) {
+  // Expects { accepted : boolean }
+  const { id } = req.params;
+  const { confirmation } = req.body; 
+  const trip = await tripsService.getTripById(id);
+  //TODO: verify driver credentials
+  if (trip && confirmation.accepted) {
+    trip.status = TripStatus.IN_TRAVEL;
+    //TODO: notify client
+    return tripsService.updateTrip(trip);
+  }
+  //TODO: look for a new driver and assign trip.
+}
+
 export default {
   getAll,
   getById,
   createTrip,
-  updateTrip
+  updateTrip,
+  confirmTrip
 };
