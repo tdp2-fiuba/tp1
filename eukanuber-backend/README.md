@@ -1,8 +1,6 @@
-# EukanUber Backend
+# EukanUber Backend [![Build Status](https://travis-ci.org/tdp2-fiuba/tp1.svg?branch=master)](https://travis-ci.org/tdp2-fiuba/tp1)
 
-- [![Build Status](https://travis-ci.org/tdp2-fiuba/tp1.svg?branch=master)](https://travis-ci.org/tdp2-fiuba/tp1)
-- [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-- Database: TBC
+[Go to the backend in Heroku](https://quiet-ravine-53171.herokuapp.com/ping)
 
 ## Getting started
 
