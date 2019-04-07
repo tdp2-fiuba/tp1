@@ -1,3 +1,4 @@
-import ITrip from "./trip";
+import ICreateTripData from "./ICreateTripData";
+import ITrip, { TripStatus } from "./ITrip";
 
-export { ITrip };
+export { ICreateTripData, ITrip, TripStatus };

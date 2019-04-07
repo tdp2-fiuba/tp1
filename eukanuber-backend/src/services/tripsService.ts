@@ -1,5 +1,6 @@
 import db from "../db/db";
-import { ITrip } from "../models";
+import { ICreateTripData, ITrip, TripStatus } from "../models";
+import googleMapsService from "./googleMapsService";
 
 async function getTrips() {
   return await db.table("trips").select();
@@ -22,23 +23,31 @@ async function getTripById(id: string): Promise<ITrip> {
   };
 }
 
-async function createTrip(trip: ITrip) {
-  // TODO: remove
-  trip.clientId = "dummyClient";
-  trip.driverId = "dummyDriver";
-  trip.price = "5.99 USD";
-
+async function createTrip(trip: ICreateTripData): Promise<ITrip> {
+  // Move to controller
   const newTrip = {
     ...trip,
-    pets: trip.pets.join(",").replace(/\s/g, "")
+    originCoordinates: await googleMapsService.getGeocode(trip.origin),
+    destinationCoordinates: await googleMapsService.getGeocode(trip.destination),
+    pets: trip.pets.join(",").replace(/\s/g, ""),
+    // TODO: remove
+    clientId: "dummyClientId"
   };
 
-  trip.id = ((await db
+  const tripId = ((await db
     .table("trips")
     .returning("id")
     .insert(newTrip)) as string[])[0];
 
-  return trip;
+  return {
+    ...newTrip,
+    id: tripId,
+    pets: trip.pets,
+    // TODO: remove
+    driverId: "dummyDriverId",
+    status: TripStatus.PENDING,
+    price: "100 USD"
+  };
 }
 
 async function updateTrip(trip: ITrip) {

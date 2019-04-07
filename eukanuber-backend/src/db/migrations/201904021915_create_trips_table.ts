@@ -11,8 +11,10 @@ function up(knex: Knex) {
 
     tableBuilder.string("origin").notNullable();
     tableBuilder.string("destination").notNullable();
+    tableBuilder.string("originCoordinates").notNullable();
+    tableBuilder.string("destinationCoordinates").notNullable();
     tableBuilder.string("clientId").notNullable();
-    tableBuilder.string("driverId").notNullable();
+    tableBuilder.string("driverId").defaultTo("");
     tableBuilder.string("pets").defaultTo("");
     tableBuilder.boolean("escort").defaultTo(false);
     tableBuilder.integer("status").defaultTo(0);

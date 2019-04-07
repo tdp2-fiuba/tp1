@@ -4,8 +4,10 @@ async function seed(knex: Knex) {
   const providersQueryBuilder = knex("trips");
 
   const newTrip = {
-    origin: "43.138092,-89.747988",
-    destination: "43.017218,-89.831479",
+    origin: "Goya 630, Buenos Aires, Argentina",
+    destination: "Avenida Paseo Colón 850, Buenos Aires, Argentina",
+    originCoordinates: "43.138092,-89.747988",
+    destinationCoordinates: "43.017218,-89.831479",
     clientId: "abc123",
     driverId: "def456",
     pets: "S, M, L",
