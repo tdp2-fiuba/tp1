@@ -1,6 +1,8 @@
 language: node_js
 node_js: 10
 cache: npm
+env:
+  - NODE_ENV=heroku
 
 before_install:
   - cd eukanuber-backend
@@ -11,3 +13,10 @@ install:
 script:
   - npm run build
   - npm run coverage
+
+before_deploy:
+  - npm run db:migrate
+
+deploy:
+  provider: heroku
+  api_key: 19208418-520b-4d6f-836b-937b21d9f986
