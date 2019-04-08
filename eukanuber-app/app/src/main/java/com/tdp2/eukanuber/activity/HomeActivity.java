@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ import org.checkerframework.checker.linear.qual.Linear;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,7 +58,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
     private final String CLIENT_TYPE = "client";
     private final Integer TRIP_ACCEPTED = 1;
     private final Integer TRIP_CANCELLED = 4;
-
+    private final String DEFAULT_TRIP_ID = "58ce748f-d68b-40db-a5b7-9598806a1d9a";
 
 
     private LocationListener locationListener;
@@ -79,7 +81,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
             public void onLocationChanged(Location location) {
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 if (mMap != null) {
-                   // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
                 }
             }
 
@@ -122,14 +124,18 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         driverStatusView.setOnClickListener(view -> {
             // Llega id del trip en el push para ir a buscar info del trip
             SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
-            String newTripId = settings.getString("newTripId", "58ce748f-d68b-40db-a5b7-9598806a1d9a");
+            String newTripId = settings.getString("newTripId", DEFAULT_TRIP_ID);
             TripService tripService = new TripService();
             Call<Trip> call = tripService.get(newTripId);
+            ProgressDialog dialog = new ProgressDialog(HomeActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
                     Trip trip = response.body();
-                    if(trip == null){
+                    if (trip == null) {
                         trip = new Trip();
                         trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
                         trip.setOrigin("Paseo Colon 850 Esquina Independencia");
@@ -138,7 +144,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
                         Collection<String> pets = new ArrayList<>();
                         pets.add("S");
                         pets.add("M");
-                        pets.add("B");
+                        pets.add("L");
                         trip.setPets(pets);
                     }
                     openPopupNewTripDriver(view, trip);
@@ -147,7 +153,9 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     Log.v("TRIP", t.getMessage());
+                    dialog.dismiss();
                     showMessage("Ha ocurrido un error al solicitar el viaje.");
+
                 }
             });
         });
@@ -160,7 +168,8 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-        String petsString = "Chica: 1, Mediana: 1, Grande: 1";
+        String petsString = getPetStringFromArray(trip.getPets());
+
         String escortText = trip.getEscort() ? "Si" : "No";
         trip.setDuration("1h 04m");
         trip.setPrice("$456,90");
@@ -202,6 +211,30 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
             showMessage("El viaje ha sido confirmado.");
         });
     }
+
+    private String getPetStringFromArray(Collection<String> pets) {
+        String petsString = "";
+        Integer quantSmall = Collections.frequency(pets, "S");
+        Integer quantMedium = Collections.frequency(pets, "M");
+        Integer quantLarge = Collections.frequency(pets, "L");
+        if(quantSmall > 0){
+            petsString += quantSmall.toString() + " chica";
+            if(quantMedium > 0 || quantLarge > 0){
+                petsString += " - ";
+            }
+        }
+        if(quantMedium > 0){
+            petsString += quantSmall.toString() + " mediana ";
+            if(quantLarge > 0){
+                petsString += " - ";
+            }
+        }
+        if(quantLarge > 0){
+            petsString += quantSmall.toString() + " grande";
+        }
+        return petsString;
+    }
+
     public void showMessage(String message) {
         Toast.makeText(
                 this,
@@ -209,11 +242,12 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
                 Toast.LENGTH_LONG
         ).show();
     }
+
     private void checkPermissionsLocation() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSION_FINE_LOCATION);
             return;
         }
@@ -222,15 +256,15 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-        case PERMISSION_FINE_LOCATION: {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initMapLocation();
-            } else {
-                Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
-                        Toast.LENGTH_SHORT).show();
+            case PERMISSION_FINE_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initMapLocation();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
             }
-            return;
-        }
         }
 
     }

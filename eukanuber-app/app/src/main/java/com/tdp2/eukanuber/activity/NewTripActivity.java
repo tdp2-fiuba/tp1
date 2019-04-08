@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -261,24 +262,38 @@ public class NewTripActivity extends MenuActivity implements
             newTripRequest.setEscort(switchEscort.isChecked());
             newTripRequest.setPayment(payment);
             newTripRequest.setPets(pets.values());
-
+            if(newTripRequest.getOrigin().isEmpty()){
+                Toast.makeText(this, "Ingrese el origen",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(newTripRequest.getDestination().isEmpty()){
+                Toast.makeText(this, "Ingrese el destino",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(newTripRequest.getOrigin().equals(newTripRequest.getDestination())){
+                Toast.makeText(this, "Origen y destino no pueden ser iguales",Toast.LENGTH_SHORT).show();
+                return;
+            }
             TripService tripService = new TripService();
             Call<Trip> call = tripService.create(newTripRequest);
-
+            ProgressDialog dialog = new ProgressDialog(NewTripActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
                     Trip trip = response.body();
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString("newTripId", trip.getId());
                     editor.commit();
-
                     showMessage("El viaje ha sido solicitado.");
                 }
 
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
+                    dialog.dismiss();
                     Log.v("TRIP", t.getMessage());
                     showMessage("Ha ocurrido un error al solicitar el viaje.");
                 }
