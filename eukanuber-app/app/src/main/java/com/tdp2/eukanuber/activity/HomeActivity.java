@@ -73,8 +73,8 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Intent intent = getIntent();
-        userType = intent.getStringExtra("userType");
+        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
+        userType = settings.getString("userType", "client");
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -224,13 +224,13 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
             }
         }
         if(quantMedium > 0){
-            petsString += quantSmall.toString() + " mediana ";
+            petsString += quantMedium.toString() + " mediana ";
             if(quantLarge > 0){
                 petsString += " - ";
             }
         }
         if(quantLarge > 0){
-            petsString += quantSmall.toString() + " grande";
+            petsString += quantLarge.toString() + " grande";
         }
         return petsString;
     }

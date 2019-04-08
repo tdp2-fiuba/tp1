@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -16,13 +17,19 @@ public class LoginActivity extends AppCompatActivity {
 
     public void goHomeClient(View view) {
         Intent intent = new Intent(this, HomeActivity.class);
-        intent.putExtra("userType", "client");
+        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("userType", "client");
+        editor.commit();
         startActivity(intent);
     }
 
     public void goHomeDriver(View view) {
         Intent intent = new Intent(this, HomeActivity.class);
-        intent.putExtra("userType", "driver");
+        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("userType", "driver");
+        editor.commit();
         startActivity(intent);
     }
 }

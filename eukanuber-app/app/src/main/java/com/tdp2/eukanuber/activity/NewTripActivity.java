@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -289,6 +290,8 @@ public class NewTripActivity extends MenuActivity implements
                     editor.putString("newTripId", trip.getId());
                     editor.commit();
                     showMessage("El viaje ha sido solicitado.");
+                    Intent intent = new Intent(NewTripActivity.this, HomeActivity.class);
+                    startActivity(intent);
                 }
 
                 @Override
