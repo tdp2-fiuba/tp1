@@ -11,24 +11,44 @@ describe("tripsController", () => {
   let response: Express.Response;
   let tripsServiceMock: Sinon.SinonMock;
 
-  beforeEach(() => {
+  before(() => {
     // Creates a mock on the object (see https://sinonjs.org/releases/latest/mocks/)
     tripsServiceMock = Sinon.mock(tripsService);
   });
 
-  beforeEach(() => {
+  before(() => {
     // Restores all mocked methods
     tripsServiceMock.restore();
   });
 
   describe("updateTrip", () => {
-    before(() => {
+    let trip: any;
+    let updatedTrip: any;
+    let updateTripStub: Sinon.SinonStub;
+    let responseJsonSpy: any;
+
+    before(async () => {
       // This section should be similar as createTrip, except that
-      // you need to mock the tripsService.updateTrip instead
+      // the tripsService.updateTrip is mocked instead
+      trip = { id:"ankhmp12", origin: "ankhmp", destination: "Circle Sea" }
+      updatedTrip = { id:"ankhmp12", origin: "ankhmp", destination: "Cori Celesti" }
+      
+      responseJsonSpy = Sinon.spy();
+
+      updateTripStub = tripsServiceMock.expects("updateTrip").returns(Promise.resolve(updatedTrip));
+
+      request = mockReq<Express.Request>({ body: trip } as any);
+      response = mockRes<Express.Response>( { json: responseJsonSpy } as any);
+
+      await tripsController.updateTrip(request, response);
     });
 
-    it("should call the trips service with the proper parameters", () => {});
-    it("should return the updated trip", () => {});
+    it("should call the trips service with the proper parameters", () => {
+      expect(updateTripStub).calledOnceWith(trip);
+    });
+    it("should return the updated trip", () => {
+      expect(responseJsonSpy).calledOnceWith(updatedTrip);
+    });
   });
 
   describe("getById", () => {
@@ -38,17 +58,13 @@ describe("tripsController", () => {
     let responseJsonSpy: any;
 
     before(async () => {
-      // This section should be similar as createTrip, except that
-      // you need to mock the tripsService.getTripById instead
       tripId = { id: "ankhmp12" }
       trip = { id:"ankhmp12", origin: "ankhmp", destination: "circleSea" }
-
       getTripByIdStub = tripsServiceMock.expects("getTripById").returns(Promise.resolve(trip));
-
       responseJsonSpy = Sinon.spy();
 
-      request = mockReq<Express.Request>( {params: tripId} as any);
-      response = mockRes<Express.Response>({json : responseJsonSpy} as any);
+      request = mockReq<Express.Request>({ params: tripId } as any);
+      response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
 
       await tripsController.getById(request, response);
     });
@@ -68,15 +84,11 @@ describe("tripsController", () => {
 
     before(async () => {
       trips = [{ origin: "abc", destination: "bcd" }, { origin: "def", destination: "ghi" }];
-
-      // This section should be similar as createTrip, except that
-      // you need to mock the tripsService.getTrips instead
       getAllTripsStub = tripsServiceMock.expects("getTrips").returns(Promise.resolve(trips));
-
       responseJsonSpy = Sinon.spy();
 
       request = mockReq<Express.Request>();
-      response = mockRes<Express.Response>({json : responseJsonSpy} as any);
+      response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
 
       await tripsController.getAll(request, response);
     });

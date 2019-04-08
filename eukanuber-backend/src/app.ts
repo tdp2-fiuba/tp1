@@ -16,6 +16,7 @@ app.get("/users", usersController.getUsers);
 // Trips endpoints
 app.get("/trips", tripsController.getAll);
 app.get("/trips/:id", tripsController.getById);
+app.get("/trips/:id/confirmation", tripsController.confirmTrip);
 app.post("/trips", tripsController.createTrip);
 app.put("/trips", tripsController.updateTrip);
 
