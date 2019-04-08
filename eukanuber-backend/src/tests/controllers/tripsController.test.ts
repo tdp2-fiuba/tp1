@@ -58,16 +58,12 @@ describe("tripsController", () => {
     let responseJsonSpy: any;
 
     before(async () => {
-      // This section should be similar as createTrip, except that
-      // the tripsService.getTripById is mocked instead
       tripId = { id: "ankhmp12" }
       trip = { id:"ankhmp12", origin: "ankhmp", destination: "circleSea" }
-
       getTripByIdStub = tripsServiceMock.expects("getTripById").returns(Promise.resolve(trip));
-
       responseJsonSpy = Sinon.spy();
 
-      request = mockReq<Express.Request>( { params: tripId } as any);
+      request = mockReq<Express.Request>({ params: tripId } as any);
       response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
 
       await tripsController.getById(request, response);
@@ -88,11 +84,7 @@ describe("tripsController", () => {
 
     before(async () => {
       trips = [{ origin: "abc", destination: "bcd" }, { origin: "def", destination: "ghi" }];
-
-      // This section should be similar as createTrip, except that
-      // the tripsService.getTrips is mocked instead
       getAllTripsStub = tripsServiceMock.expects("getTrips").returns(Promise.resolve(trips));
-
       responseJsonSpy = Sinon.spy();
 
       request = mockReq<Express.Request>();
