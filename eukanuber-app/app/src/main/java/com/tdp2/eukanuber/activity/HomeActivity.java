@@ -6,12 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,30 +22,29 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
-import com.tdp2.eukanuber.R;
-import com.tdp2.eukanuber.model.ChangeTripStatusRequest;
-import com.tdp2.eukanuber.model.Trip;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
+import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.model.MapRoute;
+import com.tdp2.eukanuber.model.MapRouteLeg;
+import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.services.TripService;
-
-import org.checkerframework.checker.linear.qual.Linear;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -98,10 +97,59 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
 
         if (userType.equals(CLIENT_TYPE)) {
             initClientHome();
+            showPath();
         }
         if (userType.equals(DRIVER_TYPE)) {
             initDriverHome();
         }
+    }
+    private void showPath(){
+        String tripExampleId = "8fb570de-45b1-4be2-a466-e682533baaa1";
+        TripService tripService = new TripService();
+        Call<Trip> call = tripService.get(tripExampleId);
+        ProgressDialog dialog = new ProgressDialog(HomeActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                dialog.dismiss();
+                Trip trip = response.body();
+                MapRoute route = trip.getRoutes().get(0);
+                List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(Color.BLUE);
+                polyOptions.width(10);
+                polyOptions.addAll(pointsPolyline);
+                mMap.clear();
+                mMap.addPolyline(polyOptions);
+                /*MapRouteLeg leg = route.getLegs().get(0);
+                LatLng locationOrigin = new LatLng(Double.valueOf(leg.getStartLocation().getLat()), Double.valueOf(leg.getStartLocation().getLng()));
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(locationOrigin.latitude, locationOrigin.longitude))
+                        .zoom(12.0f)
+                        .tilt(40).build();
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);*/
+                int padding = 100;
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for (LatLng latLng : pointsPolyline) {
+                    builder.include(latLng);
+                }
+
+                final LatLngBounds bounds = builder.build();
+
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                mMap.animateCamera(cu);
+            }
+
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                Log.v("TRIP", t.getMessage());
+                dialog.dismiss();
+                showMessage("Ha ocurrido un error al solicitar el viaje.");
+
+            }
+        });
     }
 
     private void initClientHome() {
@@ -282,27 +330,15 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         }
 
         mMap.setMyLocationEnabled(true);
-        mMap.setMinZoomPreference(14.0f);
+        mMap.setMinZoomPreference(10.0f);
         mMap.setMaxZoomPreference(20.0f);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
         if (location != null) {
-            LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-
-            // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-            // mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
-
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    // Centra el mapa en locacion del usuario
                     .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    // seteo el zoom
                     .zoom(18.0f)
-                    // Orientacion de la camara al este - no queda bien
-                    // .bearing(90)
-                    // tiltea la camara 40 grados
                     .tilt(40).build();
-
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
         }
     }

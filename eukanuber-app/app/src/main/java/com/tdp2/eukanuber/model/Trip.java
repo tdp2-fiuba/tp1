@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class Trip {
 
@@ -13,6 +14,7 @@ public class Trip {
     private String payment;
     private String duration;
     private String price;
+    private List<MapRoute> routes;
 
     public String getId() {
         return id;
@@ -80,5 +82,13 @@ public class Trip {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public List<MapRoute> getRoutes() {
+        return routes;
+    }
+
+    public void setRoutes(List<MapRoute> routes) {
+        this.routes = routes;
     }
 }
