@@ -15,6 +15,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -26,18 +27,17 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.tdp2.eukanuber.R;
 
 public class PlaceAutocompleteAdapter extends RecyclerView.Adapter<PlaceAutocompleteAdapter.PlaceViewHolder> implements Filterable {
 
     public interface PlaceAutoCompleteInterface {
         public void onPlaceClick(ArrayList<PlaceAutocomplete> mResultList, int position, EditText editText, RecyclerView recyclerView);
-    }
-    public interface ShowMessageInterface {
-        public void showMessage(String message);
     }
 
     private String TAG = "PlaceAutocompleteAdapter";

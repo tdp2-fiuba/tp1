@@ -1,18 +1,11 @@
 package com.tdp2.eukanuber.activity;
 
-import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,148 +16,39 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.PolyUtil;
 import com.tdp2.eukanuber.R;
-import com.tdp2.eukanuber.model.MapRoute;
-import com.tdp2.eukanuber.model.MapRouteLeg;
+import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.services.TripService;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
+public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
-    private final int PERMISSION_FINE_LOCATION = 1;
-    private final String DRIVER_TYPE = "driver";
-    private final String CLIENT_TYPE = "client";
-    private final Integer TRIP_ACCEPTED = 1;
-    private final Integer TRIP_CANCELLED = 4;
     private final String DEFAULT_TRIP_ID = "58ce748f-d68b-40db-a5b7-9598806a1d9a";
-
-
-    private LocationListener locationListener;
-    private LocationManager locationManager;
-    private String userType;
+    private MapManager mapManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_home_driver);
         this.createMenu();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
-        userType = settings.getString("userType", "client");
-
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                if (mMap != null) {
-                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-                }
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-        };
-        this.checkPermissionsLocation();
-
-        if (userType.equals(CLIENT_TYPE)) {
-            initClientHome();
-            showPath();
-        }
-        if (userType.equals(DRIVER_TYPE)) {
-            initDriverHome();
-        }
-    }
-    private void showPath(){
-        String tripExampleId = "8fb570de-45b1-4be2-a466-e682533baaa1";
-        TripService tripService = new TripService();
-        Call<Trip> call = tripService.get(tripExampleId);
-        ProgressDialog dialog = new ProgressDialog(HomeActivity.this);
-        dialog.setMessage("Espere un momento por favor");
-        dialog.show();
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                dialog.dismiss();
-                Trip trip = response.body();
-                MapRoute route = trip.getRoutes().get(0);
-                List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(Color.BLUE);
-                polyOptions.width(10);
-                polyOptions.addAll(pointsPolyline);
-                mMap.clear();
-                mMap.addPolyline(polyOptions);
-                /*MapRouteLeg leg = route.getLegs().get(0);
-                LatLng locationOrigin = new LatLng(Double.valueOf(leg.getStartLocation().getLat()), Double.valueOf(leg.getStartLocation().getLng()));
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(new LatLng(locationOrigin.latitude, locationOrigin.longitude))
-                        .zoom(12.0f)
-                        .tilt(40).build();
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);*/
-                int padding = 100;
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (LatLng latLng : pointsPolyline) {
-                    builder.include(latLng);
-                }
-
-                final LatLngBounds bounds = builder.build();
-
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                mMap.animateCamera(cu);
-            }
-
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.v("TRIP", t.getMessage());
-                dialog.dismiss();
-                showMessage("Ha ocurrido un error al solicitar el viaje.");
-
-            }
-        });
+        initDriverHome();
     }
 
-    private void initClientHome() {
-        LinearLayout layoutMap = findViewById(R.id.layoutMap);
-        layoutMap.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 10f));
-        FloatingActionButton newTripButton = findViewById(R.id.newTripButton);
-        FloatingActionsMenu fam = findViewById(R.id.menu_fab);
-        findViewById(R.id.driverStatus).setVisibility(View.GONE);
-        newTripButton.setOnClickListener(view -> {
-            Intent intent = new Intent(HomeActivity.this, NewTripActivity.class);
-            fam.collapse();
-            startActivity(intent);
-        });
-    }
 
     private void initDriverHome() {
         findViewById(R.id.menu_fab).setVisibility(View.GONE);
@@ -175,7 +59,7 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
             String newTripId = settings.getString("newTripId", DEFAULT_TRIP_ID);
             TripService tripService = new TripService();
             Call<Trip> call = tripService.get(newTripId);
-            ProgressDialog dialog = new ProgressDialog(HomeActivity.this);
+            ProgressDialog dialog = new ProgressDialog(HomeDriverActivity.this);
             dialog.setMessage("Espere un momento por favor");
             dialog.show();
             call.enqueue(new Callback<Trip>() {
@@ -265,19 +149,19 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         Integer quantSmall = Collections.frequency(pets, "S");
         Integer quantMedium = Collections.frequency(pets, "M");
         Integer quantLarge = Collections.frequency(pets, "L");
-        if(quantSmall > 0){
+        if (quantSmall > 0) {
             petsString += quantSmall.toString() + " chica";
-            if(quantMedium > 0 || quantLarge > 0){
+            if (quantMedium > 0 || quantLarge > 0) {
                 petsString += " - ";
             }
         }
-        if(quantMedium > 0){
+        if (quantMedium > 0) {
             petsString += quantMedium.toString() + " mediana ";
-            if(quantLarge > 0){
+            if (quantLarge > 0) {
                 petsString += " - ";
             }
         }
-        if(quantLarge > 0){
+        if (quantLarge > 0) {
             petsString += quantLarge.toString() + " grande";
         }
         return petsString;
@@ -291,22 +175,13 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
         ).show();
     }
 
-    private void checkPermissionsLocation() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_FINE_LOCATION);
-            return;
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case PERMISSION_FINE_LOCATION: {
+            case MapManager.PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initMapLocation();
+                    mapManager.setCurrentLocation();
+
                 } else {
                     Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
                             Toast.LENGTH_SHORT).show();
@@ -314,32 +189,31 @@ public class HomeActivity extends MenuActivity implements OnMapReadyCallback {
                 return;
             }
         }
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        initMapLocation();
+        mapManager = new MapManager(mMap, this);
+        mapManager.setCurrentLocation();
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                if (mMap != null) {
+                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                }
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            public void onProviderEnabled(String provider) {
+            }
+
+            public void onProviderDisabled(String provider) {
+            }
+        };
+        mapManager.setListener(locationListener);
     }
 
-    private void initMapLocation() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        mMap.setMyLocationEnabled(true);
-        mMap.setMinZoomPreference(10.0f);
-        mMap.setMaxZoomPreference(20.0f);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location != null) {
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .zoom(18.0f)
-                    .tilt(40).build();
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
-        }
-    }
 }

@@ -20,26 +20,27 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+import com.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
+import com.tdp2.eukanuber.model.NewTripRequest;
+import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.services.TripService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import com.tdp2.eukanuber.model.NewTripRequest;
-import com.tdp2.eukanuber.model.Trip;
-import com.tdp2.eukanuber.services.TripService;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class NewTripActivity extends MenuActivity implements
-        PlaceAutocompleteAdapter.PlaceAutoCompleteInterface,
-        PlaceAutocompleteAdapter.ShowMessageInterface {
+        PlaceAutocompleteAdapter.PlaceAutoCompleteInterface, ShowMessageInterface {
     private final String PAYMENT_CASH = "cash";
     private final String PAYMENT_CARD = "card";
     public static final String PREFS_NAME = "NewTrip";
@@ -290,7 +291,7 @@ public class NewTripActivity extends MenuActivity implements
                     editor.putString("newTripId", trip.getId());
                     editor.commit();
                     showMessage("El viaje ha sido solicitado.");
-                    Intent intent = new Intent(NewTripActivity.this, HomeActivity.class);
+                    Intent intent = new Intent(NewTripActivity.this, HomeDriverActivity.class);
                     startActivity(intent);
                 }
 

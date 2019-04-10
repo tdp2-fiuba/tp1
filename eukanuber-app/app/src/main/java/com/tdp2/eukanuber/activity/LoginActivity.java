@@ -16,20 +16,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void goHomeClient(View view) {
-        Intent intent = new Intent(this, HomeActivity.class);
-        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
+        Intent intent = new Intent(this, HomeClientActivity.class);
+        /*SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("userType", "client");
         editor.commit();
+        */
         startActivity(intent);
     }
 
     public void goHomeDriver(View view) {
-        Intent intent = new Intent(this, HomeActivity.class);
-        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("userType", "driver");
-        editor.commit();
+        Intent intent = new Intent(this, HomeDriverActivity.class);
         startActivity(intent);
     }
 }
