@@ -8,4 +8,5 @@
     <string name="nav_header_subtitle">eukanuber-user@eukanuber.com</string>
     <string name="nav_header_desc">Navegacion</string>
     <string name="action_settings">Configuracion</string>
+    <string name="popup_waiting">Espere un momento por favor...</string>
 </resources>

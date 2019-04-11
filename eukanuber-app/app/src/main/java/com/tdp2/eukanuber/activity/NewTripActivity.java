@@ -24,15 +24,20 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.adapter.PlaceAutocompleteAdapter;
+import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.services.TripService;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -284,15 +289,20 @@ public class NewTripActivity extends MenuActivity implements
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
-                    dialog.dismiss();
                     Trip trip = response.body();
+                    Gson gson = new Gson();
+                    Type mapRouteListType = new TypeToken<ArrayList<MapRoute>>(){}.getType();
+                    List<MapRoute> routes = gson.fromJson(trip.getRoutes(), mapRouteListType);
+                    trip.setRoutesList(routes);
                     SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("newTripId", trip.getId());
+                    editor.putString("currentTripId", trip.getId());
                     editor.commit();
-                    showMessage("El viaje ha sido solicitado.");
-                    Intent intent = new Intent(NewTripActivity.this, HomeDriverActivity.class);
+                    dialog.dismiss();
+                    Intent intent = new Intent(NewTripActivity.this, SummaryTripActivity.class);
+                    intent.putExtra("currentTrip", trip);
                     startActivity(intent);
+
                 }
 
                 @Override

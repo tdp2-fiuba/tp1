@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.model;
 
-public class MapRouteTextValue {
+import java.io.Serializable;
+
+public class MapRouteTextValue implements Serializable {
     private String text;
     private String value;
 

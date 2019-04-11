@@ -21,9 +21,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
-import com.tdp2.eukanuber.activity.HomeDriverActivity;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.model.MapRoute;
+import com.tdp2.eukanuber.model.MapRoutePolyline;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.services.TripService;
 
@@ -45,6 +45,11 @@ public class MapManager {
         this.mContext = mContext;
         this.mActivity = (Activity) mContext;
         this.mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        LatLngBounds bounds = new LatLngBounds(
+                new LatLng(-34.594404, -58.424455),
+                new LatLng(-34.586650, -58.375858));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.getCenter(), 12));
+
         checkPermissionsLocation();
     }
 
@@ -70,13 +75,13 @@ public class MapManager {
         if (location != null) {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .zoom(18.0f)
+                    .zoom(18)
                     .tilt(40).build();
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
         }
     }
 
-    public void setListener(LocationListener locationListener){
+    public void setListener(LocationListener locationListener) {
         if (ContextCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -84,51 +89,24 @@ public class MapManager {
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
 
-    private void showPath() {
-        String tripExampleId = "8fb570de-45b1-4be2-a466-e682533baaa1";
-        TripService tripService = new TripService();
-        Call<Trip> call = tripService.get(tripExampleId);
-        ProgressDialog dialog = new ProgressDialog(mContext);
-        dialog.setMessage("Espere un momento por favor");
-        dialog.show();
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                dialog.dismiss();
-                Trip trip = response.body();
-                MapRoute route = trip.getRoutes().get(0);
-                List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(Color.BLUE);
-                polyOptions.width(10);
-                polyOptions.addAll(pointsPolyline);
-                mMap.clear();
-                mMap.addPolyline(polyOptions);
-                int padding = 100;
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (LatLng latLng : pointsPolyline) {
-                    builder.include(latLng);
-                }
+    public void drawPath(MapRoutePolyline mapRoutePolyline) {
+        List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
+        PolylineOptions polyOptions = new PolylineOptions();
+        polyOptions.color(Color.BLUE);
+        polyOptions.width(10);
+        polyOptions.addAll(pointsPolyline);
+        mMap.clear();
+        mMap.addPolyline(polyOptions);
+        int padding = 100;
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng latLng : pointsPolyline) {
+            builder.include(latLng);
+        }
 
-                final LatLngBounds bounds = builder.build();
+        final LatLngBounds bounds = builder.build();
 
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                mMap.animateCamera(cu);
-            }
-
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.v("TRIP", t.getMessage());
-                dialog.dismiss();
-                try{
-                    ShowMessageInterface showMessageInterface = (ShowMessageInterface) mActivity;
-                    showMessageInterface.showMessage("Ha ocurrido un error al solicitar el viaje.");
-                }catch (ClassCastException ex){
-                    Log.d(MapManager.class.getSimpleName(), ex.getMessage());
-                }
-
-
-            }
-        });
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        mMap.animateCamera(cu);
     }
+
 }

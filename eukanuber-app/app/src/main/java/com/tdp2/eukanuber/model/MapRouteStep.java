@@ -2,7 +2,9 @@ package com.tdp2.eukanuber.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MapRouteStep {
+import java.io.Serializable;
+
+public class MapRouteStep implements Serializable {
     private MapRouteTextValue distance;
     private MapRouteTextValue duration;
     private MapRoutePolyline polyline;

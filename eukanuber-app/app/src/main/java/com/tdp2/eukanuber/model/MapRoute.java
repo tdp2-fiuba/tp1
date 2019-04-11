@@ -2,10 +2,11 @@ package com.tdp2.eukanuber.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-public class MapRoute {
+public class MapRoute implements Serializable {
     private List<MapRouteLeg> legs;
     @SerializedName("overview_polyline")
     private MapRoutePolyline overviewPolyline;

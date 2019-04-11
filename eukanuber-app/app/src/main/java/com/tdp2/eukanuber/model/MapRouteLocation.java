@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.model;
 
-public class MapRouteLocation {
+import java.io.Serializable;
+
+public class MapRouteLocation implements Serializable {
     private String lat;
     private String lng;
 

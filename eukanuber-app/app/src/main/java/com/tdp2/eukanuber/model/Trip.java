@@ -1,20 +1,22 @@
 package com.tdp2.eukanuber.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Trip {
+public class Trip implements Serializable {
 
     private String id;
     private String origin;
     private String destination;
-    private Collection<String> pets;
+    private List<String> pets;
     private Boolean escort;
     private String payment;
     private String duration;
     private String price;
-    private List<MapRoute> routes;
+    private String routes;
+    private List<MapRoute> routesList;
 
     public String getId() {
         return id;
@@ -44,11 +46,12 @@ public class Trip {
         this.destination = destination;
     }
 
-    public Collection<String> getPets() {
+
+    public List<String> getPets() {
         return pets;
     }
 
-    public void setPets(Collection<String> pets) {
+    public void setPets(List<String> pets) {
         this.pets = pets;
     }
 
@@ -84,11 +87,19 @@ public class Trip {
         this.price = price;
     }
 
-    public List<MapRoute> getRoutes() {
+    public String getRoutes() {
         return routes;
     }
 
-    public void setRoutes(List<MapRoute> routes) {
+    public void setRoutes(String routes) {
         this.routes = routes;
+    }
+
+    public List<MapRoute> getRoutesList() {
+        return routesList;
+    }
+
+    public void setRoutesList(List<MapRoute> routesList) {
+        this.routesList = routesList;
     }
 }

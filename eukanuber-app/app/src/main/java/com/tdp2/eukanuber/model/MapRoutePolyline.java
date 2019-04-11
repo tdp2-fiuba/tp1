@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.model;
 
-public class MapRoutePolyline {
+import java.io.Serializable;
+
+public class MapRoutePolyline implements Serializable {
     private String points;
 
     public String getPoints() {

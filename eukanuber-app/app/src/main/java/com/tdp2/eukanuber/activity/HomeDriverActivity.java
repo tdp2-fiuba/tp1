@@ -29,6 +29,7 @@ import com.tdp2.eukanuber.services.TripService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,12 +52,11 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
 
 
     private void initDriverHome() {
-        findViewById(R.id.menu_fab).setVisibility(View.GONE);
         TextView driverStatusView = findViewById(R.id.driverStatus);
         driverStatusView.setOnClickListener(view -> {
             // Llega id del trip en el push para ir a buscar info del trip
             SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
-            String newTripId = settings.getString("newTripId", DEFAULT_TRIP_ID);
+            String newTripId = settings.getString("currentTripId", DEFAULT_TRIP_ID);
             TripService tripService = new TripService();
             Call<Trip> call = tripService.get(newTripId);
             ProgressDialog dialog = new ProgressDialog(HomeDriverActivity.this);
@@ -73,7 +73,7 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                         trip.setOrigin("Paseo Colon 850 Esquina Independencia");
                         trip.setEscort(true);
                         trip.setPayment("cash");
-                        Collection<String> pets = new ArrayList<>();
+                        List<String> pets = new ArrayList<>();
                         pets.add("S");
                         pets.add("M");
                         pets.add("L");
