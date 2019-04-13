@@ -121,11 +121,10 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         });
         buttonConfirm.setOnClickListener(view -> {
 
-            /*TripService tripService = new TripService();
-            ChangeTripStatusRequest changeTripStatusRequest = new ChangeTripStatusRequest();
-            changeTripStatusRequest.setId(trip.getId());
-            changeTripStatusRequest.setStatus(TRIP_ACCEPTED);
-            Call<Trip> call = tripService.updateStatus(changeTripStatusRequest);
+            /*
+            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest("dummyDriverId");
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.assignDriverToTrip(trip.getId(), assignDriverToTripRequest);
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
@@ -136,6 +135,7 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     popupWindow.dismiss();
+                    // TODO: mostrar error de que el viaje ha sido tomado y/o seguir de largo
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
             });*/

@@ -1,6 +1,6 @@
 package com.tdp2.eukanuber.services;
 
-import com.tdp2.eukanuber.model.ChangeTripStatusRequest;
+import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 
@@ -21,6 +21,6 @@ public interface BackendService {
     @GET("trips/{tripId}")
     Call<Trip> get(@Path("tripId") String tripId);
 
-    @PUT("trips")
-    Call<Trip> updateStatusTrip(@Body ChangeTripStatusRequest changeTripStatusRequest);
+    @PUT("trips/{tripId}")
+    Call<Trip> assignDriverToTrip(@Path("tripId") String tripId, @Body AssignDriverToTripRequest assignDriverToTripRequest);
 }
