@@ -12,7 +12,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface BackendService {
-    String API_PATH = "https://quiet-ravine-53171.herokuapp.com";
+    String API_PATH = "https:/eukanuber-backend.herokuapp.com";
 
     // Trips
     @POST("trips")
