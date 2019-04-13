@@ -1,9 +1,17 @@
+import Knex from "knex";
 import db from "../db/db";
 import { ICreateTripData, ITrip, TripStatus } from "../models";
 import googleMapsService from "./googleMapsService";
 
-async function getTrips() {
-  return await db.table("trips").select();
+async function getTrips(status: TripStatus) {
+  return await db
+    .table("trips")
+    .modify((queryBuilder: Knex.QueryBuilder) => {
+      if (status) {
+        queryBuilder.where("status", status);
+      }
+    })
+    .select();
 }
 
 async function getTripById(id: string): Promise<ITrip> {

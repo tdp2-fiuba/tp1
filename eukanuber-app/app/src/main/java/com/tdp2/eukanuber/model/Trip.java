@@ -46,7 +46,6 @@ public class Trip implements Serializable {
         this.destination = destination;
     }
 
-
     public List<String> getPets() {
         return pets;
     }

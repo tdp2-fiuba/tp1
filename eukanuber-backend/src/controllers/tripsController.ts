@@ -1,9 +1,10 @@
 import Express from "express";
-import { ICreateTripData, ITrip } from "../models";
+import { ICreateTripData, ITrip, TripStatus } from "../models";
 import { tripsService } from "../services";
 
 async function getAll(req: Express.Request, res: Express.Response) {
-  const trips = await tripsService.getTrips();
+  const status: TripStatus = req.query.status;
+  const trips = await tripsService.getTrips(status);
   res.json(trips);
 }
 
