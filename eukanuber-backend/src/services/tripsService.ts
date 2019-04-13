@@ -61,11 +61,23 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   } as any;
 }
 
+async function updateTripStatus(id: string, status: TripStatus) {
+  await db
+    .table("trips")
+    .where("id", id)
+    .update({ status });
+
+  return await db
+    .table("trips")
+    .where("id", id)
+    .select();
+}
+
 async function assignDriverToTrip(id: string, driverId: string) {
   await db
     .table("trips")
     .where("id", id)
-    .update({ driverId, status: TripStatus.ACCEPTED });
+    .update({ driverId, status: TripStatus.IN_TRAVEL });
 
   return await db
     .table("trips")
@@ -89,5 +101,6 @@ export default {
   getTrips,
   getTripById,
   createTrip,
+  updateTripStatus,
   assignDriverToTrip
 };

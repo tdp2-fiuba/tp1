@@ -28,6 +28,14 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
     const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
     return res.json(updatedTrip);
   }
+
+  if (trip.status) {
+    const updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
+    return res.json(updatedTrip);
+  }
+
+  // Send a Bad request
+  res.sendStatus(400);
 }
 
 export default {
