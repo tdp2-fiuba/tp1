@@ -61,18 +61,16 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   } as any;
 }
 
-async function updateTrip(trip: ITrip) {
-  const updatedTrip = {
-    ...trip,
-    pets: trip.pets.join(",").replace(/\s/g, "")
-  };
-
+async function assignDriverToTrip(id: string, driverId: string) {
   await db
     .table("trips")
-    .where("id", trip.id)
-    .update(updatedTrip);
+    .where("id", id)
+    .update({ driverId, status: TripStatus.ACCEPTED });
 
-  return trip;
+  return await db
+    .table("trips")
+    .where("id", id)
+    .select();
 }
 
 function calculateRouteData(routes: string) {
@@ -91,5 +89,5 @@ export default {
   getTrips,
   getTripById,
   createTrip,
-  updateTrip
+  assignDriverToTrip
 };

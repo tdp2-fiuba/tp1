@@ -9,8 +9,8 @@ async function getAll(req: Express.Request, res: Express.Response) {
 }
 
 async function getById(req: Express.Request, res: Express.Response) {
-  const { id } = req.params; // This is object deconstruction, equivalent to "const id = req.params.id;"
-  const trip = await tripsService.getTripById(id);
+  const tripId = req.params.id;
+  const trip = await tripsService.getTripById(tripId);
   res.json(trip);
 }
 
@@ -21,9 +21,13 @@ async function createTrip(req: Express.Request, res: Express.Response) {
 }
 
 async function updateTrip(req: Express.Request, res: Express.Response) {
-  const trip: ITrip = req.body;
-  const updatedTrip = await tripsService.updateTrip(trip);
-  res.json(updatedTrip);
+  const tripId = req.params.id;
+  const trip: Partial<ITrip> = req.body;
+
+  if (trip.driverId) {
+    const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
+    return res.json(updatedTrip);
+  }
 }
 
 export default {
