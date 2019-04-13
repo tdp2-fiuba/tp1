@@ -1,5 +1,5 @@
 import Express from "express";
-import { ICreateTripData } from "../models";
+import { ICreateTripData, ITrip } from "../models";
 import { tripsService } from "../services";
 
 async function getAll(req: Express.Request, res: Express.Response) {
@@ -20,9 +20,8 @@ async function createTrip(req: Express.Request, res: Express.Response) {
 }
 
 async function updateTrip(req: Express.Request, res: Express.Response) {
-  const { body } = req; // This is object deconstruction, equivalent to "const body = req.body"
-
-  const updatedTrip = await tripsService.updateTrip(body);
+  const trip: ITrip = req.body;
+  const updatedTrip = await tripsService.updateTrip(trip);
   res.json(updatedTrip);
 }
 

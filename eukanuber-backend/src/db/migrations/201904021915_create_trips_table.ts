@@ -9,18 +9,24 @@ function up(knex: Knex) {
       .primary()
       .defaultTo(knex.raw("uuid_generate_v4()"));
 
+    tableBuilder.string("clientId").notNullable();
+    tableBuilder.string("driverId").defaultTo("");
+
     tableBuilder.string("pets").notNullable();
+
     tableBuilder.string("origin").notNullable();
     tableBuilder.string("destination").notNullable();
     tableBuilder.string("originCoordinates").notNullable();
     tableBuilder.string("destinationCoordinates").notNullable();
+
     tableBuilder.jsonb("routes").notNullable();
-    tableBuilder.string("clientId").notNullable();
-    tableBuilder.string("driverId").defaultTo("");
+    tableBuilder.string("distance").defaultTo("");
+    tableBuilder.string("duration").defaultTo("");
+    tableBuilder.string("price").defaultTo("");
+
     tableBuilder.boolean("escort").defaultTo(false);
     tableBuilder.integer("status").defaultTo(0);
     tableBuilder.string("payment").defaultTo("cash");
-    tableBuilder.string("price").defaultTo("");
 
     // TODO: Add Client ID and Driver ID indexes
   });

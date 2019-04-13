@@ -28,14 +28,17 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   const originCoordinates = await googleMapsService.getGeocode(trip.origin);
   const destinationCoordinates = await googleMapsService.getGeocode(trip.destination);
   const routes = await googleMapsService.getDirections(originCoordinates, destinationCoordinates);
+  const routeData = calculateRouteData(routes);
+
   const newTrip = {
     ...trip,
     pets: trip.pets.join(",").replace(/\s/g, ""),
     originCoordinates,
     destinationCoordinates,
-    routes,
-    // TODO: remove
-    clientId: "dummyClientId"
+    clientId: "dummyClientId", // TODO: remove
+    status: TripStatus.PENDING,
+    ...routeData,
+    routes
   };
 
   const tripId = ((await db
@@ -46,12 +49,8 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   return {
     ...newTrip,
     id: tripId,
-    pets: trip.pets,
-    // TODO: remove
-    driverId: "dummyDriverId",
-    status: TripStatus.PENDING,
-    price: "100 USD"
-  };
+    pets: trip.pets
+  } as any;
 }
 
 async function updateTrip(trip: ITrip) {
@@ -66,6 +65,18 @@ async function updateTrip(trip: ITrip) {
     .update(updatedTrip);
 
   return trip;
+}
+
+function calculateRouteData(routes: string) {
+  const distanceMultiplier = 0.2;
+  const route = JSON.parse(routes)[0];
+  const price = route.legs[0].duration.value * distanceMultiplier;
+
+  return {
+    distance: route.legs[0].distance.text,
+    duration: route.legs[0].duration.text,
+    price: `$${price.toFixed(2)}`
+  };
 }
 
 export default {
