@@ -21,7 +21,6 @@ describe("tripsController", () => {
     tripsServiceMock.restore();
   });
 
-<<<<<<< Updated upstream
   describe("updateTrip", () => {
     before(() => {
       // This section should be similar as createTrip, except that
@@ -90,8 +89,6 @@ describe("tripsController", () => {
     });
   });
 
-=======
->>>>>>> Stashed changes
   describe("createTrip", () => {
     let trip: any;
     let createTripStub: Sinon.SinonStub;
