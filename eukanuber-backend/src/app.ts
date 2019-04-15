@@ -12,6 +12,11 @@ app.use(requestLoggerMiddleware);
 
 // Users endpoints
 app.get("/users", usersController.getUsers);
+app.post("/users", usersController.createUser);
+app.get("/users/:id", usersController.getUserById);
+app.put("/users/:id", usersController.updateUser);
+app.get("/users/:id/position", usersController.getUserPosition);
+app.put("/users/:id/position", usersController.updateUserPosition);
 
 // Trips endpoints
 app.get("/trips", tripsController.getAll);

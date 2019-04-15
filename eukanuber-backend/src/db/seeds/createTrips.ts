@@ -13,7 +13,8 @@ async function seed(knex: Knex) {
     pets: "S, M, L",
     status: "0",
     payment: "cash",
-    price: "100 USD"
+    price: "100 USD",
+    routes: {}
   };
 
   // Deletes ALL existing entries
@@ -21,6 +22,7 @@ async function seed(knex: Knex) {
 
   // Inserts new entries
   return providersQueryBuilder.insert(newTrip);
+  
 }
 
 export { seed };
