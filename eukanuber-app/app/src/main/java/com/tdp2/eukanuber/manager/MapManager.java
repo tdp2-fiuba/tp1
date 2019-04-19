@@ -5,7 +5,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,11 +20,15 @@ import android.util.Log;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
+import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.MapRoutePolyline;
@@ -80,6 +88,23 @@ public class MapManager {
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
         }
     }
+    public void moveCamera(LatLng position) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(position)
+                .zoom(18)
+                .tilt(40).build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
+    }
+
+    public void addMarkerCar(LatLng position){
+        Bitmap iconCar = BitmapFactory.decodeResource(mContext.getResources(),
+                R.drawable.ic_fab_trip);
+        mMap.addMarker(new MarkerOptions()
+                .position(position)
+                .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_car_map))
+        );
+    }
 
     public void setListener(LocationListener locationListener) {
         if (ContextCompat.checkSelfPermission(mContext,
@@ -107,6 +132,15 @@ public class MapManager {
 
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         mMap.animateCamera(cu);
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
 }

@@ -1,43 +1,23 @@
 package com.tdp2.eukanuber.activity;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.maps.android.PolyUtil;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
-import com.tdp2.eukanuber.services.TripService;
 
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
+public class TrackingTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
     private Trip currentTrip;
@@ -45,24 +25,10 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_summary_trip);
+        setContentView(R.layout.activity_tracking_trip);
         this.createMenu();
-        /*Intent intent = getIntent();
-        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");*/
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        ImageButton buttonCancel = this.findViewById(R.id.buttonCancelTrip);
-        ImageButton buttonConfirm = this.findViewById(R.id.buttonConfirmTrip);
-        buttonCancel.setOnClickListener(view -> {
-            Intent intent = new Intent(this, HomeClientActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
-        buttonConfirm.setOnClickListener(view -> {
-            Intent intent = new Intent(this, TrackingTripActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
     }
 
 
@@ -87,7 +53,16 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
-       // drawSummaryPath();
+        initDriverPosition();
+
+        // drawSummaryPath();
+    }
+
+    private void initDriverPosition() {
+        LatLng positionDriver =new LatLng(-34.800714, -58.278466);
+        mapManager.addMarkerCar(positionDriver);
+        mapManager.moveCamera(positionDriver);
+
     }
 
     private void drawSummaryPath() {
