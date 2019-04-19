@@ -10,11 +10,10 @@ Install all dependencies by running:
 npm i
 ```
 
-Set up your database by [starting a Postgres service](https://www.postgresql.org/download/) locally. Then create an **Eukanuber** database and, finally, run migrations and seed:
+Then, build the service with:
 
 ```
-npm run db:migrate
-npm run db:seed
+npm run build
 ```
 
 Finally, run the backend server with:
@@ -32,3 +31,12 @@ npm run debug
 ```
 
 And then, attach your IDE to the port `9229`.
+
+### Database setup
+
+Set up your database by [starting a Postgres service](https://www.postgresql.org/download/) locally. Then create an **Eukanuber** database and, finally, run migrations and seed:
+
+```
+npm run db:migrate
+npm run db:seed
+```

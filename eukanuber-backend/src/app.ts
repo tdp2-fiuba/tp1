@@ -30,5 +30,5 @@ app.get("/ready", statusController.ready);
 app.get("/status", statusController.status);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`);
+  console.log(`Example app listening on htpp://localhost:${port}!`);
 });
