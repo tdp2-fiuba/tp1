@@ -5,7 +5,7 @@ function up(knex: Knex) {
 }
 
 function down(knex: Knex) {
-  return knex.raw(`DROP EXTENSION IF EXISTS "uuid-ossp";`);
+  return knex.raw(`DROP EXTENSION IF EXISTS "uuid-ossp" CASCADE;`);
 }
 
 export { up, down };
