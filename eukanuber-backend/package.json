@@ -5,14 +5,14 @@
   "main": "dist/app.js",
   "scripts": {
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "debug": "tsnd --respawn --transpileOnly --debug --inspect=9229 --nolazy -- ./src/app.ts",
     "start": "node .",
     "test": "mocha -r ts-node/register src/tests/init-tests.ts src/**/*.test.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test && nyc report",
-    "db:migrate": "node ./dist/db/cli.js --migrate",
-    "db:rollback": "node ./dist/db/cli.js --rollback",
-    "db:seed": "node ./dist/db/cli.js --seed"
+    "db:migrate": "npm run build && node ./dist/db/cli.js --migrate",
+    "db:rollback": "npm run build && node ./dist/db/cli.js --rollback",
+    "db:seed": "npm run build && node ./dist/db/cli.js --seed"
   },
   "author": "",
   "license": "MIT",
