@@ -97,10 +97,22 @@ function calculateRouteData(routes: string) {
   };
 }
 
+async function getRoute(origin: string, destination: string) {
+  const originCoordinates = await googleMapsService.getGeocode(origin);
+  const destinationCoordinates = await googleMapsService.getGeocode(destination);
+  try {
+    const routes = await googleMapsService.getDirections(originCoordinates, destinationCoordinates);
+    return routes as any;
+  } catch (e) {
+    return {};
+  }
+}
+
 export default {
   getTrips,
   getTripById,
   createTrip,
   updateTripStatus,
-  assignDriverToTrip
+  assignDriverToTrip,
+  getRoute
 };

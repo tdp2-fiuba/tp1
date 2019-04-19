@@ -1,15 +1,14 @@
 import Knex from "knex";
 
 async function seed(knex: Knex) {
-  const providersQueryBuilder = knex("user");
+  const providersQueryBuilder = knex("users");
 
   const newUser = {
-    id: "4e994db0-d847-42fc-9929-e738c8aca2e3",
     userType: "Passenger",
+    position: "43.017218,-89.831479",
     firstName: "Arthur",
     lastName: "Dent",
     rating: 4,
-    position: "-33.8696, 151.2094"
   };
 
   // Deletes ALL existing entries

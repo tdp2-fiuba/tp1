@@ -12,8 +12,8 @@ export async function up(knex: Knex): Promise<any> {
     tableBuilder.string("userType").notNullable();
     tableBuilder.string("firstName").notNullable();
     tableBuilder.string("lastName").notNullable();
-    tableBuilder.integer("rating").defaultTo(0);
-    tableBuilder.jsonb("position").notNullable();
+    tableBuilder.integer("rating").defaultTo(-1);
+    tableBuilder.string("position").notNullable();
   });
 }
 

@@ -23,6 +23,7 @@ app.get("/trips", tripsController.getAll);
 app.get("/trips/:id", tripsController.getById);
 app.post("/trips", tripsController.createTrip);
 app.put("/trips/:id", tripsController.updateTrip);
+app.post("/trips/routes", tripsController.getRoute);
 
 // Status endpoints
 app.get("/ping", statusController.ping);
@@ -30,5 +31,5 @@ app.get("/ready", statusController.ready);
 app.get("/status", statusController.status);
 
 app.listen(port, () => {
-  console.log(`Example app listening on htpp://localhost:${port}!`);
+  console.log(`Example app listening on http://localhost:${port}!`);
 });

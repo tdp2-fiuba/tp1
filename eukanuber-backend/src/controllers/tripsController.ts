@@ -1,6 +1,7 @@
 import Express from "express";
 import { ICreateTripData, ITrip, TripStatus } from "../models";
 import { tripsService } from "../services";
+import ILoc from "../models/ILoc"
 
 async function getAll(req: Express.Request, res: Express.Response) {
   const status: TripStatus = req.query.status;
@@ -38,9 +39,18 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
   res.sendStatus(400);
 }
 
+async function getRoute(req: Express.Request, res: Express.Response) {
+  const loc: ILoc = req.body;
+  const origin: string = loc.origin;
+  const destination: string = loc.destination;
+  const route = await tripsService.getRoute(origin, destination);
+  return res.json(route);
+}
+
 export default {
   getAll,
   getById,
   createTrip,
-  updateTrip
+  updateTrip,
+  getRoute
 };
