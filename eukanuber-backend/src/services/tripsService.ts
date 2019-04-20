@@ -49,16 +49,15 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
     routes
   };
 
-  const tripId = ((await db
-    .table("trips")
-    .returning("id")
-    .insert(newTrip)) as string[])[0];
+  const tripCreated = await db
+    .insert(newTrip)
+    .into("trips")
+    .returning("*");
 
   return {
-    ...newTrip,
-    id: tripId,
+    ...tripCreated[0],
     pets: trip.pets
-  } as any;
+  };
 }
 
 async function updateTripStatus(id: string, status: TripStatus) {
