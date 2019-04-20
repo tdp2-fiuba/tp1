@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
+import com.tdp2.eukanuber.model.GetRouteRequest;
+import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 
@@ -15,7 +17,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface BackendService {
-    String API_PATH = "http://localhost:3000/";
+    String API_PATH = "http://192.168.0.8:3000/";
 
     // Trips
     @POST("trips")
@@ -29,4 +31,7 @@ public interface BackendService {
 
     @GET("trips")
     Call<List<Trip>> getAll(@Query("status") String status);
+
+    @POST("trips/routes")
+    Call<MapRoute> getRoute(@Body GetRouteRequest getRouteRequest);
 }

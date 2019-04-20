@@ -9,8 +9,9 @@ public class Trip implements Serializable {
     private String id;
     private String origin;
     private String destination;
-    private String pets;
-    //private List<String> pets;
+    private String originCoordinates;
+    private String destinationCoordinates;
+    private List<String> pets;
     private Boolean escort;
     private String payment;
     private String duration;
@@ -96,19 +97,27 @@ public class Trip implements Serializable {
         this.routes = routes;
     }
 
-    /*public List<String> getPets() {
+    public List<String> getPets() {
         return pets;
     }
 
     public void setPets(List<String> pets) {
         this.pets = pets;
-    }*/
-
-    public String getPets() {
-        return pets;
     }
 
-    public void setPets(String pets) {
-        this.pets = pets;
+    public String getOriginCoordinates() {
+        return originCoordinates;
+    }
+
+    public void setOriginCoordinates(String originCoordinates) {
+        this.originCoordinates = originCoordinates;
+    }
+
+    public String getDestinationCoordinates() {
+        return destinationCoordinates;
+    }
+
+    public void setDestinationCoordinates(String destinationCoordinates) {
+        this.destinationCoordinates = destinationCoordinates;
     }
 }

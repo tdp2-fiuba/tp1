@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
@@ -97,11 +98,16 @@ public class MapManager {
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
     }
 
-    public void addMarkerCar(LatLng position){
-        mMap.addMarker(new MarkerOptions()
+    public Marker addMarkerCar(LatLng position){
+        return mMap.addMarker(new MarkerOptions()
                 .position(position)
                 .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_car_map))
         );
+    }
+    public void moveMarker(Marker marker, LatLng position){
+        marker.setPosition(position);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+
     }
 
     public void setListener(LocationListener locationListener) {
@@ -115,11 +121,18 @@ public class MapManager {
     public void drawPath(MapRoutePolyline mapRoutePolyline) {
         List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
         PolylineOptions polyOptions = new PolylineOptions();
-        polyOptions.color(Color.BLUE);
-        polyOptions.width(10);
+        polyOptions.color(Color.rgb(100,149,237));
+        polyOptions.width(20);
         polyOptions.addAll(pointsPolyline);
-        mMap.clear();
+        PolylineOptions polyOptionsInside = new PolylineOptions();
+        polyOptionsInside.color(Color.rgb(30,144,255));
+        polyOptionsInside.width(16);
+        polyOptionsInside.addAll(pointsPolyline);
         mMap.addPolyline(polyOptions);
+        mMap.addPolyline(polyOptionsInside);
+    }
+    public void clearMap() {
+        mMap.clear();
     }
 
     public void zoomToPath(MapRoutePolyline mapRoutePolyline){

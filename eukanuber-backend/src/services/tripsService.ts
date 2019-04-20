@@ -82,7 +82,7 @@ async function assignDriverToTrip(id: string, driverId: string) {
     await db
         .table("trips")
         .where("id", id)
-        .update({driverId, status: TripStatus.IN_TRAVEL});
+        .update({driverId, status: TripStatus.DRIVER_GOING_ORIGIN});
 
     const trip = await db
         .table("trips")
@@ -108,14 +108,8 @@ function calculateRouteData(routes: string) {
 }
 
 async function getRoute(origin: string, destination: string) {
-    const originCoordinates = await googleMapsService.getGeocode(origin);
-    const destinationCoordinates = await googleMapsService.getGeocode(destination);
-    try {
-        const routes = await googleMapsService.getDirections(originCoordinates, destinationCoordinates);
-        return routes as any;
-    } catch (e) {
-        return {};
-    }
+    const routes = await googleMapsService.getDirections(origin, destination);
+    return JSON.parse(routes)[0] as any;
 }
 
 export default {

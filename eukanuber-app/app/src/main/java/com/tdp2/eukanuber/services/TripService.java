@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
+import com.tdp2.eukanuber.model.GetRouteRequest;
+import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 
@@ -50,4 +52,13 @@ public class TripService {
         return postService.assignDriverToTrip(tripId, assignDriverToTripRequest);
     }
 
+    public Call<MapRoute> getRoutes(GetRouteRequest getRouteRequest) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.getRoute(getRouteRequest);
+    }
 }

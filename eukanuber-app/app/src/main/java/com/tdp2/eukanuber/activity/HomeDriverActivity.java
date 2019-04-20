@@ -3,10 +3,12 @@ package com.tdp2.eukanuber.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
@@ -46,6 +49,8 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
     private MapManager mapManager;
     private List<String> tripsOpened;
     private Activity mActivity;
+    private Timer timer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         tripsOpened = new ArrayList<>();
@@ -55,13 +60,13 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         this.createMenu();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        timer = new Timer();
         initDriverHome();
     }
 
 
     private void initDriverHome() {
-        TextView driverStatusView = findViewById(R.id.driverStatus);
-        new Timer().scheduleAtFixedRate(new TimerTask() {
+         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 TripService tripService = new TripService();
@@ -89,44 +94,6 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                 });
             }
         }, 0, 10000);
-        /*driverStatusView.setOnClickListener(view -> {
-            // Llega id del trip en el push para ir a buscar info del trip
-           /* SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
-            String newTripId = settings.getString("currentTripId", DEFAULT_TRIP_ID);
-            TripService tripService = new TripService();
-            Call<Trip> call = tripService.get(newTripId);
-            ProgressDialog dialog = new ProgressDialog(HomeDriverActivity.this);
-            dialog.setMessage("Espere un momento por favor");
-            dialog.show();
-            call.enqueue(new Callback<Trip>() {
-                @Override
-                public void onResponse(Call<Trip> call, Response<Trip> response) {
-                    dialog.dismiss();
-                    Trip trip = response.body();
-                    if (trip == null) {
-                        trip = new Trip();
-                        trip.setDestination("Santa Fe 3329 Entre Bulnes y Vidt");
-                        trip.setOrigin("Paseo Colon 850 Esquina Independencia");
-                        trip.setEscort(true);
-                        trip.setPayment("cash");
-                        List<String> pets = new ArrayList<>();
-                        pets.add("S");
-                        pets.add("M");
-                        pets.add("L");
-                        trip.setPets(pets);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Trip> call, Throwable t) {
-                    Log.v("TRIP", t.getMessage());
-                    dialog.dismiss();
-                    showMessage("Ha ocurrido un error al solicitar el viaje.");
-
-                }
-            });
-        });
-*/
     }
 
     private void openPopupNewTripDriver(View v, Trip trip) {
@@ -161,7 +128,13 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
                     popupWindow.dismiss();
+                    Trip trip = response.body();
+                    Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
+                    intentActiveTripDriver.putExtra("currentTrip", trip);
+                    intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     showMessage("El viaje ha sido confirmado.");
+                    timer.cancel();
+                    startActivity(intentActiveTripDriver);
                 }
 
                 @Override
