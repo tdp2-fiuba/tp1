@@ -6,6 +6,8 @@ import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
+import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.User;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface BackendService {
-    String API_PATH = "http://192.168.0.8:3000/";
+    String API_PATH = "https://eukanuber-backend.herokuapp.com/";
 
     // Trips
     @POST("trips")
@@ -38,4 +40,11 @@ public interface BackendService {
 
     @POST("trips/routes")
     Call<MapRoute> getRoute(@Body GetRouteRequest getRouteRequest);
+
+    //USERS
+    @PUT("users/{userId}/position")
+    Call<User> updatePositionUser(@Path("userId") String tripId, @Body UpdateUserPositionRequest updateUserPositionRequest);
+
+    @GET("users/{userId}")
+    Call<User> getUser(@Path("userId") String userId);
 }

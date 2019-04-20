@@ -17,6 +17,7 @@ public class Trip implements Serializable {
     private String duration;
     private String distance;
     private String price;
+    private String driverId;
     private Integer status;
     private List<MapRoute> routes;
 
@@ -128,5 +129,13 @@ public class Trip implements Serializable {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(String driverId) {
+        this.driverId = driverId;
     }
 }

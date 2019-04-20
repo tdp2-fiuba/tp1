@@ -1,8 +1,11 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,17 +18,26 @@ import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
+import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
+import com.tdp2.eukanuber.services.TripService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
     private Trip currentTrip;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary_trip);
         this.createMenu();
+        mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -39,16 +51,58 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
         ImageButton buttonCancel = this.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = this.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
-            Intent intentHome = new Intent(this, HomeClientActivity.class);
-            intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            showMessage("Viaje cancelado");
-            startActivity(intentHome);
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.CLIENT_CANCELLED.ordinal());
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
+            ProgressDialog dialog = new ProgressDialog(SummaryTripActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
+
+                    Intent intentHome = new Intent(mContext, HomeClientActivity.class);
+                    intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    showMessage("Viaje cancelado");
+                    startActivity(intentHome);
+                }
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    dialog.dismiss();
+                    Log.d("UPDATE STATUS TRIP", t.getMessage());
+                    showMessage("Ha ocurrido un error. Intente luego.");
+                }
+            });
+
         });
         buttonConfirm.setOnClickListener(view -> {
-            Intent intentTrackingTrip = new Intent(this, TrackingTripActivity.class);
-            intentTrackingTrip.putExtra("currentTrip", currentTrip);
-            intentTrackingTrip.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intentTrackingTrip);
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.CLIENT_ACCEPTED.ordinal());
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
+            ProgressDialog dialog = new ProgressDialog(SummaryTripActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
+                    Intent intentTrackingTrip = new Intent(mContext, TrackingTripActivity.class);
+                    intentTrackingTrip.putExtra("currentTrip", currentTrip);
+                    intentTrackingTrip.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    showMessage("Viaje confirmado");
+                    startActivity(intentTrackingTrip);
+                }
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    dialog.dismiss();
+                    Log.d("UPDATE STATUS TRIP", t.getMessage());
+                    showMessage("Ha ocurrido un error. Intente luego.");
+                }
+            });
+
+
+
         });
     }
 
@@ -80,7 +134,7 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
     }
 
     private void drawSummaryPath() {
-        if(currentTrip != null){
+        if (currentTrip != null) {
             MapRoute route = currentTrip.getRoutes().get(0);
             mapManager.drawPath(route.getOverviewPolyline());
             mapManager.zoomToPath(route.getOverviewPolyline());

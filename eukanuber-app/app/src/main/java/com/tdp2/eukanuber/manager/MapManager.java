@@ -89,6 +89,7 @@ public class MapManager {
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
         }
     }
+
     public void moveCamera(LatLng position) {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -98,13 +99,14 @@ public class MapManager {
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
     }
 
-    public Marker addMarkerCar(LatLng position){
+    public Marker addMarkerCar(LatLng position) {
         return mMap.addMarker(new MarkerOptions()
                 .position(position)
                 .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_car_map))
         );
     }
-    public void moveMarker(Marker marker, LatLng position){
+
+    public void moveMarker(Marker marker, LatLng position) {
         marker.setPosition(position);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
 
@@ -119,34 +121,52 @@ public class MapManager {
     }
 
     public void drawPath(MapRoutePolyline mapRoutePolyline) {
-        List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
-        PolylineOptions polyOptions = new PolylineOptions();
-        polyOptions.color(Color.rgb(100,149,237));
-        polyOptions.width(20);
-        polyOptions.addAll(pointsPolyline);
-        PolylineOptions polyOptionsInside = new PolylineOptions();
-        polyOptionsInside.color(Color.rgb(30,144,255));
-        polyOptionsInside.width(16);
-        polyOptionsInside.addAll(pointsPolyline);
-        mMap.addPolyline(polyOptions);
-        mMap.addPolyline(polyOptionsInside);
+
+
+        try {
+            List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
+            if (pointsPolyline.size() > 0) {
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(Color.rgb(100, 149, 237));
+                polyOptions.width(20);
+                polyOptions.addAll(pointsPolyline);
+                PolylineOptions polyOptionsInside = new PolylineOptions();
+                polyOptionsInside.color(Color.rgb(30, 144, 255));
+                polyOptionsInside.width(16);
+                polyOptionsInside.addAll(pointsPolyline);
+                mMap.addPolyline(polyOptions);
+                mMap.addPolyline(polyOptionsInside);
+            }
+        } catch (Exception ex) {
+            Log.d("DRAW PATH", ex.getMessage());
+        }
+
     }
+
     public void clearMap() {
         mMap.clear();
     }
 
-    public void zoomToPath(MapRoutePolyline mapRoutePolyline){
-        int padding = 100;
+    public void zoomToPath(MapRoutePolyline mapRoutePolyline) {
+        int padding = 50;
         List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng latLng : pointsPolyline) {
-            builder.include(latLng);
+        try {
+            if (pointsPolyline.size() > 0) {
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for (LatLng latLng : pointsPolyline) {
+                    builder.include(latLng);
+                }
+
+                final LatLngBounds bounds = builder.build();
+
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50);
+                mMap.animateCamera(cu);
+            }
+        } catch (Exception ex) {
+            Log.d("ZOOM PATH", ex.getMessage());
         }
 
-        final LatLngBounds bounds = builder.build();
 
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-        mMap.animateCamera(cu);
     }
 
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {

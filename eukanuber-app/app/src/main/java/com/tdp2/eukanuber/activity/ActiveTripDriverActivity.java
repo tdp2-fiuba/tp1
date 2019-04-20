@@ -2,10 +2,10 @@ package com.tdp2.eukanuber.activity;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -27,17 +27,17 @@ import com.google.maps.android.PolyUtil;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
-import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
+import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
+import com.tdp2.eukanuber.services.UserService;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,13 +49,16 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
     private Trip currentTrip;
     private LocationManager locationManager;
     private Marker markerCar;
+    private Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active_trip_driver);
         this.createMenu();
+        mActivity = this;
         Intent intent = getIntent();
+
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -79,7 +82,6 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
                 MapRoute route = response.body();
                 if (route != null) {
                     mapManager.drawPath(route.getOverviewPolyline());
-                    //mapManager.zoomToPath(route.getOverviewPolyline());
                     initSimulateDriver(route);
                 }
             }
@@ -94,8 +96,8 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
     private void initSimulateDriver(MapRoute route) {
         List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
         Handler handler = new Handler();
-        Integer speedCar = 3;
-        Integer delay = 1000/speedCar;
+        Integer speedCar = 1;
+        Integer delay = 3000 / speedCar;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
@@ -107,7 +109,7 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
                 if (index < pointsPolyline.size()) {
                     if (index == pointsPolyline.size() - 1) {
                         next = index;
-                    }else{
+                    } else {
                         next = index + 1;
                     }
                     startPosition = pointsPolyline.get(index);
@@ -128,16 +130,16 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
                         }
                     });
                     valueAnimator.start();
+                    refreshDriverPosition(startPosition);
                     index++;
                     handler.postDelayed(this, delay);
-                }else{
-                    if(TripStatus.IN_TRAVEL.ordinal() == currentTrip.getStatus()){
+                } else {
+                    if (TripStatus.IN_TRAVEL.ordinal() == currentTrip.getStatus()) {
                         driverOnDestination();
                     }
-                    if(TripStatus.DRIVER_GOING_ORIGIN.ordinal() == currentTrip.getStatus()){
-                        driverOnOrigin();
+                    if (TripStatus.DRIVER_GOING_ORIGIN.ordinal() == currentTrip.getStatus()) {
+                        driverOnOrigin(startPosition);
                     }
-
 
 
                 }
@@ -146,7 +148,28 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
         handler.postDelayed(runnable, delay);
     }
 
-    private void driverOnOrigin(){
+    private void refreshDriverPosition(LatLng position) {
+
+        UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
+        UserService userService = new UserService();
+        Call<User> call = userService.updatePositionUser(HomeDriverActivity.driverId, updateUserPositionRequest);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User userUpdated = response.body();
+                Log.d("USER UPDATED", userUpdated.getId());
+
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d("UPDATE USER POSITION", t.getMessage());
+            }
+        });
+    }
+
+
+    private void driverOnOrigin(LatLng position) {
         Button buttonStatusStart = findViewById(R.id.button_status_start);
         buttonStatusStart.setVisibility(View.VISIBLE);
         Button buttonStatusFinish = findViewById(R.id.button_status_finish);
@@ -155,54 +178,60 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
 
         buttonStatusStart.setOnClickListener(v -> {
             hideStatus();
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.IN_TRAVEL.ordinal());
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    currentTrip = response.body();
+                }
+
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    Log.d("UPDATE STATUS TRIP", t.getMessage());
+                }
+            });
             MapRoute tripRoute = currentTrip.getRoutes().get(0);
             mapManager.clearMap();
-            initMarkerMap();
+            initMarkerMap(position);
             mapManager.drawPath(tripRoute.getOverviewPolyline());
             initSimulateDriver(tripRoute);
         });
-        UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.IN_TRAVEL.ordinal());
-        TripService tripService = new TripService();
-        Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                currentTrip = response.body();
-            }
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.d("UPDATE STATUS TRIP", t.getMessage());
-            }
-        });
+
     }
 
-    private void driverOnDestination(){
+    private void driverOnDestination() {
         Button buttonStatusStart = findViewById(R.id.button_status_start);
         buttonStatusStart.setVisibility(View.GONE);
         Button buttonStatusFinish = findViewById(R.id.button_status_finish);
         buttonStatusFinish.setVisibility(View.VISIBLE);
         showStatus();
         buttonStatusFinish.setOnClickListener(v -> {
-            Intent intent = new Intent(this, HomeDriverActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            showMessage("Viaje finalizado con exito!");
-            startActivity(intent);
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.ARRIVED_DESTINATION.ordinal());
+            TripService tripService = new TripService();
+            Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    currentTrip = response.body();
+                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    showMessage("Viaje finalizado con exito!");
+                    startActivity(intent);
+                }
+
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    Log.d("UPDATE STATUS TRIP", t.getMessage());
+                }
+            });
+
         });
-        UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.ARRIVED_DESTINATION.ordinal());
-        TripService tripService = new TripService();
-        Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                currentTrip = response.body();
-            }
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.d("UPDATE STATUS TRIP", t.getMessage());
-            }
-        });
+
     }
-    private void showStatus(){
+
+    private void showStatus() {
         LinearLayout layoutMap = findViewById(R.id.layoutMap);
         LinearLayout layoutStatus = findViewById(R.id.layoutStatus);
         LinearLayout.LayoutParams lParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
@@ -213,7 +242,7 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
         layoutStatus.setLayoutParams(lParamsStatus);
     }
 
-    private void hideStatus(){
+    private void hideStatus() {
         LinearLayout layoutMap = findViewById(R.id.layoutMap);
         LinearLayout layoutStatus = findViewById(R.id.layoutStatus);
         LinearLayout.LayoutParams lParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
@@ -245,18 +274,18 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        initMarkerMap();
-    }
-
-    private void initMarkerMap(){
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        markerCar = mapManager.addMarkerCar(position);
+        initMarkerMap(position);
         mapManager.moveCamera(position);
+    }
+
+    private void initMarkerMap(LatLng position) {
+        markerCar = mapManager.addMarkerCar(position);
     }
 
 

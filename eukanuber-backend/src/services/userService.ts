@@ -11,7 +11,6 @@ async function getUsers() {
     const rows = await db
     .table("users")
     .select();
-    console.log(rows);
     return rows;
 }
 
@@ -38,12 +37,12 @@ async function createUser(user: ICreateUserData) {
         .table("users")
         .returning("id")
         .insert(newUser)) as string[])[0];
-    
+
     return {
         ...newUser,
         id: userId
     } as any;
-    
+
 }
 
 async function updateUser(id: string, userData: Partial<IUser> ) {
@@ -82,7 +81,7 @@ async function getUserPosition(id: string) {
 
 async function updateUserPosition(id: string, pos: IPosition) {
     const newPos: string = pos.lat + "," + pos.lng;
-    
+
     const user = await db
         .table("users")
         .where("id", id)

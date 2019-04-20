@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -10,6 +11,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,7 +34,10 @@ import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
+import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
+import com.tdp2.eukanuber.services.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,7 +55,11 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
     private MapManager mapManager;
     private List<String> tripsOpened;
     private Activity mActivity;
-    private Timer timer;
+    private Handler handlerRequestTrips;
+    private Runnable runnableRequestTrips;
+    private Integer delayRequestTrips;
+    private Boolean popupOpen;
+    public static final String driverId = "981db688-ddf0-404a-8461-50fb8675a9cc";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,49 +70,60 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         this.createMenu();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        timer = new Timer();
+        popupOpen = false;
         initDriverHome();
     }
 
 
     private void initDriverHome() {
-         timer.scheduleAtFixedRate(new TimerTask() {
+        handlerRequestTrips = new Handler();
+        delayRequestTrips = 5000;
+        runnableRequestTrips = new Runnable() {
             @Override
             public void run() {
-                TripService tripService = new TripService();
-                Call<List<Trip>> call = tripService.getAll(String.valueOf(TripStatus.PENDING.ordinal()));
-                call.enqueue(new Callback<List<Trip>>() {
-                    @Override
-                    public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
-                        List<Trip> trips = response.body();
-                        if(trips.size() > 0){
-                            Trip lastTrip = trips.get(trips.size() -1);
-                            Log.v("OPEN TRIP", lastTrip.getId());
-
-                            if(!tripsOpened.contains(lastTrip.getId())){
-                                tripsOpened.add(lastTrip.getId());
-                                View view = mActivity.findViewById(R.id.layoutMap);
-                                openPopupNewTripDriver(view, lastTrip);
+                if (!popupOpen) {
+                    TripService tripService = new TripService();
+                    Call<List<Trip>> call = tripService.getAll(String.valueOf(TripStatus.CLIENT_ACCEPTED.ordinal()));
+                    call.enqueue(new Callback<List<Trip>>() {
+                        @Override
+                        public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
+                            List<Trip> trips = response.body();
+                            if (trips.size() > 0) {
+                                Trip trip = trips.get(0);
+                                Log.v("CLIENT ACCEPTED TRIP", trip.getId());
+                                if (!tripsOpened.contains(trip.getId())) {
+                                    tripsOpened.add(trip.getId());
+                                    View view = mActivity.findViewById(R.id.layoutMap);
+                                    openPopupNewTripDriver(view, trip);
+                                }
                             }
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Call<List<Trip>> call, Throwable t) {
-                        Log.v("TRIP", t.getMessage());
-                    }
-                });
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Trip>> call, Throwable t) {
+                            Log.v("TRIP", t.getMessage());
+                        }
+                    });
+                }
+
+
+                handlerRequestTrips.postDelayed(this, delayRequestTrips);
+
             }
-        }, 0, 10000);
+        };
+        handlerRequestTrips.postDelayed(runnableRequestTrips, delayRequestTrips);
+
     }
 
     private void openPopupNewTripDriver(View v, Trip trip) {
+        popupOpen = true;
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.new_trip_popup, null);
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-     //   String petsString = getPetStringFromArray(trip.getPets());
+        //   String petsString = getPetStringFromArray(trip.getPets());
 
         String escortText = trip.getEscort() ? "Si" : "No";
         trip.setDuration("1h 04m");
@@ -118,10 +139,11 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
             popupWindow.dismiss();
+            popupOpen = false;
             showMessage("No ha aceptado el viaje.");
         });
         buttonConfirm.setOnClickListener(view -> {
-            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest("dummyDriverId");
+            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest(driverId);
             TripService tripService = new TripService();
             Call<Trip> call = tripService.assignDriverToTrip(trip.getId(), assignDriverToTripRequest);
             call.enqueue(new Callback<Trip>() {
@@ -133,13 +155,14 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                     intentActiveTripDriver.putExtra("currentTrip", trip);
                     intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     showMessage("El viaje ha sido confirmado.");
-                    timer.cancel();
+                    handlerRequestTrips.removeCallbacks(runnableRequestTrips);
                     startActivity(intentActiveTripDriver);
                 }
 
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     popupWindow.dismiss();
+                    popupOpen = false;
                     // TODO: mostrar error de que el viaje ha sido tomado y/o seguir de largo
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
@@ -199,6 +222,29 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+        UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
+        UserService userService = new UserService();
+        Call<User> call = userService.updatePositionUser(HomeDriverActivity.driverId, updateUserPositionRequest);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User userUpdated = response.body();
+                Log.d("USER UPDATED", userUpdated.getId());
+
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d("UPDATE USER POSITION", t.getMessage());
+            }
+        });
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
