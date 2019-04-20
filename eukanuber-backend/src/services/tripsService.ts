@@ -70,34 +70,22 @@ async function updateTripStatus(id: string, status: TripStatus) {
     .where("id", id)
     .update({ status });
 
-  const trip = await db
-    .table("trips")
-    .where("id", id)
-    .select()
-    .first();
-
-  return {
-    ...trip,
-    pets: trip.pets.split(",")
-  };
+  return await this.getTripById(id);
 }
 
 async function assignDriverToTrip(id: string, driverId: string) {
+  const tripToUpdate = await getTripById(id);
+
+  if (tripToUpdate.driverId && tripToUpdate.driverId !== driverId) {
+    throw new Error(`The trip '${id}' is already assigned to driver '${tripToUpdate.driverId}'`);
+  }
+
   await db
     .table("trips")
     .where("id", id)
     .update({ driverId, status: TripStatus.DRIVER_GOING_ORIGIN });
 
-  const trip = await db
-    .table("trips")
-    .where("id", id)
-    .select()
-    .first();
-
-  return {
-    ...trip,
-    pets: trip.pets.split(",")
-  };
+  return await getTripById(id);
 }
 
 function calculateRouteData(routes: string) {

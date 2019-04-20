@@ -1,7 +1,6 @@
 import Express from "express";
-import { ICreateTripData, ITrip, TripStatus } from "../models";
+import { ICreateTripData, ILocation, ITrip, TripStatus } from "../models";
 import { tripsService } from "../services";
-import ILoc from "../models/ILoc"
 
 async function getAll(req: Express.Request, res: Express.Response) {
   const status: TripStatus = req.query.status;
@@ -25,11 +24,18 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
   const tripId = req.params.id;
   const trip: Partial<ITrip> = req.body;
 
+  // { driverId: <id> } assigns a trip to a driver
   if (trip.driverId) {
-    const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
-    return res.json(updatedTrip);
+    try {
+      const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
+      return res.json(updatedTrip);
+    } catch (e) {
+      console.error(e);
+      return res.status(403).send({ error: true, message: e.message });
+    }
   }
 
+  // { status: <status> } updates trip status
   if (trip.status) {
     const updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
     return res.json(updatedTrip);
@@ -40,7 +46,7 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
 }
 
 async function getRoute(req: Express.Request, res: Express.Response) {
-  const loc: ILoc = req.body;
+  const loc: ILocation = req.body;
   const origin: string = loc.origin;
   const destination: string = loc.destination;
   const route = await tripsService.getRoute(origin, destination);
