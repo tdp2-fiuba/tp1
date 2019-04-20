@@ -9,6 +9,7 @@ function up(knex: Knex) {
       .primary()
       .defaultTo(knex.raw("uuid_generate_v4()"));
 
+    tableBuilder.string("createdDate").defaultTo("");
     tableBuilder.string("clientId").notNullable();
     tableBuilder.string("driverId").defaultTo("");
 
