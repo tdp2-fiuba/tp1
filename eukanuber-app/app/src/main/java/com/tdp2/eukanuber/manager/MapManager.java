@@ -98,8 +98,6 @@ public class MapManager {
     }
 
     public void addMarkerCar(LatLng position){
-        Bitmap iconCar = BitmapFactory.decodeResource(mContext.getResources(),
-                R.drawable.ic_fab_trip);
         mMap.addMarker(new MarkerOptions()
                 .position(position)
                 .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_car_map))
@@ -122,7 +120,11 @@ public class MapManager {
         polyOptions.addAll(pointsPolyline);
         mMap.clear();
         mMap.addPolyline(polyOptions);
+    }
+
+    public void zoomToPath(MapRoutePolyline mapRoutePolyline){
         int padding = 100;
+        List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (LatLng latLng : pointsPolyline) {
             builder.include(latLng);

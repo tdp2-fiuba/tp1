@@ -4,7 +4,7 @@ import { ICreateTripData, ITrip, TripStatus } from "../models";
 import googleMapsService from "./googleMapsService";
 
 async function getTrips(status: TripStatus) {
-  return await db
+  const trips = await db
     .table("trips")
     .modify((queryBuilder: Knex.QueryBuilder) => {
       if (status) {
@@ -12,6 +12,7 @@ async function getTrips(status: TripStatus) {
       }
     })
     .select();
+    return trips.map((o:any) => ({ ...o, pets: o.pets.split(",") }));
 }
 
 async function getTripById(id: string): Promise<ITrip> {

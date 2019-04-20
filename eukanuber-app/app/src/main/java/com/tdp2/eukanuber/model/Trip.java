@@ -2,7 +2,6 @@ package com.tdp2.eukanuber.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Trip implements Serializable {
@@ -10,13 +9,14 @@ public class Trip implements Serializable {
     private String id;
     private String origin;
     private String destination;
-    private List<String> pets;
+    private String pets;
+    //private List<String> pets;
     private Boolean escort;
     private String payment;
     private String duration;
+    private String distance;
     private String price;
-    private String routes;
-    private List<MapRoute> routesList;
+    private List<MapRoute> routes;
 
     public String getId() {
         return id;
@@ -27,7 +27,7 @@ public class Trip implements Serializable {
     }
 
     public Trip() {
-        pets = new ArrayList<>();
+        //pets = new ArrayList<>();
     }
 
     public String getOrigin() {
@@ -46,13 +46,6 @@ public class Trip implements Serializable {
         this.destination = destination;
     }
 
-    public List<String> getPets() {
-        return pets;
-    }
-
-    public void setPets(List<String> pets) {
-        this.pets = pets;
-    }
 
     public Boolean getEscort() {
         return escort;
@@ -86,19 +79,36 @@ public class Trip implements Serializable {
         this.price = price;
     }
 
-    public String getRoutes() {
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
+
+
+    public List<MapRoute> getRoutes() {
         return routes;
     }
 
-    public void setRoutes(String routes) {
+    public void setRoutes(List<MapRoute> routes) {
         this.routes = routes;
     }
 
-    public List<MapRoute> getRoutesList() {
-        return routesList;
+    /*public List<String> getPets() {
+        return pets;
     }
 
-    public void setRoutesList(List<MapRoute> routesList) {
-        this.routesList = routesList;
+    public void setPets(List<String> pets) {
+        this.pets = pets;
+    }*/
+
+    public String getPets() {
+        return pets;
+    }
+
+    public void setPets(String pets) {
+        this.pets = pets;
     }
 }

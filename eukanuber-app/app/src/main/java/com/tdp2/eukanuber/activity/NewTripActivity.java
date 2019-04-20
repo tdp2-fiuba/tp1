@@ -48,7 +48,6 @@ public class NewTripActivity extends MenuActivity implements
         PlaceAutocompleteAdapter.PlaceAutoCompleteInterface, ShowMessageInterface {
     private final String PAYMENT_CASH = "cash";
     private final String PAYMENT_CARD = "card";
-    public static final String PREFS_NAME = "NewTrip";
 
     private PlacesClient placesClient;
     private RectangularBounds rectangularBounds;
@@ -290,18 +289,21 @@ public class NewTripActivity extends MenuActivity implements
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
                     Trip trip = response.body();
-                    Gson gson = new Gson();
-                    Type mapRouteListType = new TypeToken<ArrayList<MapRoute>>(){}.getType();
-                    List<MapRoute> routes = gson.fromJson(trip.getRoutes(), mapRouteListType);
-                    trip.setRoutesList(routes);
-                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                  /*  SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString("currentTripId", trip.getId());
-                    editor.commit();
+                    editor.commit();*/
                     dialog.dismiss();
-                    Intent intent = new Intent(NewTripActivity.this, SummaryTripActivity.class);
-                    intent.putExtra("currentTrip", trip);
-                    startActivity(intent);
+                    if(trip.getRoutes().isEmpty()){
+                        Intent intent = new Intent(NewTripActivity.this, HomeClientActivity.class);
+                        showMessage("No se ha podido encontrar una ruta para el viaje.");
+                        startActivity(intent);
+                    }else{
+                        Intent intent = new Intent(NewTripActivity.this, SummaryTripActivity.class);
+                        intent.putExtra("currentTrip", trip);
+                        startActivity(intent);
+                    }
+
 
                 }
 

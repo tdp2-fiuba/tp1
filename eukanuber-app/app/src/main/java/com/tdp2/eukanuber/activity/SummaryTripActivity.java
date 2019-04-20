@@ -1,41 +1,20 @@
 package com.tdp2.eukanuber.activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.maps.android.PolyUtil;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
-import com.tdp2.eukanuber.services.TripService;
-
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
@@ -47,21 +26,29 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary_trip);
         this.createMenu();
-        /*Intent intent = getIntent();
-        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");*/
+        Intent intent = getIntent();
+        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        TextView textDistance = this.findViewById(R.id.textDistance);
+        TextView textDuration = this.findViewById(R.id.textDuration);
+        TextView textPrice = this.findViewById(R.id.textPrice);
+        textDistance.setText(currentTrip.getDistance());
+        textDuration.setText(currentTrip.getDuration());
+        textPrice.setText(currentTrip.getPrice());
         ImageButton buttonCancel = this.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = this.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
-            Intent intent = new Intent(this, HomeClientActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            Intent intentHome = new Intent(this, HomeClientActivity.class);
+            intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            showMessage("Viaje cancelado");
+            startActivity(intentHome);
         });
         buttonConfirm.setOnClickListener(view -> {
-            Intent intent = new Intent(this, TrackingTripActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            Intent intentTrackingTrip = new Intent(this, TrackingTripActivity.class);
+            intentTrackingTrip.putExtra("currentTrip", currentTrip);
+            intentTrackingTrip.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intentTrackingTrip);
         });
     }
 
@@ -87,12 +74,18 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
-       // drawSummaryPath();
+
+        drawSummaryPath();
+
     }
 
     private void drawSummaryPath() {
-        MapRoute route = currentTrip.getRoutesList().get(0);
-        mapManager.drawPath(route.getOverviewPolyline());
+        if(currentTrip != null){
+            MapRoute route = currentTrip.getRoutes().get(0);
+            mapManager.drawPath(route.getOverviewPolyline());
+            mapManager.zoomToPath(route.getOverviewPolyline());
+        }
+
     }
 
     public void showMessage(String message) {

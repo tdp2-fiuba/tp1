@@ -1,7 +1,10 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -13,9 +16,14 @@ import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.services.TripService;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TrackingTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
@@ -27,8 +35,32 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
         this.createMenu();
+        /*Intent intent = getIntent();
+        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");*/
+
+        getTrip();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    private void getTrip() {
+        String tripId = "348d3a0c-9804-4eec-837b-e36a61cbc191";
+        TripService tripService = new TripService();
+        Call<Trip> call = tripService.get(tripId);
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                currentTrip = response.body();
+                drawSummaryPath();
+            }
+
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                Log.v("TRIP", t.getMessage());
+                showMessage("Ha ocurrido un error al solicitar el viaje.");
+
+            }
+        });
     }
 
 
@@ -53,21 +85,23 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
-        initDriverPosition();
-
-        // drawSummaryPath();
+        drawSummaryPath();
+        //initDriverPosition();
     }
 
     private void initDriverPosition() {
-        LatLng positionDriver =new LatLng(-34.800714, -58.278466);
+        LatLng positionDriver = new LatLng(-34.800714, -58.278466);
         mapManager.addMarkerCar(positionDriver);
         mapManager.moveCamera(positionDriver);
 
     }
 
     private void drawSummaryPath() {
-        MapRoute route = currentTrip.getRoutesList().get(0);
-        mapManager.drawPath(route.getOverviewPolyline());
+        if (currentTrip != null) {
+            MapRoute route = currentTrip.getRoutes().get(0);
+            mapManager.drawPath(route.getOverviewPolyline());
+            mapManager.zoomToPath(route.getOverviewPolyline());
+        }
     }
 
     public void showMessage(String message) {

@@ -1,6 +1,8 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -23,13 +25,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
+import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.services.TripService;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,11 +43,13 @@ import retrofit2.Response;
 
 public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
-    private final String DEFAULT_TRIP_ID = "58ce748f-d68b-40db-a5b7-9598806a1d9a";
     private MapManager mapManager;
-
+    private List<String> tripsOpened;
+    private Activity mActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        tripsOpened = new ArrayList<>();
+        mActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_driver);
         this.createMenu();
@@ -53,9 +61,37 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
 
     private void initDriverHome() {
         TextView driverStatusView = findViewById(R.id.driverStatus);
-        driverStatusView.setOnClickListener(view -> {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                TripService tripService = new TripService();
+                Call<List<Trip>> call = tripService.getAll(String.valueOf(TripStatus.PENDING.ordinal()));
+                call.enqueue(new Callback<List<Trip>>() {
+                    @Override
+                    public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
+                        List<Trip> trips = response.body();
+                        if(trips.size() > 0){
+                            Trip lastTrip = trips.get(trips.size() -1);
+                            Log.v("OPEN TRIP", lastTrip.getId());
+
+                            if(!tripsOpened.contains(lastTrip.getId())){
+                                tripsOpened.add(lastTrip.getId());
+                                View view = mActivity.findViewById(R.id.layoutMap);
+                                openPopupNewTripDriver(view, lastTrip);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Trip>> call, Throwable t) {
+                        Log.v("TRIP", t.getMessage());
+                    }
+                });
+            }
+        }, 0, 10000);
+        /*driverStatusView.setOnClickListener(view -> {
             // Llega id del trip en el push para ir a buscar info del trip
-            SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
+           /* SharedPreferences settings = getSharedPreferences(NewTripActivity.PREFS_NAME, 0);
             String newTripId = settings.getString("currentTripId", DEFAULT_TRIP_ID);
             TripService tripService = new TripService();
             Call<Trip> call = tripService.get(newTripId);
@@ -79,7 +115,6 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                         pets.add("L");
                         trip.setPets(pets);
                     }
-                    openPopupNewTripDriver(view, trip);
                 }
 
                 @Override
@@ -91,7 +126,7 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                 }
             });
         });
-
+*/
     }
 
     private void openPopupNewTripDriver(View v, Trip trip) {
@@ -100,7 +135,7 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-        String petsString = getPetStringFromArray(trip.getPets());
+     //   String petsString = getPetStringFromArray(trip.getPets());
 
         String escortText = trip.getEscort() ? "Si" : "No";
         trip.setDuration("1h 04m");
@@ -110,18 +145,15 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         ((TextView) popupView.findViewById(R.id.tripDurationText)).setText(trip.getDuration());
         ((TextView) popupView.findViewById(R.id.tripPriceText)).setText(trip.getPrice());
 
-        ((TextView) popupView.findViewById(R.id.petsText)).setText(petsString);
+        //((TextView) popupView.findViewById(R.id.petsText)).setText(petsString);
         ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
         ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
             popupWindow.dismiss();
-
-            showMessage("El viaje ha sido cancelado.");
+            showMessage("No ha aceptado el viaje.");
         });
         buttonConfirm.setOnClickListener(view -> {
-
-            /*
             AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest("dummyDriverId");
             TripService tripService = new TripService();
             Call<Trip> call = tripService.assignDriverToTrip(trip.getId(), assignDriverToTripRequest);
@@ -138,9 +170,7 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
                     // TODO: mostrar error de que el viaje ha sido tomado y/o seguir de largo
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
-            });*/
-            popupWindow.dismiss();
-            showMessage("El viaje ha sido confirmado.");
+            });
         });
     }
 

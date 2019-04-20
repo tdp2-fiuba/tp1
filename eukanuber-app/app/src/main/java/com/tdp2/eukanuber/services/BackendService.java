@@ -4,15 +4,18 @@ import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface BackendService {
-    String API_PATH = "https://eukanuber-backend.herokuapp.com/";
+    String API_PATH = "http://localhost:3000/";
 
     // Trips
     @POST("trips")
@@ -23,4 +26,7 @@ public interface BackendService {
 
     @PUT("trips/{tripId}")
     Call<Trip> assignDriverToTrip(@Path("tripId") String tripId, @Body AssignDriverToTripRequest assignDriverToTripRequest);
+
+    @GET("trips")
+    Call<List<Trip>> getAll(@Query("status") String status);
 }

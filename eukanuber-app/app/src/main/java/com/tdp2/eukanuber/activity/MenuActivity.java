@@ -12,6 +12,7 @@ import com.tdp2.eukanuber.R;
 
 abstract class MenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static final String PREFS_NAME = "Eukanuber";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
