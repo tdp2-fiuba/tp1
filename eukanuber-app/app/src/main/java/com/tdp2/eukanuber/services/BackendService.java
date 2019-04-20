@@ -5,6 +5,7 @@ import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public interface BackendService {
 
     @PUT("trips/{tripId}")
     Call<Trip> assignDriverToTrip(@Path("tripId") String tripId, @Body AssignDriverToTripRequest assignDriverToTripRequest);
+
+    @PUT("trips/{tripId}")
+    Call<Trip> updateStatusTrip(@Path("tripId") String tripId, @Body UpdateStatusTripRequest updateStatusTripRequest);
 
     @GET("trips")
     Call<List<Trip>> getAll(@Query("status") String status);

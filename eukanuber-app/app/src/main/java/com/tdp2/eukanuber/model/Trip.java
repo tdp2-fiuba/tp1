@@ -17,6 +17,7 @@ public class Trip implements Serializable {
     private String duration;
     private String distance;
     private String price;
+    private Integer status;
     private List<MapRoute> routes;
 
     public String getId() {
@@ -119,5 +120,13 @@ public class Trip implements Serializable {
 
     public void setDestinationCoordinates(String destinationCoordinates) {
         this.destinationCoordinates = destinationCoordinates;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

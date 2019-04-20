@@ -13,9 +13,9 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class TripService {
+public class UserService {
 
-    public Call<Trip> create(NewTripRequest newTripRequest) {
+    public Call<User> updatePosition(NewTripRequest newTripRequest) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
