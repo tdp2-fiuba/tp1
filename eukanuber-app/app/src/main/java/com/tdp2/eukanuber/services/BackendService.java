@@ -22,12 +22,15 @@ import retrofit2.http.Query;
 public interface BackendService {
     String API_PATH = "https://eukanuber-backend.herokuapp.com/";
 
-    // Trips
-    @POST("trips")
-    Call<Trip> createTrip(@Body NewTripRequest request);
+    @GET("trips")
+    Call<List<Trip>> getAll(@Query("status") String status);
 
     @GET("trips/{tripId}")
     Call<Trip> get(@Path("tripId") String tripId);
+
+    // Trips
+    @POST("trips")
+    Call<Trip> createTrip(@Body NewTripRequest request);
 
     @PUT("trips/{tripId}")
     Call<Trip> assignDriverToTrip(@Path("tripId") String tripId, @Body AssignDriverToTripRequest assignDriverToTripRequest);
@@ -35,13 +38,10 @@ public interface BackendService {
     @PUT("trips/{tripId}")
     Call<Trip> updateStatusTrip(@Path("tripId") String tripId, @Body UpdateStatusTripRequest updateStatusTripRequest);
 
-    @GET("trips")
-    Call<List<Trip>> getAll(@Query("status") String status);
-
     @POST("trips/routes")
     Call<MapRoute> getRoute(@Body GetRouteRequest getRouteRequest);
 
-    //USERS
+    // Users
     @PUT("users/{userId}/position")
     Call<User> updatePositionUser(@Path("userId") String tripId, @Body UpdateUserPositionRequest updateUserPositionRequest);
 
