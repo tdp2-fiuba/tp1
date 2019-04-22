@@ -121,11 +121,11 @@ public class MapManager {
     }
 
     public void drawPath(MapRoutePolyline mapRoutePolyline) {
-
-
         try {
             List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
             if (pointsPolyline.size() > 0) {
+                LatLng firstPoint = pointsPolyline.get(0);
+                LatLng lastPoint = pointsPolyline.get(pointsPolyline.size()-1);
                 PolylineOptions polyOptions = new PolylineOptions();
                 polyOptions.color(Color.rgb(100, 149, 237));
                 polyOptions.width(20);
@@ -134,8 +134,20 @@ public class MapManager {
                 polyOptionsInside.color(Color.rgb(30, 144, 255));
                 polyOptionsInside.width(16);
                 polyOptionsInside.addAll(pointsPolyline);
+                mMap.addMarker(new MarkerOptions()
+                        .position(firstPoint)
+                        .draggable(false)
+                        .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_begin_path))
+                );
+                mMap.addMarker(new MarkerOptions()
+                        .position(lastPoint)
+                        .draggable(false)
+                        .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_finish_path))
+                );
                 mMap.addPolyline(polyOptions);
                 mMap.addPolyline(polyOptionsInside);
+
+
             }
         } catch (Exception ex) {
             Log.d("DRAW PATH", ex.getMessage());

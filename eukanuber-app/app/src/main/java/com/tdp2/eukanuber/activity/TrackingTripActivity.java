@@ -57,7 +57,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void checkDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 3000;
+        Integer delay = 2000;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -83,20 +83,17 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
                     }
 
                 });
-                if (currentTrip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal()) {
-                    handler.removeCallbacks(this);
-                } else {
+                if (currentTrip.getStatus() != TripStatus.ARRIVED_DESTINATION.ordinal()) {
                     handler.postDelayed(this, delay);
                 }
             }
         };
         handler.postDelayed(runnable, delay);
-
     }
 
     private void updateDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 3000;
+        Integer delay = 1500;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
@@ -137,8 +134,10 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
                         index++;
                     }
                 }
+                if (currentStatus != TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                    handler.postDelayed(this, delay);
+                }
 
-                handler.postDelayed(this, delay);
             }
         };
         handler.postDelayed(runnable, delay);
@@ -146,7 +145,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void checkTripStatus() {
         Handler handler = new Handler();
-        Integer delay = 1000;
+        Integer delay = 2000;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -177,7 +176,10 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
                     }
                 });
-                handler.postDelayed(this, delay);
+                if (currentStatus != TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                    handler.postDelayed(this, delay);
+                }
+
 
             }
         };

@@ -96,8 +96,7 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
     private void initSimulateDriver(MapRoute route) {
         List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
         Handler handler = new Handler();
-        Integer speedCar = 1;
-        Integer delay = 3000 / speedCar;
+        Integer delay = 2000;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
