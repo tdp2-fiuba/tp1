@@ -57,7 +57,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void checkDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 1000;
+        Integer delay = 3000;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -69,7 +69,10 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
                         User driver = response.body();
                         String[] positionSplit = driver.getPosition().split(",");
                         LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
-                        driverPath.add(position);
+                        if(!driverPath.contains(position)){
+                            driverPath.add(position);
+                        }
+
                     }
 
                     @Override
@@ -93,7 +96,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void updateDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 1000;
+        Integer delay = 3000;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
