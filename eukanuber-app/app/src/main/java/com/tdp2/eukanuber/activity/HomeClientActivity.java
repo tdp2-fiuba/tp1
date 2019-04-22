@@ -67,12 +67,10 @@ public class HomeClientActivity extends MenuActivity implements OnMapReadyCallba
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
-        LocationListener locationListener = new LocationListener() {
+      /*  LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                if (mMap != null) {
-                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
-                }
+                mapManager.moveCamera(currentPosition);
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -84,7 +82,7 @@ public class HomeClientActivity extends MenuActivity implements OnMapReadyCallba
             public void onProviderDisabled(String provider) {
             }
         };
-        mapManager.setListener(locationListener);
+        mapManager.setListener(locationListener);*/
     }
 
     public void showMessage(String message) {

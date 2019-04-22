@@ -224,17 +224,9 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        mapManager.setCurrentLocation();
         drawSummaryPath();
-        //initDriverPosition();
     }
 
-    private void initDriverPosition() {
-        LatLng positionDriver = new LatLng(-34.800714, -58.278466);
-        mapManager.addMarkerCar(positionDriver);
-        mapManager.moveCamera(positionDriver);
-
-    }
 
     private void drawSummaryPath() {
         if (currentTrip != null) {
