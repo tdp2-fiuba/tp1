@@ -32,7 +32,7 @@ describe("tripsController", () => {
     it("should return the updated trip", () => {});
   });
 
-  describe("updateTrip", () => {
+  describe("updateTripStatus", () => {
     let tripId: any;
     let status: any;
     let updatedTrip: any;
@@ -60,6 +60,40 @@ describe("tripsController", () => {
 
     it("should call the trips service with the proper parameters", () => {
       expect(updateTripStub).calledOnceWith(tripId.id, updatedTrip.status);
+    });
+    it("should return the updated trip", () => {
+      expect(responseJsonSpy).calledOnceWith(updatedTrip);
+    });
+  });
+  
+  describe("updateTripDriver", () => {
+      let tripId: any;
+      let driverId: any;
+      let updatedTrip: any;
+      let updateTripStub: Sinon.SinonStub;
+      let responseJsonSpy: any;
+  
+      before(async () => {
+        tripId = { id: "mordor123" };
+        driverId = "gollum123";
+        updatedTrip = { id: tripId, origin: "Rivendell", destination: "Mordor", driverId: driverId };
+  
+        // Create a stub that will replace the tripService implementation and
+        // configure it to return the same value it receives (see https://sinonjs.org/releases/v7.3.1/stubs/)
+        updateTripStub = tripsServiceMock.expects("assignDriverToTrip").returns(Promise.resolve(updatedTrip));
+  
+        // Create a spy to only record what will happen with the response (see https://sinonjs.org/releases/v7.3.1/spies/)
+        responseJsonSpy = Sinon.spy();
+  
+        request = mockReq<Express.Request>({ params: tripId, body: updatedTrip } as any);
+        response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
+  
+        // Execute the controller's action and (a)wait for it to finish
+        await tripsController.updateTrip(request, response);
+      });
+
+    it("should call the trips service with the proper parameters", () => {
+      expect(updateTripStub).calledOnceWith(tripId.id, driverId);
     });
     it("should return the updated trip", () => {
       expect(responseJsonSpy).calledOnceWith(updatedTrip);
