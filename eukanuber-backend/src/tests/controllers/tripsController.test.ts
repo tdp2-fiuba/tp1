@@ -5,6 +5,7 @@ import Sinon from "sinon";
 import { mockReq, mockRes } from "sinon-express-mock";
 import tripsController from "../../controllers/tripsController";
 import { tripsService } from "../../services";
+import { TripStatus } from "../../models";
 
 describe("tripsController", () => {
   let request: Express.Request;
@@ -21,7 +22,7 @@ describe("tripsController", () => {
     tripsServiceMock.restore();
   });
 
-  describe("updateTrip", () => {
+  describe("someTest", () => {
     before(() => {
       // This section should be similar as createTrip, except that
       // you need to mock the tripsService.updateTrip instead
@@ -29,6 +30,40 @@ describe("tripsController", () => {
 
     it("should call the trips service with the proper parameters", () => {});
     it("should return the updated trip", () => {});
+  });
+
+  describe("updateTrip", () => {
+    let tripId: any;
+    let status: any;
+    let updatedTrip: any;
+    let updateTripStub: Sinon.SinonStub;
+    let responseJsonSpy: any;
+
+    before(async () => {
+      tripId = { id: "mordor123" };
+      status = { status: TripStatus.DRIVER_GOING_ORIGIN };
+      updatedTrip = { id: "mordor123", origin: "Rivendell", destination: "Mordor", status: TripStatus.DRIVER_GOING_ORIGIN };
+
+      // Create a stub that will replace the tripService implementation and
+      // configure it to return the same value it receives (see https://sinonjs.org/releases/v7.3.1/stubs/)
+      updateTripStub = tripsServiceMock.expects("updateTripStatus").returns(Promise.resolve(updatedTrip));
+
+      // Create a spy to only record what will happen with the response (see https://sinonjs.org/releases/v7.3.1/spies/)
+      responseJsonSpy = Sinon.spy();
+
+      request = mockReq<Express.Request>({ params: tripId, body: status } as any);
+      response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
+
+      // Execute the controller's action and (a)wait for it to finish
+      await tripsController.updateTrip(request, response);
+    });
+
+    it("should call the trips service with the proper parameters", () => {
+      expect(updateTripStub).calledOnceWith(tripId.id, updatedTrip.status);
+    });
+    it("should return the updated trip", () => {
+      expect(responseJsonSpy).calledOnceWith(updatedTrip);
+    });
   });
 
   describe("getById", () => {
