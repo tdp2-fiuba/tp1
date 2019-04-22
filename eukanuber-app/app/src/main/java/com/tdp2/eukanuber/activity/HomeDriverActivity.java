@@ -123,17 +123,17 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-        //   String petsString = getPetStringFromArray(trip.getPets());
 
         String escortText = trip.getEscort() ? "Si" : "No";
-        trip.setDuration("1h 04m");
-        trip.setPrice("$456,90");
+        trip.setDuration(trip.getDuration());
+        trip.setPrice(trip.getPrice());
         ((TextView) popupView.findViewById(R.id.tripOriginText)).setText(trip.getOrigin());
         ((TextView) popupView.findViewById(R.id.tripDestinationText)).setText(trip.getDestination());
         ((TextView) popupView.findViewById(R.id.tripDurationText)).setText(trip.getDuration());
         ((TextView) popupView.findViewById(R.id.tripPriceText)).setText(trip.getPrice());
 
-        //((TextView) popupView.findViewById(R.id.petsText)).setText(petsString);
+        String pets = this.getPetsString(trip.getPets());
+        ((TextView) popupView.findViewById(R.id.petsText)).setText(pets);
         ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
         ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
@@ -170,27 +170,32 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         });
     }
 
-    private String getPetStringFromArray(Collection<String> pets) {
-        String petsString = "";
-        Integer quantSmall = Collections.frequency(pets, "S");
-        Integer quantMedium = Collections.frequency(pets, "M");
-        Integer quantLarge = Collections.frequency(pets, "L");
-        if (quantSmall > 0) {
-            petsString += quantSmall.toString() + " chica";
-            if (quantMedium > 0 || quantLarge > 0) {
-                petsString += " - ";
+    private String getPetsString(List<String> pets) {
+        String toReturn = "";
+        Integer small = Collections.frequency(pets, "S");
+        Integer medium = Collections.frequency(pets, "M");
+        Integer large = Collections.frequency(pets, "L");
+
+        if (small > 0) {
+            toReturn += toReturn.toString() + " chica/s";
+
+            if (medium > 0 || large > 0) {
+                toReturn += ", ";
             }
         }
-        if (quantMedium > 0) {
-            petsString += quantMedium.toString() + " mediana ";
-            if (quantLarge > 0) {
-                petsString += " - ";
+
+        if (medium > 0) {
+            toReturn += medium.toString() + " mediana/s";
+            if (large > 0) {
+                toReturn += ", ";
             }
         }
-        if (quantLarge > 0) {
-            petsString += quantLarge.toString() + " grande";
+
+        if (large > 0) {
+            toReturn += large.toString() + " grande/s";
         }
-        return petsString;
+
+        return toReturn;
     }
 
     public void showMessage(String message) {
