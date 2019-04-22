@@ -227,12 +227,12 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
         mapManager.setCurrentLocation();
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        Location location = this.getLastKnownLocation();
+
+        if (location ==  null) {
             return;
         }
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
         UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
         UserService userService = new UserService();
@@ -268,6 +268,31 @@ public class HomeDriverActivity extends MenuActivity implements OnMapReadyCallba
             }
         };
         mapManager.setListener(locationListener);
+    }
+
+    private Location getLastKnownLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+
+        LocationManager locationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+
+        for (String provider : providers) {
+            Location location = locationManager.getLastKnownLocation(provider);
+
+            if (location == null) {
+                continue;
+            }
+
+            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = location;
+            }
+        }
+
+        return bestLocation;
     }
 
 }
