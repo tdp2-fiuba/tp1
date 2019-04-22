@@ -85,16 +85,12 @@ public class MapManager {
         mMap.setMaxZoomPreference(20.0f);
         Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (location != null) {
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .zoom(18)
-                    .tilt(40).build();
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            moveCamera(position);
         }
     }
 
     public void moveCamera(LatLng position) {
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(position)
                 .zoom(18)
@@ -103,16 +99,17 @@ public class MapManager {
     }
 
     public Marker addMarkerCar(LatLng position) {
-        return mMap.addMarker(new MarkerOptions()
+        Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(position)
                 .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_car_map))
         );
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        return marker;
     }
 
     public void moveMarker(Marker marker, LatLng position) {
         marker.setPosition(position);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
-
+       // mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
 
     public void setListener(LocationListener locationListener) {
@@ -151,22 +148,29 @@ public class MapManager {
     }
 
     public void zoomToPath(MapRoutePolyline mapRoutePolyline) {
-        int padding = 50;
+        int padding = 100;
         List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
-        try {
-            if (pointsPolyline.size() > 0) {
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (LatLng latLng : pointsPolyline) {
-                    builder.include(latLng);
-                }
 
-                final LatLngBounds bounds = builder.build();
-
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50);
-                mMap.animateCamera(cu);
+        if (pointsPolyline.size() > 0) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (LatLng latLng : pointsPolyline) {
+                builder.include(latLng);
             }
-        } catch (Exception ex) {
-            Log.d("ZOOM PATH", ex.getMessage());
+
+            final LatLngBounds bounds = builder.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+            mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    try {
+                        mMap.animateCamera(cu);
+                    } catch (Exception ex) {
+                        Log.d("ZOOM PATH", ex.getMessage());
+                    }
+
+                }
+            });
         }
 
 

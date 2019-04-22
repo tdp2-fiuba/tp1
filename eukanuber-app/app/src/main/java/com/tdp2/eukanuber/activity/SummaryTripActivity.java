@@ -127,7 +127,7 @@ public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallb
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        mapManager.setCurrentLocation();
+      //  mapManager.setCurrentLocation();
 
         drawSummaryPath();
 
