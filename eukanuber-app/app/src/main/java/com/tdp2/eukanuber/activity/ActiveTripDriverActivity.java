@@ -96,7 +96,7 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
     private void initSimulateDriver(MapRoute route) {
         List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
         Handler handler = new Handler();
-        Integer delay = 2000;
+        Integer delay = 4000;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
@@ -113,6 +113,8 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
                     }
                     startPosition = pointsPolyline.get(index);
                     endPosition = pointsPolyline.get(next);
+                    refreshDriverPosition(startPosition);
+
                     ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
                     valueAnimator.setDuration(delay);
                     valueAnimator.setInterpolator(new LinearInterpolator());
@@ -129,7 +131,6 @@ public class ActiveTripDriverActivity extends MenuActivity implements OnMapReady
                         }
                     });
                     valueAnimator.start();
-                    refreshDriverPosition(startPosition);
                     index++;
                     handler.postDelayed(this, delay);
                 } else {

@@ -57,7 +57,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void checkDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 2000;
+        Integer delay = 2500;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -93,7 +93,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void updateDriverPosition() {
         Handler handler = new Handler();
-        Integer delay = 1500;
+        Integer delay = 2000;
         Runnable runnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
@@ -145,7 +145,7 @@ public class TrackingTripActivity extends MenuActivity implements OnMapReadyCall
 
     private void checkTripStatus() {
         Handler handler = new Handler();
-        Integer delay = 2000;
+        Integer delay = 2500;
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
