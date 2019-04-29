@@ -47,34 +47,35 @@ async function createUser(user: ICreateUserData) {
 }
 
 async function createDriver(newDriver: ICreateDriverData) {
-    const driver: ICreateUserData = {
-        ...newDriver.user
+    const driver = newDriver.user as ICreateUserData;
+
+    //TODO: ver por que esto no me deja castear usando ...newDriver.user
+    const user: Partial<ICreateUserData> = { 
+        userType: newDriver.user.userType,
+        firstName: newDriver.user.firstName,
+        lastName: newDriver.user.lastName,
+        position: newDriver.user.position
     }
-    const userId = ((await db
-        .table("users")
-        .returning("id")
-        .insert(driver)) as string[])[0];
-    
-    console.log("HI");
+
     db.transaction(function(trx) {
-        db('users').transacting(trx).insert(driver)
+        db('users').transacting(trx).insert(user)
             .then(function(resp) {
                 var id = resp[0];
                 newDriver.images.forEach(img => {
                     db('userMedia').insert({"userId": id , "fileName": img.fileName, "fileContent": img.file})
                 });
+                return id;
               })
             .then(trx.commit)
             .catch(trx.rollback); 
     })
-    .then(function () {
+    .then(function() {
         return {
-            ...driver,
-            id: userId
+            ...user
         } as any; 
       })
     .catch((err) => {
-        console.log("We get here", err);
+        console.error(err);
         return undefined;
     });
 }

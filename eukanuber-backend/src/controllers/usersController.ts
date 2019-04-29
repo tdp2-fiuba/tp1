@@ -3,6 +3,7 @@ import { IUser } from "../models";
 import { userService } from "../services";
 import ICreateUserData  from "../models/ICreateUserData";
 import ICreateDriverData  from "../models/ICreateDriverData";
+import { map } from "bluebird";
 
 var fs = require('fs');
 const BASE64_PREFIX = /^data:image\/\w+;base64,/;
@@ -38,38 +39,6 @@ async function createUser(req: Express.Request, res: Express.Response) {
   }
 }
 
-async function createDriverUser(req: Express.Request , res: Express.Response) {
-  try {
-    const data = req.body;
-    const userData: ICreateUserData = req.body;
-    const driverData: ICreateDriverData = {
-      user: userData,
-      images: [
-        {
-          fileName: "license",
-          file: base64ImgToBuffer(data['license'])
-        },
-        {
-          fileName: "insurance",
-          file: base64ImgToBuffer(data['insurance'])
-        },
-        {
-          fileName: "vehicle",
-          file: base64ImgToBuffer(data['vehicle'])
-        }
-      ]
-    }
-    const newDriver = await userService.createDriver(driverData);
-    res.json(newDriver);
-  } catch (e) {
-    res.status(500).send(e);
-  }
-}
-
-function base64ImgToBuffer(img: any) {
-  return Buffer.from(img.replace(BASE64_PREFIX, ""), 'base64')
-}
-
 async function updateUser(req: Express.Request, res: Express.Response) {
   try {
     const userId = req.params.id;
@@ -100,6 +69,31 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
   } catch (e) {
     res.status(500).send(e);
   }
+}
+
+//drivers
+
+async function createDriverUser(req: Express.Request , res: Express.Response) {
+  try {
+    const data = req.body;
+    const userData: ICreateUserData = req.body;
+    const driverData: ICreateDriverData = {
+      user: userData,
+      images: data.images.map(function(img: any) { return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file)} })
+    }
+    const newDriver = await userService.createDriver(driverData);
+    res.json(newDriver);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+}
+
+function ImgBase64StringToBuffer(img: string) {
+  return Buffer.from(img, 'base64');
+}
+
+async function getDriverUsers(req: Express.Request, res: Express.Response) {
+
 }
 
 export default { 
