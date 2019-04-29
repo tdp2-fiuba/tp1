@@ -1,7 +1,8 @@
 import db from "../db/db";
 import { IUser } from "../models";
 import ICreateUserData  from "../models/ICreateUserData";
-
+import ICreateDriverData  from "../models/ICreateDriverData";
+ 
 interface IPosition {
     lat: string,
     lng: string
@@ -43,6 +44,39 @@ async function createUser(user: ICreateUserData) {
         id: userId
     } as any;
 
+}
+
+async function createDriver(newDriver: ICreateDriverData) {
+    const driver: ICreateUserData = {
+        ...newDriver.user
+    }
+    const userId = ((await db
+        .table("users")
+        .returning("id")
+        .insert(driver)) as string[])[0];
+    
+    console.log("HI");
+    db.transaction(function(trx) {
+        db('users').transacting(trx).insert(driver)
+            .then(function(resp) {
+                var id = resp[0];
+                newDriver.images.forEach(img => {
+                    db('userMedia').insert({"userId": id , "fileName": img.fileName, "fileContent": img.file})
+                });
+              })
+            .then(trx.commit)
+            .catch(trx.rollback); 
+    })
+    .then(function () {
+        return {
+            ...driver,
+            id: userId
+        } as any; 
+      })
+    .catch((err) => {
+        console.log("We get here", err);
+        return undefined;
+    });
 }
 
 async function updateUser(id: string, userData: Partial<IUser> ) {
@@ -98,6 +132,7 @@ export default {
     getUsers,
     getUserById,
     createUser,
+    createDriver,
     updateUser,
     getUserPosition,
     updateUserPosition

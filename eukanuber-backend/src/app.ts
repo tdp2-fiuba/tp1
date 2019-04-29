@@ -2,7 +2,6 @@ import bodyParser from "body-parser";
 import Express from "express";
 import { statusController, tripsController, usersController } from "./controllers";
 import { requestLoggerMiddleware } from "./middlewares";
-
 const app = Express();
 const port = process.env.PORT || 3000;
 
@@ -17,6 +16,7 @@ app.get("/users/:id", usersController.getUserById);
 app.put("/users/:id", usersController.updateUser);
 app.get("/users/:id/position", usersController.getUserPosition);
 app.put("/users/:id/position", usersController.updateUserPosition);
+app.post("/users/drivers", usersController.createDriverUser);
 
 // Trips endpoints
 app.get("/trips", tripsController.getAll);
