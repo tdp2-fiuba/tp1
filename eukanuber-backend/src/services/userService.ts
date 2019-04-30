@@ -16,18 +16,28 @@ async function getUsers() {
 }
 
 async function getUserById(id: string) {
-  const user = await db
-    .table("users")
-    .where("id", id)
-    .select()
-    .first();
+    let users = await db("users").innerJoin("userMedia", "users.id", "=", "userMedia.userId").where("users.id", id).select();
+    
+    if (!users) {
+      return undefined;
+    }
 
-  if (!user) {
-    return undefined;
+    let userData = users[0];
+    let userImages = users.map((u:any) => 
+        ({"fileName": u.fileName, "fileContent": Buffer.from(u.fileContent).toString("base64")})
+    );
+
+    const user = { 
+        id: id,
+        userType: userData.userType,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        position: userData.position,
+        images: userImages
+    }
+  
+    return user;
   }
-
-  return user;
-}
 
 async function createUser(user: ICreateUserData) {
     const newUser = {
@@ -47,36 +57,28 @@ async function createUser(user: ICreateUserData) {
 }
 
 async function createDriver(newDriver: ICreateDriverData) {
-    const driver = newDriver.user as ICreateUserData;
-
     //TODO: ver por que esto no me deja castear usando ...newDriver.user
-    const user: Partial<ICreateUserData> = { 
+    const user: ICreateUserData = { 
         userType: newDriver.user.userType,
         firstName: newDriver.user.firstName,
         lastName: newDriver.user.lastName,
         position: newDriver.user.position
     }
-
-    db.transaction(function(trx) {
-        db('users').transacting(trx).insert(user)
-            .then(function(resp) {
-                var id = resp[0];
-                newDriver.images.forEach(img => {
-                    db('userMedia').insert({"userId": id , "fileName": img.fileName, "fileContent": img.file})
-                });
-                return id;
-              })
-            .then(trx.commit)
-            .catch(trx.rollback); 
+    db.transaction(function(t: any) {
+        return db("users")
+        .transacting(t)
+        .insert(user)
+        .returning("id")
+    }).then(function(resp) {
+        var id = resp[0];
+        const fields = newDriver.images.map(img => 
+                    ({"userId": id, "fileName": img.fileName, "fileContent": img.file})
+                );
+        return db("userMedia").insert(fields).returning("userId");
     })
-    .then(function() {
-        return {
-            ...user
-        } as any; 
-      })
-    .catch((err) => {
-        console.error(err);
-        return undefined;
+    .catch((error) => {
+        console.error(error);
+        throw error;
     });
 }
 

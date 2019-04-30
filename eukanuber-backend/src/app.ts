@@ -17,7 +17,6 @@ app.put("/users/:id", usersController.updateUser);
 app.get("/users/:id/position", usersController.getUserPosition);
 app.put("/users/:id/position", usersController.updateUserPosition);
 app.post("/users/drivers", usersController.createDriverUser);
-app.get("/users/drivers", usersController.getDriverUsers);
 
 
 // Trips endpoints
@@ -31,6 +30,8 @@ app.post("/trips/routes", tripsController.getRoute);
 app.get("/ping", statusController.ping);
 app.get("/ready", statusController.ready);
 app.get("/status", statusController.status);
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}!`);

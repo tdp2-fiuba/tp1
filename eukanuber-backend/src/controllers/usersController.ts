@@ -82,19 +82,16 @@ async function createDriverUser(req: Express.Request , res: Express.Response) {
       images: data.images.map(function(img: any) { return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file)} })
     }
     const newDriver = await userService.createDriver(driverData);
-    res.json(newDriver);
+    res.status(201).json(newDriver);
   } catch (e) {
     res.status(500).send(e);
   }
 }
 
 function ImgBase64StringToBuffer(img: string) {
-  return Buffer.from(img, 'base64');
+  return Buffer.from(img, "base64");
 }
 
-async function getDriverUsers(req: Express.Request, res: Express.Response) {
-
-}
 
 export default { 
   getUsers,
