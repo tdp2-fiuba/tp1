@@ -29,8 +29,8 @@ async function getUserById(req: Express.Request, res: Express.Response) {
 
 async function createUser(req: Express.Request, res: Express.Response) {
   try {
-    console.log("HI 1");
-    const userData: ICreateUserData = req.body;
+    let userData: ICreateUserData = req.body;
+    userData.userType = "Passenger";
     const newUser = await userService.createUser(userData);
     res.json(newUser);
   } catch (e) {
@@ -76,7 +76,8 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
 async function createDriverUser(req: Express.Request , res: Express.Response) {
   try {
     const data = req.body;
-    const userData: ICreateUserData = req.body;
+    let userData: ICreateUserData = req.body;
+    userData.userType = "Driver";
     const driverData: ICreateDriverData = {
       user: userData,
       images: data.images.map(function(img: any) { return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file)} })

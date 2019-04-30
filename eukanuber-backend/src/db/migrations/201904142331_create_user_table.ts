@@ -17,6 +17,9 @@ export async function up(knex: Knex): Promise<any> {
     tableBuilder.integer("rating").defaultTo(-1);
     tableBuilder.integer("state").defaultTo(0);
 
+    tableBuilder.boolean("loggedIn").defaultTo(false);
+    tableBuilder.string("token").defaultTo("");
+
     tableBuilder.string("position").notNullable();
   });
 }

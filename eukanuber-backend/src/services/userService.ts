@@ -2,7 +2,8 @@ import db from "../db/db";
 import { IUser } from "../models";
 import ICreateUserData  from "../models/ICreateUserData";
 import ICreateDriverData  from "../models/ICreateDriverData";
- 
+import UserStatus from "../models/UserStatus";
+
 interface IPosition {
     lat: string,
     lng: string
@@ -33,6 +34,7 @@ async function getUserById(id: string) {
         firstName: userData.firstName,
         lastName: userData.lastName,
         position: userData.position,
+        state: userData.state,
         images: userImages
     }
   
@@ -62,7 +64,8 @@ async function createDriver(newDriver: ICreateDriverData) {
         userType: newDriver.user.userType,
         firstName: newDriver.user.firstName,
         lastName: newDriver.user.lastName,
-        position: newDriver.user.position
+        position: newDriver.user.position,
+        fbId: newDriver.user.fbId
     }
     db.transaction(function(t: any) {
         return db("users")

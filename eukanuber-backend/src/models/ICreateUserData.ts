@@ -3,4 +3,5 @@ export default interface ICreateUserData {
     firstName: string;
     lastName: string;
     position: string;
+    fbId: string;
 }
