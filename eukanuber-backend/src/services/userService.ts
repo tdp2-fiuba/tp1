@@ -1,8 +1,6 @@
 import db from "../db/db";
 import { IUser } from "../models";
 import ICreateUserData  from "../models/ICreateUserData";
-import ICreateDriverData  from "../models/ICreateDriverData";
-import UserStatus from "../models/UserStatus";
 
 interface IPosition {
     lat: string,
@@ -66,7 +64,6 @@ async function createUser(newUser: ICreateUserData) {
         console.error(error);
         throw error;
     });
-
 }
 
 async function updateUser(id: string, userData: Partial<IUser> ) {
@@ -118,11 +115,47 @@ async function updateUserPosition(id: string, pos: IPosition) {
         .first();
 }
 
+async function userLogin(id: string) {
+    try {
+        const updateData = {
+            loggedIn: true
+        }
+
+        await db
+            .table("users")
+            .where("id", id)
+            .update(updateData);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+async function userLogout(id: string) {
+    try {
+        const updateData = {
+            loggedIn: false
+        }
+
+        await db
+            .table("users")
+            .where("id", id)
+            .update(updateData);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 export default {
     getUsers,
     getUserById,
     createUser,
     updateUser,
+    userLogin,
+    userLogout,
     getUserPosition,
     updateUserPosition
 };

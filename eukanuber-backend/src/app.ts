@@ -16,6 +16,9 @@ app.get("/users/:id", usersController.getUserById);
 app.put("/users/:id", usersController.updateUser);
 app.get("/users/:id/position", usersController.getUserPosition);
 app.put("/users/:id/position", usersController.updateUserPosition);
+app.post("/users/:id/login", usersController.userLogin);
+app.post("/users/:id/logout", usersController.userLogout);
+
 
 // Trips endpoints
 app.get("/trips", tripsController.getAll);

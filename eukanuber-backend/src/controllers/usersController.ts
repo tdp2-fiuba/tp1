@@ -2,17 +2,18 @@ import Express from "express";
 import { IUser } from "../models";
 import { userService } from "../services";
 import ICreateUserData  from "../models/ICreateUserData";
-import { map } from "bluebird";
 
 var fs = require('fs');
-const BASE64_PREFIX = /^data:image\/\w+;base64,/;
+const jwt = require('jsonwebtoken');
+
+var secret = "ALOHOMORA";
 
 async function getUsers(req: Express.Request, res: Express.Response) {
   try {
     const users = await userService.getUsers();
     res.json(users);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
@@ -22,7 +23,7 @@ async function getUserById(req: Express.Request, res: Express.Response) {
     const user = await userService.getUserById(userId);
     res.json(user);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
@@ -33,7 +34,7 @@ async function updateUser(req: Express.Request, res: Express.Response) {
     const updatedUser = await userService.updateUser(userId, userData);
     res.json(updatedUser);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
@@ -43,7 +44,7 @@ async function getUserPosition(req: Express.Request, res: Express.Response) {
     const userPos = await userService.getUserPosition(userId);
     res.json(userPos);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
@@ -54,7 +55,7 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
     const user = await userService.updateUserPosition(userId, position)
     res.json(user);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
@@ -70,12 +71,38 @@ async function createUser(req: Express.Request, res: Express.Response) {
     const newUser = await userService.createUser(userData);
     res.status(201).json(newUser);
   } catch (e) {
-    res.status(500).send(e);
+    res.status(500).json({message: e}).send();
   }
 }
 
 function ImgBase64StringToBuffer(img: string) {
   return Buffer.from(img, "base64");
+}
+
+async function userLogin(req: Express.Request, res: Express.Response) {
+  try{
+    const id = req.params.id;
+    const data = { id: id, name: req.body.firstName, lastName: req.body.lastName, fbId: req.body.fbId };
+    //TODO: check user has registered.
+    const token = jwt.sign(data, secret, {});
+    userService.userLogin(id);
+
+    res.status(200).send({ token });
+  } catch (e) {
+    res.status(500).json({message: e}).send();
+  }
+}
+
+async function userLogout(req: Express.Request, res: Express.Response) {
+  try{
+    const id = req.params.id;
+    //TODO: check user has registered and validate credentials.
+    userService.userLogout(id);
+    
+    res.status(200).send();
+  } catch (e) {
+    res.status(500).json({message: e}).send();
+  }
 }
 
 export default { 
@@ -84,5 +111,7 @@ export default {
   createUser,
   updateUser,
   getUserPosition,
-  updateUserPosition
+  updateUserPosition,
+  userLogin,
+  userLogout
 };
