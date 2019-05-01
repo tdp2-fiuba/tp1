@@ -19,7 +19,6 @@ app.put("/users/:id/position", usersController.updateUserPosition);
 app.post("/users/:id/login", usersController.userLogin);
 app.post("/users/:id/logout", usersController.userLogout);
 
-
 // Trips endpoints
 app.get("/trips", tripsController.getAll);
 app.get("/trips/:id", tripsController.getById);
@@ -31,7 +30,6 @@ app.post("/trips/routes", tripsController.getRoute);
 app.get("/ping", statusController.ping);
 app.get("/ready", statusController.ready);
 app.get("/status", statusController.status);
-
 
 
 app.listen(port, () => {

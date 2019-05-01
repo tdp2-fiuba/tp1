@@ -1,6 +1,9 @@
 import db from "../db/db";
 import { IUser } from "../models";
 import ICreateUserData  from "../models/ICreateUserData";
+import facebookService from "./facebookService";
+
+const MIN_FRIEND_COUNT = 1000;
 
 interface IPosition {
     lat: string,
@@ -47,6 +50,10 @@ async function createUser(newUser: ICreateUserData) {
         lastName: newUser.lastName,
         position: newUser.position,
         fbId: newUser.fbId
+    }
+    const accountValidation = await validateFacebookAccount(newUser.fbId);
+    if (!accountValidation.validAccount) {
+        throw new Error(accountValidation.message);
     }
     db.transaction(function(t: any) {
         return db("users")
@@ -159,6 +166,17 @@ async function isUserLogged(id: string) {
     } catch (e) {
         return false;
     }
+}
+
+interface FacebookData {
+    data: [];
+    summary: { total_count: number };
+}
+
+async function validateFacebookAccount(id: string) {
+    const friendCount: string = await facebookService.getFacebookFriendCount(id);
+    const validAccount = (parseInt(friendCount, 10) >= MIN_FRIEND_COUNT);
+    return { validAccount: validAccount, message: (validAccount)? "" : "Required: Minimum friend count " + MIN_FRIEND_COUNT };
 }
 
 export default {
