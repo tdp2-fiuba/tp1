@@ -2,7 +2,6 @@ import Express from "express";
 import { IUser } from "../models";
 import { userService } from "../services";
 import ICreateUserData  from "../models/ICreateUserData";
-import ICreateDriverData  from "../models/ICreateDriverData";
 import { map } from "bluebird";
 
 var fs = require('fs');
@@ -23,18 +22,6 @@ async function getUserById(req: Express.Request, res: Express.Response) {
     const user = await userService.getUserById(userId);
     res.json(user);
   } catch (e) {
-    res.status(500).send(e);
-  }
-}
-
-async function createUser(req: Express.Request, res: Express.Response) {
-  try {
-    let userData: ICreateUserData = req.body;
-    userData.userType = "Passenger";
-    const newUser = await userService.createUser(userData);
-    res.json(newUser);
-  } catch (e) {
-    console.error(e);
     res.status(500).send(e);
   }
 }
@@ -71,19 +58,17 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
   }
 }
 
-//drivers
-
-async function createDriverUser(req: Express.Request , res: Express.Response) {
+async function createUser(req: Express.Request, res: Express.Response) {
   try {
     const data = req.body;
     let userData: ICreateUserData = req.body;
-    userData.userType = "Driver";
-    const driverData: ICreateDriverData = {
-      user: userData,
-      images: data.images.map(function(img: any) { return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file)} })
-    }
-    const newDriver = await userService.createDriver(driverData);
-    res.status(201).json(newDriver);
+    userData.images = data.images.map(function(img: any) { return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file)} });
+    //TODO: validate fb account
+    //TODO #2: if user is Passenger state should be valid if fb account check successful
+    //otherwise user approval should remain as PENDING.
+
+    const newUser = await userService.createUser(userData);
+    res.status(201).json(newUser);
   } catch (e) {
     res.status(500).send(e);
   }
@@ -93,12 +78,10 @@ function ImgBase64StringToBuffer(img: string) {
   return Buffer.from(img, "base64");
 }
 
-
 export default { 
   getUsers,
   getUserById,
   createUser,
-  createDriverUser,
   updateUser,
   getUserPosition,
   updateUserPosition

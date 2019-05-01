@@ -41,31 +41,14 @@ async function getUserById(id: string) {
     return user;
   }
 
-async function createUser(user: ICreateUserData) {
-    const newUser = {
-        ...user
-    }
-
-    const userId = ((await db
-        .table("users")
-        .returning("id")
-        .insert(newUser)) as string[])[0];
-
-    return {
-        ...newUser,
-        id: userId
-    } as any;
-
-}
-
-async function createDriver(newDriver: ICreateDriverData) {
-    //TODO: ver por que esto no me deja castear usando ...newDriver.user
-    const user: ICreateUserData = { 
-        userType: newDriver.user.userType,
-        firstName: newDriver.user.firstName,
-        lastName: newDriver.user.lastName,
-        position: newDriver.user.position,
-        fbId: newDriver.user.fbId
+async function createUser(newUser: ICreateUserData) {
+    //TODO: ver por que esto no me deja castear usando ...newUser
+    const user = { 
+        userType: newUser.userType,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        position: newUser.position,
+        fbId: newUser.fbId
     }
     db.transaction(function(t: any) {
         return db("users")
@@ -74,7 +57,7 @@ async function createDriver(newDriver: ICreateDriverData) {
         .returning("id")
     }).then(function(resp) {
         var id = resp[0];
-        const fields = newDriver.images.map(img => 
+        const fields = newUser.images.map(img => 
                     ({"userId": id, "fileName": img.fileName, "fileContent": img.file})
                 );
         return db("userMedia").insert(fields).returning("userId");
@@ -83,6 +66,7 @@ async function createDriver(newDriver: ICreateDriverData) {
         console.error(error);
         throw error;
     });
+
 }
 
 async function updateUser(id: string, userData: Partial<IUser> ) {
@@ -138,7 +122,6 @@ export default {
     getUsers,
     getUserById,
     createUser,
-    createDriver,
     updateUser,
     getUserPosition,
     updateUserPosition
