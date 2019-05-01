@@ -149,6 +149,18 @@ async function userLogout(id: string) {
     }
 }
 
+async function isUserLogged(id: string) {
+    try {
+        const user = await db("users")
+            .where("id", id)
+            .select();
+    
+        return user.loggedIn as boolean;
+    } catch (e) {
+        return false;
+    }
+}
+
 export default {
     getUsers,
     getUserById,
@@ -156,6 +168,7 @@ export default {
     updateUser,
     userLogin,
     userLogout,
+    isUserLogged,
     getUserPosition,
     updateUserPosition
 };
