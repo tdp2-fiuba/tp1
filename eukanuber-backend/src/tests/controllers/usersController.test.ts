@@ -39,8 +39,20 @@ describe("usersController", () => {
 
     before(async () => {
       userId = { id: "terry123" };
-      updatedUser = { userType: "Driver", firstName: "Terry", lastName: "Pratchett" };
-
+      updatedUser = {
+        firstName: "Terry",
+        lastName: "Pratchett",
+        userType: "Passenger",
+        position: "-33.8696, 151.2094",
+        fbId:"100000524659075",
+        images: [
+          {
+            fileName:"vehicle",
+            file: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+          }
+        ]
+      };
+      const headers = {authorization: "Bearer "};
       // Create a stub that will replace the userService implementation and
       // configure it to return the same value it receives (see https://sinonjs.org/releases/v7.3.1/stubs/)
       updateUserStub = userServiceMock.expects("updateUser").returns(Promise.resolve(updatedUser));
@@ -48,7 +60,7 @@ describe("usersController", () => {
       // Create a spy to only record what will happen with the response (see https://sinonjs.org/releases/v7.3.1/spies/)
       responseJsonSpy = Sinon.spy();
 
-      request = mockReq<Express.Request>({ params: userId, body: updatedUser } as any);
+      request = mockReq<Express.Request>({ headers: headers, params: userId, body: updatedUser } as any);
       response = mockRes<Express.Response>({ json: responseJsonSpy } as any);
 
       // Execute the controller's action and (a)wait for it to finish

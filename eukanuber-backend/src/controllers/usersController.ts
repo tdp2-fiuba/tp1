@@ -20,8 +20,11 @@ async function getUsers(req: Express.Request, res: Express.Response) {
 async function getUserById(req: Express.Request, res: Express.Response) {
   try {
     const userId = req.params.id;
-    const user = await userService.getUserById(userId);
-    res.json(user);
+    let user = await userService.getUserById(userId);
+    if (user == undefined){
+      res.status(200).json({}).send();
+    }
+    res.status(200).json(user).send();
   } catch (e) {
     res.status(500).json({ message: e.message }).send();
   }
@@ -29,7 +32,10 @@ async function getUserById(req: Express.Request, res: Express.Response) {
 
 async function updateUser(req: Express.Request, res: Express.Response) {
   try {
-    validateUserLoggedWithCredentials(req, res);
+    const validated = await validateUserLoggedWithCredentials(req, res);
+    if (!validated) {
+      return;
+    }
     const userId = req.params.id;
     const userData: Partial<IUser>  = req.body;
     const updatedUser = await userService.updateUser(userId, userData);
@@ -41,7 +47,10 @@ async function updateUser(req: Express.Request, res: Express.Response) {
 
 async function getUserPosition(req: Express.Request, res: Express.Response) {
   try {
-    validateUserLoggedWithCredentials(req, res);
+    const validated = await validateUserLoggedWithCredentials(req, res);
+    if (!validated) {
+      return;
+    }
     const userId = req.params.id;
     const userPos = await userService.getUserPosition(userId);
     res.status(200).json(userPos); 
@@ -52,7 +61,10 @@ async function getUserPosition(req: Express.Request, res: Express.Response) {
 
 async function updateUserPosition(req: Express.Request, res: Express.Response) {
   try {
-    validateUserLoggedWithCredentials(req, res);
+    const validated = await validateUserLoggedWithCredentials(req, res);
+    if (!validated) {
+      return;
+    }
     const userId = req.params.id;
     const position = req.body;
     const user = await userService.updateUserPosition(userId, position);
@@ -63,16 +75,28 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
 }
 
 async function validateUserLoggedWithCredentials(req: Express.Request, res: Express.Response) {
-  const userId = req.params.id;
-  const token = req.headers.authorization.replace('Bearer ','');
-  jwt.verify(token, secret,function(err: any, user: any) {
-    if (err || user.id != userId) {
-      res.status(401).json({ message: "Invalid credentials!" }).send();
+  try {
+    if (req.headers.authorization == undefined){
+      res.status(403).json({ message: "Must provide authorization credentials!" }).send();
+      return false;
     }
-  });
-  const isUserLoggedIn: boolean = await userService.isUserLogged(userId);
-  if (!isUserLoggedIn) {
-    res.status(403).json({ message: "User must be logged in to perform this operation!" }).send();
+    const userId = req.params.id;
+    const token = req.headers.authorization.replace('Bearer ','');
+    jwt.verify(token, secret,function(err: any, user: any) {
+      if (err || user.id != userId) {
+        res.status(401).json({ message: "Invalid credentials!" }).send();
+        return false;
+      }
+    });
+    const isUserLoggedIn = await userService.isUserLogged(userId);
+    console.log("LOGGED IN " + isUserLoggedIn);
+    if (!isUserLoggedIn) {
+      res.status(403).json({ message: "User must be logged in to perform this operation!" }).send();
+      return false;
+    }
+    return true; 
+  } catch (e) {
+    return false;
   }
 }
 
@@ -85,8 +109,10 @@ async function createUser(req: Express.Request, res: Express.Response) {
     //TODO #2: if user is Passenger state should be valid if fb account check successful
     //otherwise user approval should remain as PENDING.
 
-    const newUser = await userService.createUser(userData);
-    res.status(201).json(newUser).send();
+    //TODO: esto de la response x parametro es un workaround porque no esta devolviendo el id sino... no se espera a commitear
+    //la trx a pesar de usar awaits.
+    userService.createUser(userData, res);
+    //res.send({ user: id });
   } catch (e) {
     res.status(500).json({ message: e.message }).send();
   }
@@ -102,7 +128,7 @@ async function userLogin(req: Express.Request, res: Express.Response) {
     const data = { id: id, name: req.body.firstName, lastName: req.body.lastName, fbId: req.body.fbId };
     //TODO: check user has registered.
     const token = jwt.sign(data, secret, {});
-    userService.userLogin(id);
+    await userService.userLogin(id);
 
     res.status(200).send({ token });
   } catch (e) {
@@ -112,9 +138,12 @@ async function userLogin(req: Express.Request, res: Express.Response) {
 
 async function userLogout(req: Express.Request, res: Express.Response) {
   try{
-    validateUserLoggedWithCredentials(req, res);
+    const validated = await validateUserLoggedWithCredentials(req, res);
+    if (!validated) {
+      return;
+    }
     const id = req.params.id;
-    userService.userLogout(id);
+    await userService.userLogout(id);
     res.status(200).send();
   } catch (e) {
     res.status(500).json({ message: e.message }).send();

@@ -1,9 +1,10 @@
 import db from "../db/db";
+import Express from "express";
 import { IUser } from "../models";
 import ICreateUserData  from "../models/ICreateUserData";
 import facebookService from "./facebookService";
 
-const MIN_FRIEND_COUNT = 1000;
+const MIN_FRIEND_COUNT = 10;
 
 interface IPosition {
     lat: string,
@@ -36,13 +37,15 @@ async function getUserById(id: string) {
         lastName: userData.lastName,
         position: userData.position,
         state: userData.state,
-        images: userImages
+        images: userImages,
+        loggedIn: userData.loggedIn
+        
     }
   
     return user;
   }
 
-async function createUser(newUser: ICreateUserData) {
+async function createUser(newUser: ICreateUserData, res: Express.Response) {
     //TODO: ver por que esto no me deja castear usando ...newUser
     const user = { 
         userType: newUser.userType,
@@ -55,21 +58,26 @@ async function createUser(newUser: ICreateUserData) {
     if (!accountValidation.validAccount) {
         throw new Error(accountValidation.message);
     }
-    db.transaction(function(t: any) {
-        return db("users")
+    db.transaction(async function(t: any) {
+        return await db("users")
         .transacting(t)
         .insert(user)
-        .returning("id")
-    }).then(function(resp) {
-        var id = resp[0];
-        const fields = newUser.images.map(img => 
-                    ({"userId": id, "fileName": img.fileName, "fileContent": img.file})
-                );
-        return db("userMedia").insert(fields).returning("userId");
+        .returning("id").then(async function(resp) {
+            var id = resp[0];
+            const fields = newUser.images.map(img => 
+                        ({"userId": id, "fileName": img.fileName, "fileContent": img.file})
+                    );
+            return await db("userMedia").transacting(t).insert(fields).returning("userId");
+        })
+        .then(t.commit)
+        .catch(t.rollback);
+    }).then(function(resp:any) {
+        console.log('Transaction complete.' + resp);
+        //workaround:
+        res.send({ id: resp[0] });
     })
-    .catch((error) => {
-        console.error(error);
-        throw error;
+    .catch(async function(err) {
+        console.error(err);
     });
 }
 
@@ -158,11 +166,7 @@ async function userLogout(id: string) {
 
 async function isUserLogged(id: string) {
     try {
-        const user = await db("users")
-            .where("id", id)
-            .select();
-    
-        return user.loggedIn as boolean;
+        return await getUserById(id).then(result => result.loggedIn);
     } catch (e) {
         return false;
     }

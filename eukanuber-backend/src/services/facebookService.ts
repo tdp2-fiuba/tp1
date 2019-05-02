@@ -1,7 +1,7 @@
 import axios from "axios";
 
 var APP_ID = "456257531845861";
-var ACCESS_TOKEN = "EAAGe9rwcnOUBAK5FiSspMkMyXYuSPWK3SfZBGRQO4ri7NS4dWOKZBM3NL0FpMpddR1d5ZBkjUGbZCnu3LCqstZCGLIYGSH1lB8x1wgwhHNfZCn2FZBCtDsObx1S4TYs8rmgzONPd6Rra6YEDOuSmyDUJHYuMWe8nFglRDggBYIno3HYIguLLGseJZAYnUeZCkSrUfDhQrsMrP4AZDZD";
+var ACCESS_TOKEN = "456257531845861|jF85CHDkdzzC62OzmGJ9xh4nrbw";
 const url = "https://graph.facebook.com/v3.3/";
 
 
