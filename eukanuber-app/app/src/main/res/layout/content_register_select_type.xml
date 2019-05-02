@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingTop="70dp"
+            android:paddingRight="20dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Registro de usuario"
+                android:textSize="24dp"
+                android:layout_marginBottom="30dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="¿Qué rol tendrás en Eukanuber?"
+                android:textSize="18dp"
+                android:layout_marginBottom="30dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </LinearLayout>
+            <Button
+                android:id="@+id/buttonRegisterClient"
+                style="@style/AppTheme.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="goRegisterClient"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="Soy cliente" />
+
+            <Button
+                android:id="@+id/buttonRegisterDriver"
+                style="@style/AppTheme.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:onClick="goRegisterDriver"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="Soy conductor" />
+
+        </LinearLayout>
+
+
+</LinearLayout>

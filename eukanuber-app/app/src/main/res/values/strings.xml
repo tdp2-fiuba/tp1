@@ -1,4 +1,6 @@
 <resources>
+    <string name="facebook_app_id">599430580575116</string>
+    <string name="fb_login_protocol_scheme">fb599430580575116</string>
     <string name="app_name">Eukanuber</string>
     <string name="login_button_client">Ingresar como cliente</string>
     <string name="login_button_driver">Ingresar como conductor</string>

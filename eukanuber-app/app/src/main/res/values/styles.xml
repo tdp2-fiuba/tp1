@@ -28,10 +28,12 @@
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
+
     <style name="AppTheme.Button.Secondary" parent="AppTheme.Button">
         <item name="android:background">@color/colorSecondary</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
+
     <style name="AppTheme.Button.Success" parent="AppTheme.Button">
         <item name="android:background">@color/colorSuccess</item>
         <item name="android:textColor">#FFFFFF</item>
@@ -48,20 +50,32 @@
         <item name="android:background">@drawable/background_label_floating_button</item>
         <item name="android:textColor">@color/colorWhite</item>
     </style>
+
     <style name="popup_window_animation">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
     </style>
-    <style name="NewTripDriver">
-    </style>
+
+    <style name="NewTripDriver"></style>
+
     <style name="NewTripDriver.Label">
         <item name="android:textSize">16dp</item>
         <item name="android:layout_marginRight">10dp</item>
     </style>
+
     <style name="NewTripDriver.Value">
         <item name="android:textSize">16dp</item>
         <item name="android:textColor">@color/colorBlack</item>
     </style>
+
     <style name="NewTripDriver.Value.Price">
         <item name="android:textSize">24dp</item>
     </style>
+
+    <style name="FacebookLoginButton">
+        <item name="android:textSize">16dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">10dp</item>
+    </style>
+
 </resources>

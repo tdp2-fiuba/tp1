@@ -32,23 +32,18 @@
             android:layout_height="match_parent"
             android:gravity="bottom"
             android:orientation="vertical">
-
-            <Button
-                android:id="@+id/buttonEnterClient"
-                style="@style/AppTheme.Button.Primary"
+            <com.facebook.login.widget.LoginButton
+                xmlns:facebook="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/login_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="goHomeClient"
-                android:text="@string/login_button_client" />
-
-            <Button
-                android:id="@+id/buttonEnterDriver"
-                style="@style/AppTheme.Button.Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
-                android:onClick="goHomeDriver"
-                android:text="@string/login_button_driver" />
+                android:layout_marginBottom="30dp"
+                facebook:com_facebook_login_text="Ingresar con Facebook"
+                facebook:com_facebook_logout_text=""
+                style="@style/FacebookLoginButton"/>
+
 
         </LinearLayout>
     </RelativeLayout>
