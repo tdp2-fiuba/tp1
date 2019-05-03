@@ -5,11 +5,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.facebook.CallbackManager;
 import com.tdp2.eukanuber.R;
 
-public class RegisterDriverCarActivity extends MenuActivity {
-    CallbackManager callbackManager;
+public class RegisterDriverCarActivity extends BaseActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,8 +20,8 @@ public class RegisterDriverCarActivity extends MenuActivity {
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+
     }
     public void submitRegisterDriver(View view) {
     }
@@ -32,4 +31,7 @@ public class RegisterDriverCarActivity extends MenuActivity {
         super.finish();
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
+
+
+
 }

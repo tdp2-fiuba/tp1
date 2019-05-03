@@ -13,5 +13,7 @@
     <color name="colorLightSecondary">#74CCFF</color>
     <color name="colorTertiary">#FF8000</color>
     <color name="colorLightTertiary">#FFB266</color>
+    <color name="colorFacebook">#3b5998</color>
+
 
 </resources>

@@ -1,5 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -9,13 +11,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
 
-abstract class MenuActivity extends AppCompatActivity
+abstract class BaseActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String PREFS_NAME = "Eukanuber";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
     }
 
@@ -57,6 +61,11 @@ abstract class MenuActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_terms) {
 
+        } else if (id == R.id.logout){
+            SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+            AppSecurityManager.logout(settings);
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

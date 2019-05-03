@@ -38,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewTripActivity extends MenuActivity implements
+public class NewTripActivity extends SecureActivity implements
         PlaceAutocompleteAdapter.PlaceAutoCompleteInterface, ShowMessageInterface {
     private final String PAYMENT_CASH = "cash";
     private final String PAYMENT_CARD = "card";
@@ -283,10 +283,6 @@ public class NewTripActivity extends MenuActivity implements
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
                     Trip trip = response.body();
-                  /*  SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("currentTripId", trip.getId());
-                    editor.commit();*/
                     dialog.dismiss();
                     if(trip.getRoutes().isEmpty()){
                         Intent intent = new Intent(NewTripActivity.this, HomeClientActivity.class);
