@@ -2,8 +2,6 @@ package com.tdp2.eukanuber.activity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -13,12 +11,11 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 
-public class HomeClientActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
+public class HomeClientActivity extends SecureActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
 
@@ -92,6 +89,9 @@ public class HomeClientActivity extends MenuActivity implements OnMapReadyCallba
                 Toast.LENGTH_LONG
         ).show();
     }
-
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+    }
 
 }

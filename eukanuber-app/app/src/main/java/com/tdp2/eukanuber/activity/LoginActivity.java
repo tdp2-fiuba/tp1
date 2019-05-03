@@ -1,10 +1,12 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -13,57 +15,84 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
 
 public class LoginActivity extends AppCompatActivity {
     CallbackManager callbackManager;
+    Activity mLoginActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        mLoginActivity = this;
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        if(AppSecurityManager.isUserLogged(settings)){
+            Intent intent = new Intent(this, HomeClientActivity.class);
+            startActivity(intent);
+            return;
+        }
+
+        LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions("email");
+        loginButton.setVisibility(View.GONE);
         callbackManager = CallbackManager.Factory.create();
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                AccessToken accessToken = AccessToken.getCurrentAccessToken();
-                boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
-                System.out.print("accessToken: " + accessToken.getToken());
-
+                AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
+                appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());
             }
 
             @Override
             public void onCancel() {
-                System.out.print("cancell");
+                showMessage("El login con Facebook ha sido cancelado");
             }
 
             @Override
             public void onError(FacebookException exception) {
-                System.out.print("error: " + exception.toString());
+                showMessage("Ha ocurrido un error con el login con Facebook");
             }
         });
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
-  /*
 
-    public void goHomeClient(View view) {
-        Intent intent = new Intent(this, HomeClientActivity.class);
-        SharedPreferences settings = getSharedPreferences("USER_INFO", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("userType", "client");
-        editor.commit();
 
+
+
+    public void completeLoginAction(View view) {
+        LoginButton loginButton = findViewById(R.id.login_button);
+        AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
+        boolean isLoggedInFacebook = accessTokenFacebook != null && !accessTokenFacebook.isExpired();
+        if(!isLoggedInFacebook){
+            loginButton.performClick();
+            return;
+        }
+        appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());
+
+    }
+
+    private void appLoginAction(String fbTokenKey, String fbUserId) {
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        AppSecurityManager.login(settings, fbTokenKey, fbUserId, "APP_TOKEN");
+        Intent intent = new Intent(mLoginActivity, RegisterClientActivity.class);
         startActivity(intent);
     }
 
-    public void goHomeDriver(View view) {
-        Intent intent = new Intent(this, HomeDriverActivity.class);
-        startActivity(intent);
-    }*/
+
+    public void showMessage(String message) {
+        Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
+    }
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+    }
 }

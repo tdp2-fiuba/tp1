@@ -19,7 +19,15 @@
                 android:textSize="24dp"
                 android:layout_marginBottom="30dp"
                 />
-
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_location_black"
+                android:onClick="takeAPhoto"/>
+            <ImageView
+                android:id="@+id/imagePhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
             <Button
                 android:id="@+id/buttonGoRegisterDriverCar"
                 style="@style/AppTheme.Button.Success"

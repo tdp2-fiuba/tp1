@@ -26,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SummaryTripActivity extends MenuActivity implements OnMapReadyCallback, ShowMessageInterface {
+public class SummaryTripActivity extends SecureActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
     private Trip currentTrip;
