@@ -8,7 +8,9 @@ async function seed(knex: Knex) {
     position: "43.017218,-89.831479",
     firstName: "Arthur",
     lastName: "Dent",
-    rating: 4,
+    fbId: "afa2a272-6b8d-11e9-a923-1681be663d3e",
+    state: "0",
+    rating: 4
   };
 
   // Deletes ALL existing entries

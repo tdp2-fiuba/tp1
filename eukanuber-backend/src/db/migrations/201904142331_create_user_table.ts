@@ -9,10 +9,16 @@ export async function up(knex: Knex): Promise<any> {
       .primary()
       .defaultTo(knex.raw("uuid_generate_v4()"));
 
-    tableBuilder.string("userType").notNullable();
+    tableBuilder.string("fbId").notNullable();
     tableBuilder.string("firstName").notNullable();
     tableBuilder.string("lastName").notNullable();
+
+    tableBuilder.string("userType").notNullable();
     tableBuilder.integer("rating").defaultTo(-1);
+    tableBuilder.integer("state").defaultTo(0);
+
+    tableBuilder.boolean("loggedIn").defaultTo(false);
+
     tableBuilder.string("position").notNullable();
   });
 }
