@@ -72,7 +72,7 @@ async function createUser(newUser: ICreateUserData) {
 
     await transaction('userMedia').insert(fields);
     await transaction.commit();
-    return userId;
+    return { userId: userId, ...user } as any;
   } catch (err) {
     transaction.rollback();
     console.error(`User creation transaction aborted!"${err}"`);

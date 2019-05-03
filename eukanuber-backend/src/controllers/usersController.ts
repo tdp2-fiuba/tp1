@@ -35,10 +35,7 @@ async function getUserById(req: Express.Request, res: Express.Response) {
       .json(user)
       .send();
   } catch (e) {
-    res
-      .status(500)
-      .json({ message: e.message })
-      .send();
+    res.sendStatus(500).json({ message: e });
   }
 }
 
@@ -143,8 +140,8 @@ async function createUser(req: Express.Request, res: Express.Response) {
 
     //TODO: esto de la response x parametro es un workaround porque no esta devolviendo el id sino... no se espera a commitear
     //la trx a pesar de usar awaits.
-    const id = await userService.createUser(userData);
-    res.send({ userId: id });
+    const user = await userService.createUser(userData);
+    res.send(user);
   } catch (e) {
     res
       .status(500)
