@@ -185,10 +185,11 @@ async function isUserLogged(id: string) {
     return false;
   }
 }
-
-interface FacebookData {
-  data: [];
-  summary: { total_count: number };
+async function deleteUser(fbId: string) {
+  return await db
+    .table('users')
+    .del()
+    .where({ fbId: fbId });
 }
 
 async function validateFacebookAccount(id: string) {
@@ -208,4 +209,5 @@ export default {
   isUserLogged,
   getUserPosition,
   updateUserPosition,
+  deleteUser,
 };

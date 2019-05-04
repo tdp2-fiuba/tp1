@@ -134,6 +134,21 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
   }
 }
 
+async function deleteUser(req: Express.Request, res: Express.Response) {
+  try {
+    const fbId = req.params.fbId;
+    console.log('DELETE USER ' + fbId);
+    let result = await userService.deleteUser(fbId);
+    res
+      .status(201)
+      .json({ message: 'SUCCESS' })
+      .send();
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+}
+
 async function createUser(req: Express.Request, res: Express.Response) {
   try {
     const data = req.body;
@@ -212,4 +227,5 @@ export default {
   updateUserPosition,
   userLogin,
   userLogout,
+  deleteUser,
 };

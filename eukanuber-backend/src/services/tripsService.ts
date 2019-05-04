@@ -102,7 +102,7 @@ async function calculateTripData(routes: string, pets: string[]) {
 async function computeTripCost(distance: number, pets: string[]) {
   const distanceMultiplier = 0.2;
   const defaultTimeSlotPrice = 20;
-  const petSizeMultiplier: { [name: string]: number } = { S: 0.1, M: 0.3, L: 0.5 };
+  /*const petSizeMultiplier: { [name: string]: number } = { S: 0.1, M: 0.3, L: 0.5 };
 
   const now = Date.now();
 
@@ -121,9 +121,9 @@ async function computeTripCost(distance: number, pets: string[]) {
     timeSlotCost = defaultTimeSlotPrice;
   }
 
-  let costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);
+  let costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);*/
 
-  return distance * distanceMultiplier + costPets + timeSlotCost;
+  return distance * distanceMultiplier; // + costPets + timeSlotCost;
 }
 
 async function getRoute(origin: string, destination: string) {

@@ -17,6 +17,7 @@ app.put('/users', usersController.updateUser);
 app.get('/users/position', usersController.getUserPosition);
 app.put('/users/position', usersController.updateUserPosition);
 app.post('/users/login/:fbId', usersController.userLogin);
+app.delete('/users/:fbId', usersController.deleteUser);
 app.post('/users/logout', usersController.userLogout);
 
 // Trips endpoints
