@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:text="Registro de conductor - Datos personales"
-                android:textSize="24dp" />
+                android:textSize="22dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -95,6 +95,7 @@
                 android:onClick="goRegisterDriverCar"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:text="Siguiente" />
 
 

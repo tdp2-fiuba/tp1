@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
+import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
@@ -47,4 +48,7 @@ public interface BackendService {
 
     @GET("users/{userId}")
     Call<User> getUser(@Path("userId") String userId);
+
+    @POST("users/login/{fbId}")
+    Call<LoginResponse> loginUser(@Path("fbId") String fbId);
 }

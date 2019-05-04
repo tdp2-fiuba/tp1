@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -12,26 +16,227 @@
             android:paddingLeft="20dp"
             android:paddingTop="70dp"
             android:paddingRight="20dp">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Registro de conductor - Datos del Vehiculo"
-                android:textSize="24dp"
-                android:layout_marginBottom="30dp"
-                />
+                android:layout_marginBottom="20dp"
+                android:text="Registro de conductor - Datos del vehículo"
+                android:textSize="22dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Marca"
+                android:textSize="16dp" />
+
+            <EditText
+                android:id="@+id/inputRegisterCarBrand"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Ingrese la marca"
+                android:paddingRight="40dp"
+                android:singleLine="true"
+                android:textSize="18dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Modelo"
+                android:textSize="16dp" />
+
+            <EditText
+                android:id="@+id/inputRegisterCarModel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Ingrese el modelo"
+                android:paddingRight="40dp"
+                android:singleLine="true"
+                android:textSize="18dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Patente"
+                android:textSize="16dp" />
+
+            <EditText
+                android:id="@+id/inputRegisterCarPatent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Ingrese la patente"
+                android:paddingRight="40dp"
+                android:singleLine="true"
+                android:textSize="18dp" />
+
+            <LinearLayout
+                android:id="@+id/carImageLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="12"
+                android:layout_marginTop="15dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="8">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:textSize="16dp"
+                        android:text="Imagen frontal vehículo"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSecondary"
+                        android:onClick="loadCarImage"
+                        android:src="@drawable/ic_camera_white" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:id="@+id/carImageViewButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSuccess"
+                        android:onClick="viewCarImage"
+                        android:src="@drawable/ic_view_white" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:id="@+id/licenseImageLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="12">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="8">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:textSize="16dp"
+                        android:text="Imagen licencia de conducir"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSecondary"
+                        android:onClick="loadLicenseImage"
+                        android:src="@drawable/ic_camera_white" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:id="@+id/licenseImageViewButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSuccess"
+                        android:onClick="viewLicenseImage"
+                        android:src="@drawable/ic_view_white" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/insuranceImageLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="12">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="8">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:textSize="16dp"
+                        android:text="Imagen seguro"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSecondary"
+                        android:onClick="loadInsuranceImage"
+                        android:src="@drawable/ic_camera_white" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+                    <ImageButton
+                        android:id="@+id/insuranceImageViewButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:padding="5dp"
+                        android:background="@color/colorSuccess"
+                        android:onClick="viewInsuranceImage"
+                        android:src="@drawable/ic_view_white" />
+                </LinearLayout>
+            </LinearLayout>
+
 
             <Button
                 android:id="@+id/buttonSubmitRegisterDriver"
                 style="@style/AppTheme.Button.Success"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
                 android:onClick="submitRegisterDriver"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:text="Registrar" />
+                android:layout_marginBottom="20dp"
+                android:text="Registrarme" />
 
 
         </LinearLayout>
-
+    </ScrollView>
 
 </LinearLayout>

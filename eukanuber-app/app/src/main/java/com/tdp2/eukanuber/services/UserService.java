@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
+import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
@@ -34,5 +35,15 @@ public class UserService {
 
         BackendService postService = retrofit.create(BackendService.class);
         return postService.getUser(userId);
+    }
+
+    public Call<LoginResponse> login(String fbId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.loginUser(fbId);
     }
 }

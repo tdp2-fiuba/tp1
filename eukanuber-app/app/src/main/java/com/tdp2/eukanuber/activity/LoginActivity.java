@@ -1,10 +1,12 @@
 package com.tdp2.eukanuber.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,6 +18,18 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.NewTripRequest;
+import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.services.TripService;
+import com.tdp2.eukanuber.services.UserService;
+
+import java.net.HttpURLConnection;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.HTTP;
 
 public class LoginActivity extends AppCompatActivity {
     CallbackManager callbackManager;
@@ -78,9 +92,36 @@ public class LoginActivity extends AppCompatActivity {
 
     private void appLoginAction(String fbTokenKey, String fbUserId) {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-        AppSecurityManager.login(settings, fbTokenKey, fbUserId, "APP_TOKEN");
-        Intent intent = new Intent(mLoginActivity, RegisterDriverUserActivity.class);
-        startActivity(intent);
+        UserService userService = new UserService();
+
+        Call<LoginResponse> call = userService.login(fbUserId);
+        ProgressDialog dialog = new ProgressDialog(LoginActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+              /*  dialog.dismiss();
+                if(response.code() == HttpURLConnection.HTTP_CONFLICT){
+                    showMessage("Ir a registro");
+                    return;
+                }*/
+                LoginResponse loginResponse = response.body();
+                AppSecurityManager.login(settings, fbTokenKey, fbUserId, "APP_TOKEN");
+                Intent intent = new Intent(mLoginActivity, RegisterSelectTypeActivity.class);
+                startActivity(intent);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                dialog.dismiss();
+                Log.v("Login Error", t.getMessage());
+                showMessage("Ha ocurrido un error al solicitar el viaje.");
+            }
+        });
+
     }
 
 
