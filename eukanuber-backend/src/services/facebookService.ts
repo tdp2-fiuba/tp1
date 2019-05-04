@@ -1,19 +1,19 @@
-import axios from 'axios';
+import axios from "axios";
 
-const url = 'https://graph.facebook.com/v3.3/';
+const url = "https://graph.facebook.com/v3.3/";
 
-interface FBData {
+interface IFBData {
   id: string;
   friends: {
-    data: Array<string>;
+    data: string[];
     summary: {
       total_count: number;
     };
   };
 }
 
-async function getFacebookFriendCount(fbAccessToken: string) {
-  const result = await axios.get(`${url}/me?fields=id,friends`, { headers: { Authorization: 'Bearer ' + fbAccessToken } });
+async function getFacebookFriendCount(fbAccessToken: string): Promise<IFBData> {
+  const result = await axios.get(`${url}/me?fields=id,friends`, { headers: { Authorization: "Bearer " + fbAccessToken } });
 
   if (result.status !== 200) {
     throw new Error(result.statusText);
@@ -23,11 +23,9 @@ async function getFacebookFriendCount(fbAccessToken: string) {
     throw new Error("Google API didn't return data when requesting coordinates");
   }
 
-  let fbData: FBData = { ...result.data };
-
-  return fbData;
+  return { ...result.data };
 }
 
 export default {
-  getFacebookFriendCount,
+  getFacebookFriendCount
 };

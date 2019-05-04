@@ -93,8 +93,9 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
 
 async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: Express.Response) {
   try {
-    let signature, userId;
-    if (req.headers.authorization == undefined) {
+    let userId = "";
+
+    if (req.headers.authorization === undefined) {
       res
         .status(403)
         .json({ message: "Debe proveer credenciales de autenticación!" })
@@ -104,8 +105,8 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
 
     const token = req.headers.authorization.replace("Bearer ", "");
     try {
-      signature = jwt.verify(token, secret);
-      userId = signature.id;
+      const signature = jwt.verify(token, secret);
+      userId = (signature as any).id;
       console.log("DECODE USER ID" + userId);
     } catch (e) {
       res
@@ -137,8 +138,8 @@ async function deleteUser(req: Express.Request, res: Express.Response) {
   try {
     const fbId = req.params.fbId;
     console.log("DELETE USER " + fbId);
-    const result = await userService.deleteUser(fbId);
-    res
+    await userService.deleteUser(fbId);
+    return res
       .status(201)
       .json({ message: "SUCCESS" })
       .send();
@@ -152,9 +153,8 @@ async function createUser(req: Express.Request, res: Express.Response) {
   try {
     const data = req.body;
     const userData: ICreateUserData = req.body;
-    userData.images = data.images.map(function(img: any) {
-      return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file) };
-    });
+    userData.images = data.images.map((img: any) => ({ fileName: img.fileName, file: ImgBase64StringToBuffer(img.file) }));
+
     // TODO #2: if user is Passenger state should be valid if fb account check successful
     // otherwise user approval should remain as PENDING.
 

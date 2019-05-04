@@ -1,26 +1,26 @@
-import Knex from 'knex';
-import db from '../db/db';
-import { ICreateTripData, ITrip, TripStatus } from '../models';
-import googleMapsService from './googleMapsService';
+import Knex from "knex";
+import db from "../db/db";
+import { ICreateTripData, ITrip, TripStatus } from "../models";
+import googleMapsService from "./googleMapsService";
 
 async function getTrips(status: TripStatus) {
   const trips = await db
-    .table('trips')
-    .orderBy('createdDate', 'desc')
+    .table("trips")
+    .orderBy("createdDate", "desc")
     .modify((queryBuilder: Knex.QueryBuilder) => {
       if (status) {
-        queryBuilder.where('status', status);
+        queryBuilder.where("status", status);
       }
     })
     .select();
 
-  return trips.map((trip: any) => ({ ...trip, pets: trip.pets.split(',') }));
+  return trips.map((trip: any) => ({ ...trip, pets: trip.pets.split(",") }));
 }
 
 async function getTripById(id: string): Promise<ITrip> {
   const result = await db
-    .table('trips')
-    .where('id', id)
+    .table("trips")
+    .where("id", id)
     .select()
     .first();
 
@@ -30,7 +30,7 @@ async function getTripById(id: string): Promise<ITrip> {
 
   return {
     ...result,
-    pets: result.pets.split(','),
+    pets: result.pets.split(",")
   };
 }
 
@@ -43,31 +43,31 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
 
   const newTrip = {
     ...trip,
-    pets: trip.pets.join(',').replace(/\s/g, ''),
+    pets: trip.pets.join(",").replace(/\s/g, ""),
     originCoordinates,
     destinationCoordinates,
-    clientId: 'dummyClientId', // TODO: remove
+    clientId: "dummyClientId", // TODO: remove
     status: TripStatus.PENDING,
     createdDate: new Date().toISOString(),
     ...routeData,
-    routes,
+    routes
   };
 
   const tripCreated = await db
     .insert(newTrip)
-    .into('trips')
-    .returning('*');
+    .into("trips")
+    .returning("*");
 
   return {
     ...tripCreated[0],
-    pets: trip.pets,
+    pets: trip.pets
   };
 }
 
 async function updateTripStatus(id: string, status: TripStatus) {
   await db
-    .table('trips')
-    .where('id', id)
+    .table("trips")
+    .where("id", id)
     .update({ status });
 
   return await this.getTripById(id);
@@ -81,8 +81,8 @@ async function assignDriverToTrip(id: string, driverId: string) {
   }
 
   await db
-    .table('trips')
-    .where('id', id)
+    .table("trips")
+    .where("id", id)
     .update({ driverId, status: TripStatus.DRIVER_GOING_ORIGIN });
 
   return await getTripById(id);
@@ -95,7 +95,7 @@ async function calculateTripData(routes: string, pets: string[]) {
   return {
     distance: route.legs[0].distance.text,
     duration: route.legs[0].duration.text,
-    price: `$${price.toFixed(2)}`,
+    price: `$${price.toFixed(2)}`
   };
 }
 
@@ -106,8 +106,8 @@ async function computeTripCost(distance: number, pets: string[]) {
 
   const now = Date.now();
 
-  var minutes = 1000 * 60;
-  var hours = minutes * 60;
+  const minutes = 1000 * 60;
+  const hours = minutes * 60;
 
   let timeSlotCost: number = 1; /*await db
     .table('timeSlots')
@@ -122,7 +122,7 @@ async function computeTripCost(distance: number, pets: string[]) {
     timeSlotCost = defaultTimeSlotPrice;
   }
 
-  let costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);
+  const costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);
 
   return distance * distanceMultiplier; // + costPets + timeSlotCost;
 }
@@ -135,10 +135,10 @@ async function getRoute(origin: string, destination: string) {
 
 async function getTripByUserAndStatus(userId: string, tripSatus: number) {
   const trip = await db
-    .table('trips')
-    .where('clientId', userId)
-    .orWhere('driverId', userId)
-    .andWhere('status', tripSatus)
+    .table("trips")
+    .where("clientId", userId)
+    .orWhere("driverId", userId)
+    .andWhere("status", tripSatus)
     .select()
     .first();
 
@@ -156,5 +156,5 @@ export default {
   updateTripStatus,
   assignDriverToTrip,
   getRoute,
-  getTripByUserAndStatus,
+  getTripByUserAndStatus
 };
