@@ -14,6 +14,7 @@ app.get('/users/all', usersController.getUsers);
 app.post('/users/register', usersController.createUser);
 app.get('/users', usersController.getUserById);
 app.put('/users', usersController.updateUser);
+app.get('/users/activeTripId', usersController.activeTripId);
 app.get('/users/position', usersController.getUserPosition);
 app.put('/users/position', usersController.updateUserPosition);
 app.post('/users/login/:fbId', usersController.userLogin);
