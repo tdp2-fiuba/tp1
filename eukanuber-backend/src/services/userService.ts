@@ -19,6 +19,7 @@ async function getUsers() {
 
 async function getUserById(id: string) {
   let users = await db('users')
+    .leftJoin('cars', 'users.id', '=', 'cars.userId')
     .innerJoin('userMedia', 'users.id', '=', 'userMedia.userId')
     .where('users.id', id)
     .select();
@@ -40,6 +41,10 @@ async function getUserById(id: string) {
     images: userImages,
     loggedIn: userData.loggedIn,
   };
+
+  if (user.userType.toLowerCase() == 'driver') {
+    return { ...user, car: { model: userData.model, brand: userData.brand, plateNumber: userData.plateNumber } };
+  }
 
   return user;
 }
@@ -89,8 +94,19 @@ async function createUser(newUser: ICreateUserData) {
       .returning('id');
     const userId = userInsertResult[0];
     const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.file }));
-
     await transaction('userMedia').insert(fields);
+
+    if (newUser.userType.toLowerCase() == 'driver') {
+      if (!newUser.car) {
+        throw new Error('Debe registrar un vehículo!');
+      }
+      const car = {
+        ...newUser.car,
+        userId,
+      };
+      await transaction('cars').insert(car);
+    }
+
     await transaction.commit();
     return { userId: userId, ...user } as any;
   } catch (err) {
