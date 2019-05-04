@@ -34,13 +34,14 @@ import retrofit2.http.HTTP;
 public class LoginActivity extends AppCompatActivity {
     CallbackManager callbackManager;
     Activity mLoginActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mLoginActivity = this;
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-        if(AppSecurityManager.isUserLogged(settings)){
+        if (AppSecurityManager.isUserLogged(settings)) {
             Intent intent = new Intent(this, HomeClientActivity.class);
             startActivity(intent);
             return;
@@ -69,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
@@ -76,13 +78,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
-
     public void completeLoginAction(View view) {
         LoginButton loginButton = findViewById(R.id.login_button);
         AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
         boolean isLoggedInFacebook = accessTokenFacebook != null && !accessTokenFacebook.isExpired();
-        if(!isLoggedInFacebook){
+        if (!isLoggedInFacebook) {
             loginButton.performClick();
             return;
         }
@@ -101,24 +101,25 @@ public class LoginActivity extends AppCompatActivity {
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-              /*  dialog.dismiss();
-                if(response.code() == HttpURLConnection.HTTP_CONFLICT){
-                    showMessage("Ir a registro");
+                dialog.dismiss();
+                if (response.code() == HttpURLConnection.HTTP_CONFLICT) {
+                    Intent intent = new Intent(mLoginActivity, RegisterSelectTypeActivity.class);
+                    startActivity(intent);
                     return;
-                }*/
+                }
                 LoginResponse loginResponse = response.body();
-                AppSecurityManager.login(settings, fbTokenKey, fbUserId, "APP_TOKEN");
-                Intent intent = new Intent(mLoginActivity, RegisterSelectTypeActivity.class);
+                AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken());
+                /* TODO redirigir segun tipo de usuario */
+                Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
                 startActivity(intent);
-
-
+                return;
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 dialog.dismiss();
                 Log.v("Login Error", t.getMessage());
-                showMessage("Ha ocurrido un error al solicitar el viaje.");
+                showMessage("Ha ocurrido un error. Intente luego.");
             }
         });
 
@@ -132,6 +133,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.LENGTH_LONG
         ).show();
     }
+
     @Override
     public void onBackPressed() {
         finishAffinity();

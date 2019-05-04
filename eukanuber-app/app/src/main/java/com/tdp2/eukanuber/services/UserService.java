@@ -46,4 +46,14 @@ public class UserService {
         BackendService postService = retrofit.create(BackendService.class);
         return postService.loginUser(fbId);
     }
+
+    public Call<RegisterResponse> login(String fbId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.loginUser(fbId);
+    }
 }

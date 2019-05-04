@@ -1,0 +1,26 @@
+package com.tdp2.eukanuber.model;
+
+import java.io.Serializable;
+import java.util.List;
+
+public class UserImage implements Serializable {
+    private String fileName;
+    private String file;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+}
+

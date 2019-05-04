@@ -1,31 +1,28 @@
 package com.tdp2.eukanuber.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class User implements Serializable {
-    public static final String PROFILE_IMAGE_NAME = "profileImage";
-    private String id;
-    private String userType;
+public class UserRegisterRequest implements Serializable {
     private String firstName;
     private String lastName;
+    private String userType;
     private String position;
+    private String fbId;
+    private String fbAccessToken;
     private List<UserImage> images;
 
-    public String getId() {
-        return id;
+    public UserRegisterRequest() {
+        this.images = new ArrayList<>();
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getFbAccessToken() {
+        return fbAccessToken;
     }
 
-    public String getUserType() {
-        return userType;
-    }
-
-    public void setUserType(String userType) {
-        this.userType = userType;
+    public void setFbAccessToken(String fbAccessToken) {
+        this.fbAccessToken = fbAccessToken;
     }
 
     public String getFirstName() {
@@ -44,12 +41,28 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
     public String getPosition() {
         return position;
     }
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public String getFbId() {
+        return fbId;
+    }
+
+    public void setFbId(String fbId) {
+        this.fbId = fbId;
     }
 
     public List<UserImage> getImages() {
@@ -59,4 +72,9 @@ public class User implements Serializable {
     public void setImages(List<UserImage> images) {
         this.images = images;
     }
+
+    public void addImage(UserImage image){
+        this.images.add(image);
+    }
 }
+
