@@ -22,7 +22,10 @@ async function getUsers(req: Express.Request, res: Express.Response) {
 
 async function getUserById(req: Express.Request, res: Express.Response) {
   try {
-    const userId = req.params.id;
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
+      return;
+    }
     let user = await userService.getUserById(userId);
     if (user == undefined) {
       res
@@ -41,11 +44,10 @@ async function getUserById(req: Express.Request, res: Express.Response) {
 
 async function updateUser(req: Express.Request, res: Express.Response) {
   try {
-    const validated = await validateUserLoggedWithCredentials(req, res);
-    if (!validated) {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
       return;
     }
-    const userId = req.params.id;
     const userData: Partial<IUser> = req.body;
     const updatedUser = await userService.updateUser(userId, userData);
     res.status(201).json(updatedUser);
@@ -59,11 +61,10 @@ async function updateUser(req: Express.Request, res: Express.Response) {
 
 async function getUserPosition(req: Express.Request, res: Express.Response) {
   try {
-    const validated = await validateUserLoggedWithCredentials(req, res);
-    if (!validated) {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
       return;
     }
-    const userId = req.params.id;
     const userPos = await userService.getUserPosition(userId);
     res.status(200).json(userPos);
   } catch (e) {
@@ -76,11 +77,10 @@ async function getUserPosition(req: Express.Request, res: Express.Response) {
 
 async function updateUserPosition(req: Express.Request, res: Express.Response) {
   try {
-    const validated = await validateUserLoggedWithCredentials(req, res);
-    if (!validated) {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
       return;
     }
-    const userId = req.params.id;
     const position = req.body;
     const user = await userService.updateUserPosition(userId, position);
     res.status(201).json(user);
@@ -92,38 +92,45 @@ async function updateUserPosition(req: Express.Request, res: Express.Response) {
   }
 }
 
-async function validateUserLoggedWithCredentials(req: Express.Request, res: Express.Response) {
+async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: Express.Response) {
   try {
+    let signature, userId;
     if (req.headers.authorization == undefined) {
       res
         .status(403)
         .json({ message: 'Must provide authorization credentials!' })
         .send();
-      return false;
+      return '';
     }
-    const userId = req.params.id;
+
     const token = req.headers.authorization.replace('Bearer ', '');
-    jwt.verify(token, secret, function(err: any, user: any) {
-      if (err || user.id != userId) {
-        res
-          .status(401)
-          .json({ message: 'Invalid credentials!' })
-          .send();
-        return false;
-      }
-    });
+    try {
+      signature = jwt.verify(token, secret);
+      userId = signature.id;
+      console.log('DECODE USER ID' + userId);
+    } catch (e) {
+      res
+        .status(401)
+        .json({ message: 'Invalid credentials!' })
+        .send();
+      return '';
+    }
     const isUserLoggedIn = await userService.isUserLogged(userId);
-    //console.log("LOGGED IN " + isUserLoggedIn);
+    console.log('CHECK USER LOGGED IN ' + isUserLoggedIn);
     if (!isUserLoggedIn) {
       res
         .status(403)
         .json({ message: 'User must be logged in to perform this operation!' })
         .send();
-      return false;
+      return '';
     }
-    return true;
+    return userId;
   } catch (e) {
-    return false;
+    res
+      .status(500)
+      .json({ message: e.message })
+      .send();
+    return '';
   }
 }
 
@@ -134,12 +141,10 @@ async function createUser(req: Express.Request, res: Express.Response) {
     userData.images = data.images.map(function(img: any) {
       return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file) };
     });
-    //TODO: validate fb account
     //TODO #2: if user is Passenger state should be valid if fb account check successful
     //otherwise user approval should remain as PENDING.
 
-    //TODO: esto de la response x parametro es un workaround porque no esta devolviendo el id sino... no se espera a commitear
-    //la trx a pesar de usar awaits.
+    //Create user will create a new user if facebook account is valid
     const user = await userService.createUser(userData);
     res.send(user);
   } catch (e) {
@@ -156,11 +161,20 @@ function ImgBase64StringToBuffer(img: string) {
 
 async function userLogin(req: Express.Request, res: Express.Response) {
   try {
-    const id = req.params.id;
-    const data = { id: id, name: req.body.firstName, lastName: req.body.lastName, fbId: req.body.fbId };
-    //TODO: check user has registered.
-    const token = jwt.sign(data, secret, {});
-    await userService.userLogin(id);
+    console.log('LOGIN');
+    const fbId = req.params.fbId;
+    const userId = await userService.getUserByFbId(fbId);
+
+    if (!userId || userId == undefined) {
+      //return 409 if user was not found:
+      res.status(409).send({ message: 'User not found! Please register!' });
+      return;
+    }
+    //User exists, so generate token and send it:
+    const data = { id: userId };
+    const token = jwt.sign(data, secret);
+    console.log('USER LOGGED IN ' + userId);
+    await userService.userLogin(userId);
 
     res.status(200).send({ token });
   } catch (e) {
@@ -173,12 +187,13 @@ async function userLogin(req: Express.Request, res: Express.Response) {
 
 async function userLogout(req: Express.Request, res: Express.Response) {
   try {
-    const validated = await validateUserLoggedWithCredentials(req, res);
-    if (!validated) {
+    console.log('LOGOUT');
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
       return;
     }
-    const id = req.params.id;
-    await userService.userLogout(id);
+    await userService.userLogout(userId);
+    console.log('USER LOGGED OUT ' + userId);
     res.status(200).send();
   } catch (e) {
     res

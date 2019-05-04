@@ -44,6 +44,24 @@ async function getUserById(id: string) {
   return user;
 }
 
+async function getUserByFbId(fbId: string) {
+  try {
+    let user = await db
+      .table('users')
+      .where('fbId', fbId)
+      .select()
+      .first();
+
+    if (!user) {
+      return undefined;
+    }
+
+    return user.id;
+  } catch (e) {
+    return undefined;
+  }
+}
+
 const createTransaction = () => new Promise(resolve => db.transaction(resolve));
 
 async function createUser(newUser: ICreateUserData) {
@@ -131,14 +149,10 @@ async function updateUserPosition(id: string, pos: IPosition) {
 
 async function userLogin(id: string) {
   try {
-    const updateData = {
-      loggedIn: true,
-    };
-
     await db
       .table('users')
       .where('id', id)
-      .update(updateData);
+      .update({ loggedIn: true });
 
     return true;
   } catch (e) {
@@ -165,6 +179,7 @@ async function userLogout(id: string) {
 
 async function isUserLogged(id: string) {
   try {
+    console.log(`CHECK USER "${id}" LOGGED IN`);
     return await getUserById(id).then(result => result.loggedIn);
   } catch (e) {
     return false;
@@ -185,6 +200,7 @@ async function validateFacebookAccount(id: string) {
 export default {
   getUsers,
   getUserById,
+  getUserByFbId,
   createUser,
   updateUser,
   userLogin,
