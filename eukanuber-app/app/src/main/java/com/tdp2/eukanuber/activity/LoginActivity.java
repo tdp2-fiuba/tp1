@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
     private void appLoginAction(String fbTokenKey, String fbUserId) {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
         AppSecurityManager.login(settings, fbTokenKey, fbUserId, "APP_TOKEN");
-        Intent intent = new Intent(mLoginActivity, RegisterClientActivity.class);
+        Intent intent = new Intent(mLoginActivity, RegisterDriverUserActivity.class);
         startActivity(intent);
     }
 
