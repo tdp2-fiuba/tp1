@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,12 +20,20 @@ import com.facebook.GraphRequest;
 import com.google.gson.JsonObject;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserImage;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
+import com.tdp2.eukanuber.services.UserService;
 
 import java.io.ByteArrayOutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterClientActivity extends BaseActivity {
     Activity mActivity;
@@ -113,16 +123,55 @@ public class RegisterClientActivity extends BaseActivity {
         userRegisterRequest.setFbAccessToken(accessTokenFacebook.getToken());
         userRegisterRequest.setFirstName(name.getText().toString());
         userRegisterRequest.setLastName(lastname.getText().toString());
-        UserImage profileImage = new UserImage();
-        profileImage.setFile(User.PROFILE_IMAGE_NAME);
+        userRegisterRequest.setUserType(User.USER_TYPE_CLIENT);
+        userRegisterRequest.setPosition("");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmapImageProfile.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
         String profileImageB64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
-        profileImage.setFileName(profileImageB64);
+        UserImage profileImage = new UserImage();
+        profileImage.setFileName(User.PROFILE_IMAGE_NAME);
+        profileImage.setFile(profileImageB64);
         userRegisterRequest.addImage(profileImage);
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        UserService userService = new UserService(this);
+
+        Call<LoginResponse> call = userService.register(userRegisterRequest);
+        ProgressDialog dialog = new ProgressDialog(RegisterClientActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                dialog.dismiss();
+                if (response.code() == HttpURLConnection.HTTP_CONFLICT ||
+                        response.code() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                    showMessage(response.message());
+                    return;
+                }
+                LoginResponse loginResponse = response.body();
+                AppSecurityManager.login(settings, userRegisterRequest.getFbAccessToken(), userRegisterRequest.getFbId(), loginResponse.getToken(), loginResponse.getUser());
+                if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
+                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(mActivity, HomeClientActivity.class);
+                    startActivity(intent);
+                }
+                return;
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                dialog.dismiss();
+                Log.v("Register Error", t.getMessage());
+                showMessage("Ha ocurrido un error. Intente luego.");
+            }
+        });
+
 
     }
+
     public void showMessage(String message) {
         Toast.makeText(
                 this,

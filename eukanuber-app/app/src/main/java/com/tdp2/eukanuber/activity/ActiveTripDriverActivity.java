@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.PolyUtil;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.MapRoute;
@@ -50,11 +52,19 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     private LocationManager locationManager;
     private Marker markerCar;
     private Activity mActivity;
+    private User userLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active_trip_driver);
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        userLogged = AppSecurityManager.getUserLogged(settings);
+        if(userLogged == null){
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return;
+        }
         this.createMenu();
         mActivity = this;
         Intent intent = getIntent();
@@ -67,7 +77,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     }
 
     private void initDriverRoute() {
-        TripService tripService = new TripService();
+        TripService tripService = new TripService(mActivity);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -151,8 +161,8 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     private void refreshDriverPosition(LatLng position) {
 
         UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
-        UserService userService = new UserService();
-        Call<User> call = userService.updatePositionUser(HomeDriverActivity.driverId, updateUserPositionRequest);
+        UserService userService = new UserService(this);
+        Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -179,7 +189,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         buttonStatusStart.setOnClickListener(v -> {
             hideStatus();
             UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.IN_TRAVEL.ordinal());
-            TripService tripService = new TripService();
+            TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
             call.enqueue(new Callback<Trip>() {
                 @Override
@@ -209,7 +219,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         showStatus();
         buttonStatusFinish.setOnClickListener(v -> {
             UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.ARRIVED_DESTINATION.ordinal());
-            TripService tripService = new TripService();
+            TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
             call.enqueue(new Callback<Trip>() {
                 @Override

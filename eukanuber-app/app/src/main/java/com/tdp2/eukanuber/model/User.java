@@ -5,6 +5,12 @@ import java.util.List;
 
 public class User implements Serializable {
     public static final String PROFILE_IMAGE_NAME = "profileImage";
+    public static final String CAR_IMAGE_NAME = "carPicture";
+    public static final String LICENSE_IMAGE_NAME = "licensePicture";
+    public static final String INSURANCE_IMAGE_NAME = "insurancePicture";
+    public static final String USER_TYPE_CLIENT = "Client";
+    public static final String USER_TYPE_DRIVER = "Driver";
+
     private String id;
     private String userType;
     private String firstName;

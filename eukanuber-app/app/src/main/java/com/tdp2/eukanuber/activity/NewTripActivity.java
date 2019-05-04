@@ -274,7 +274,7 @@ public class NewTripActivity extends SecureActivity implements
                 Toast.makeText(this, "Origen y destino no pueden ser iguales",Toast.LENGTH_SHORT).show();
                 return;
             }
-            TripService tripService = new TripService();
+            TripService tripService = new TripService(this);
             Call<Trip> call = tripService.create(newTripRequest);
             ProgressDialog dialog = new ProgressDialog(NewTripActivity.this);
             dialog.setMessage("Espere un momento por favor");

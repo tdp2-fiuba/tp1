@@ -9,6 +9,7 @@ import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserRegisterRequest;
 
 import java.util.List;
 
@@ -21,7 +22,9 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface BackendService {
-    String API_PATH = "https://eukanuber-backend.herokuapp.com/";
+
+    String API_PATH = "http://10.0.2.2:3000/";
+    //String API_PATH = "https://eukanuber-backend.herokuapp.com/";
 
     @GET("trips")
     Call<List<Trip>> getAll(@Query("status") String status);
@@ -43,12 +46,15 @@ public interface BackendService {
     Call<MapRoute> getRoute(@Body GetRouteRequest getRouteRequest);
 
     // Users
-    @PUT("users/{userId}/position")
-    Call<User> updatePositionUser(@Path("userId") String tripId, @Body UpdateUserPositionRequest updateUserPositionRequest);
+    @PUT("users/position")
+    Call<User> updatePositionUser(@Body UpdateUserPositionRequest updateUserPositionRequest);
 
-    @GET("users/{userId}")
-    Call<User> getUser(@Path("userId") String userId);
+    @GET("users/")
+    Call<User> getUser();
 
     @POST("users/login/{fbId}")
     Call<LoginResponse> loginUser(@Path("fbId") String fbId);
+
+    @POST("users/register")
+    Call<LoginResponse> registerUser(@Body UserRegisterRequest userRegisterRequest);
 }

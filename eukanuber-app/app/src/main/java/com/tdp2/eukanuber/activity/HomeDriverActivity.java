@@ -3,6 +3,7 @@ package com.tdp2.eukanuber.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.Trip;
@@ -52,7 +54,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     private Runnable runnableRequestTrips;
     private Integer delayRequestTrips;
     private Boolean popupOpen;
-    public static final String driverId = "981db688-ddf0-404a-8461-50fb8675a9cc";
+    private User userLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,13 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         mActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_driver);
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        userLogged = AppSecurityManager.getUserLogged(settings);
+        if (userLogged == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return;
+        }
         this.createMenu();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -75,7 +84,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void run() {
                 if (!popupOpen) {
-                    TripService tripService = new TripService();
+                    TripService tripService = new TripService(mActivity);
                     Call<List<Trip>> call = tripService.getAll(String.valueOf(TripStatus.CLIENT_ACCEPTED.ordinal()));
                     call.enqueue(new Callback<List<Trip>>() {
                         @Override
@@ -99,8 +108,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                         }
                     });
                 }
-
-
                 handlerRequestTrips.postDelayed(this, delayRequestTrips);
 
             }
@@ -136,8 +143,8 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             showMessage("No ha aceptado el viaje.");
         });
         buttonConfirm.setOnClickListener(view -> {
-            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest(driverId);
-            TripService tripService = new TripService();
+            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest(userLogged.getId());
+            TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.assignDriverToTrip(trip.getId(), assignDriverToTripRequest);
             call.enqueue(new Callback<Trip>() {
                 @Override
@@ -148,7 +155,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     intentActiveTripDriver.putExtra("currentTrip", trip);
                     intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     showMessage("El viaje ha sido confirmado.");
-                    handlerRequestTrips.removeCallbacks(runnableRequestTrips);
                     startActivity(intentActiveTripDriver);
                 }
 
@@ -156,7 +162,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 public void onFailure(Call<Trip> call, Throwable t) {
                     popupWindow.dismiss();
                     popupOpen = false;
-                    // TODO: mostrar error de que el viaje ha sido tomado y/o seguir de largo
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
             });
@@ -222,14 +227,14 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         mapManager.setCurrentLocation();
         Location location = this.getLastKnownLocation();
 
-        if (location ==  null) {
+        if (location == null) {
             return;
         }
 
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
         UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
-        UserService userService = new UserService();
-        Call<User> call = userService.updatePositionUser(HomeDriverActivity.driverId, updateUserPositionRequest);
+        UserService userService = new UserService(this);
+        Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -268,7 +273,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             return null;
         }
 
-        LocationManager locationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = locationManager.getProviders(true);
         Location bestLocation = null;
 
@@ -287,8 +292,16 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
         return bestLocation;
     }
+
     @Override
     public void onBackPressed() {
         finishAffinity();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handlerRequestTrips.removeCallbacks(runnableRequestTrips);
+    }
+
 }

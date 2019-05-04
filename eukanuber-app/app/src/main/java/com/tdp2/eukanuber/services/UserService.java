@@ -1,5 +1,7 @@
 package com.tdp2.eukanuber.services;
 
+import android.content.Context;
+
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
@@ -9,6 +11,7 @@ import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserRegisterRequest;
 
 import java.util.List;
 
@@ -16,25 +19,31 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class UserService {
+public class UserService extends ClientService{
 
-    public Call<User> updatePositionUser(String userId, UpdateUserPositionRequest updateUserPositionRequest) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BackendService.API_PATH)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        BackendService postService = retrofit.create(BackendService.class);
-        return postService.updatePositionUser(userId, updateUserPositionRequest);
+    public UserService(Context context) {
+        super(context);
     }
-    public Call<User> getUser(String userId) {
+
+    public Call<User> updatePositionUser(UpdateUserPositionRequest updateUserPositionRequest) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         BackendService postService = retrofit.create(BackendService.class);
-        return postService.getUser(userId);
+        return postService.updatePositionUser(updateUserPositionRequest);
+    }
+    public Call<User> getUser() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.getUser();
     }
 
     public Call<LoginResponse> login(String fbId) {
@@ -47,13 +56,13 @@ public class UserService {
         return postService.loginUser(fbId);
     }
 
-    public Call<RegisterResponse> login(String fbId) {
+    public Call<LoginResponse> register(UserRegisterRequest userRegisterRequest) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         BackendService postService = retrofit.create(BackendService.class);
-        return postService.loginUser(fbId);
+        return postService.registerUser(userRegisterRequest);
     }
 }

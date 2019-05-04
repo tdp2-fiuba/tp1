@@ -1,18 +1,18 @@
 package com.tdp2.eukanuber.model;
 
 public class LoginResponse {
-    private String message;
+    private User user;
     private String token;
 
     public LoginResponse() {
     }
 
-    public String getMessage() {
-        return message;
+    public User getUser() {
+        return user;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getToken() {

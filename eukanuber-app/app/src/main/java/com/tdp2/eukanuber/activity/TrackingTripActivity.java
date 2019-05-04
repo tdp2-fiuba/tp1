@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -39,12 +40,13 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private Integer currentStatus;
     private Marker markerCar;
     private List<LatLng> driverPath;
-
+    private Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
         this.createMenu();
+        mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
         currentStatus = currentTrip.getStatus();
@@ -60,8 +62,8 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                UserService userService = new UserService();
-                Call<User> call = userService.getUser(currentTrip.getDriverId());
+                UserService userService = new UserService(mContext);
+                Call<User> call = userService.getUser();
                 call.enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
@@ -148,7 +150,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                TripService tripService = new TripService();
+                TripService tripService = new TripService(mContext);
                 Call<Trip> call = tripService.get(currentTrip.getId());
                 call.enqueue(new Callback<Trip>() {
                     @Override

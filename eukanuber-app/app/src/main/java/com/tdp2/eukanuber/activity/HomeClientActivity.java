@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -13,20 +14,33 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
+import com.tdp2.eukanuber.model.User;
 
 public class HomeClientActivity extends SecureActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
+    private User userLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_client);
+        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+        userLogged = AppSecurityManager.getUserLogged(settings);
+        if(userLogged == null){
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return;
+        }
         this.createMenu();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initClientHome();
+
+
     }
 
 

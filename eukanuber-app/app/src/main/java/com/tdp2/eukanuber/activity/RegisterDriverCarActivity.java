@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,28 +11,38 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.health.SystemHealthManager;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tdp2.eukanuber.R;
-
+import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserImage;
+import com.tdp2.eukanuber.model.UserRegisterRequest;
+import com.tdp2.eukanuber.services.UserService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterDriverCarActivity extends BaseActivity {
     File carPictureFile = null;
@@ -40,7 +51,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
     static final int REQUEST_TAKE_PHOTO_CAR = 1;
     static final int REQUEST_TAKE_PHOTO_LICENSE = 2;
     static final int REQUEST_TAKE_PHOTO_INSURANCE = 3;
-
+    Activity mActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +59,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mActivity = this;
         getSupportActionBar().setTitle("Registro Conductor");
         ImageButton carImageViewButton = findViewById(R.id.carImageViewButton);
         carImageViewButton.setVisibility(View.GONE);
@@ -291,9 +303,6 @@ public class RegisterDriverCarActivity extends BaseActivity {
             showMessage("La imagen del seguro es obligatoria");
             return;
         }
-        ProgressDialog dialog = new ProgressDialog(RegisterDriverCarActivity.this);
-        dialog.setMessage("Espere un momento por favor");
-        dialog.show();
         SharedPreferences settings = getSharedPreferences(RegisterDriverUserActivity.USER_REGISTER_SETTINGS, 0);
         String userRegisterStr = settings.getString("userRegister", null);
         JsonParser parser = new JsonParser();
@@ -301,9 +310,70 @@ public class RegisterDriverCarActivity extends BaseActivity {
         userRegister.addProperty("carBrand", carBrand.getText().toString());
         userRegister.addProperty("carModel", carModel.getText().toString());
         userRegister.addProperty("carPatent", carPatent.getText().toString());
-        userRegister.addProperty("carPicturePath", getBase64FromFile(carPictureFile));
-        userRegister.addProperty("licensePicturePath", getBase64FromFile(licensePictureFile));
-        userRegister.addProperty("insurancePicturePath", getBase64FromFile(insurancePictureFile));
+        userRegister.addProperty("carPicture", getBase64FromFile(carPictureFile));
+        userRegister.addProperty("licensePicture", getBase64FromFile(licensePictureFile));
+        userRegister.addProperty("insurancePicture", getBase64FromFile(insurancePictureFile));
+        AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
+        UserRegisterRequest userRegisterRequest = new UserRegisterRequest();
+        userRegisterRequest.setFbId(accessTokenFacebook.getUserId());
+        userRegisterRequest.setFbAccessToken(accessTokenFacebook.getToken());
+        userRegisterRequest.setFirstName(userRegister.get("name").toString());
+        userRegisterRequest.setLastName(userRegister.get("lastname").toString());
+        userRegisterRequest.setUserType(User.USER_TYPE_DRIVER);
+        userRegisterRequest.setPosition("");
+        UserImage profileImage = new UserImage();
+        profileImage.setFileName(User.PROFILE_IMAGE_NAME);
+        profileImage.setFile(userRegister.get("profilePicture").toString());
+        userRegisterRequest.addImage(profileImage);
+
+        UserImage carImage = new UserImage();
+        carImage.setFileName(User.CAR_IMAGE_NAME);
+        carImage.setFile(userRegister.get("carPicture").toString());
+        userRegisterRequest.addImage(carImage);
+
+        UserImage licenseImage = new UserImage();
+        licenseImage.setFileName(User.LICENSE_IMAGE_NAME);
+        licenseImage.setFile(userRegister.get("licensePicture").toString());
+        userRegisterRequest.addImage(licenseImage);
+
+        UserImage insuranceImage = new UserImage();
+        insuranceImage.setFileName(User.INSURANCE_IMAGE_NAME);
+        insuranceImage.setFile(userRegister.get("insurancePicture").toString());
+        userRegisterRequest.addImage(insuranceImage);
+
+        UserService userService = new UserService(this);
+        Call<LoginResponse> call = userService.register(userRegisterRequest);
+        ProgressDialog dialog = new ProgressDialog(RegisterDriverCarActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                dialog.dismiss();
+                if (response.code() == HttpURLConnection.HTTP_CONFLICT ||
+                        response.code() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                    showMessage(response.message());
+                    return;
+                }
+                LoginResponse loginResponse = response.body();
+                AppSecurityManager.login(settings, userRegisterRequest.getFbAccessToken(), userRegisterRequest.getFbId(), loginResponse.getToken(), loginResponse.getUser());
+                if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
+                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(mActivity, HomeClientActivity.class);
+                    startActivity(intent);
+                }
+                return;
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                dialog.dismiss();
+                Log.v("Register Error", t.getMessage());
+                showMessage("Ha ocurrido un error. Intente luego.");
+            }
+        });
         SharedPreferences.Editor editor = settings.edit();
         editor.remove("userRegister");
         dialog.dismiss();

@@ -21,6 +21,7 @@ import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
@@ -42,8 +43,14 @@ public class LoginActivity extends AppCompatActivity {
         mLoginActivity = this;
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
         if (AppSecurityManager.isUserLogged(settings)) {
-            Intent intent = new Intent(this, HomeClientActivity.class);
-            startActivity(intent);
+            User user = AppSecurityManager.getUserLogged(settings);
+            if(user.getUserType().equals(User.USER_TYPE_DRIVER)){
+                Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
+                startActivity(intent);
+            }else{
+                Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
+                startActivity(intent);
+            }
             return;
         }
 
@@ -92,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void appLoginAction(String fbTokenKey, String fbUserId) {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-        UserService userService = new UserService();
+        UserService userService = new UserService(this);
 
         Call<LoginResponse> call = userService.login(fbUserId);
         ProgressDialog dialog = new ProgressDialog(LoginActivity.this);
@@ -108,10 +115,14 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 LoginResponse loginResponse = response.body();
-                AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken());
-                /* TODO redirigir segun tipo de usuario */
-                Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
-                startActivity(intent);
+                AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken(), loginResponse.getUser());
+                if(loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)){
+                    Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
+                    startActivity(intent);
+                }else{
+                    Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
+                    startActivity(intent);
+                }
                 return;
             }
 

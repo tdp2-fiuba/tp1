@@ -1,5 +1,7 @@
 package com.tdp2.eukanuber.services;
 
+import android.content.Context;
+
 import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.MapRoute;
@@ -13,10 +15,15 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class TripService {
+public class TripService extends ClientService {
+
+    public TripService(Context context) {
+        super(context);
+    }
 
     public Call<Trip> create(NewTripRequest newTripRequest) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -27,6 +34,7 @@ public class TripService {
 
     public Call<Trip> get(String tripId) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -36,6 +44,7 @@ public class TripService {
     }
     public Call<List<Trip>> getAll(String status) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -45,6 +54,7 @@ public class TripService {
     }
     public Call<Trip> assignDriverToTrip(String tripId, AssignDriverToTripRequest assignDriverToTripRequest) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -54,6 +64,7 @@ public class TripService {
     }
     public Call<Trip> updateStatusTrip(String tripId, UpdateStatusTripRequest updateStatusTripRequest) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -63,6 +74,7 @@ public class TripService {
     }
     public Call<MapRoute> getRoutes(GetRouteRequest getRouteRequest) {
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
