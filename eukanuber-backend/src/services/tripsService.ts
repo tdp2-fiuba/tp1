@@ -132,6 +132,22 @@ async function getRoute(origin: string, destination: string) {
   return JSON.parse(routes)[0] as any;
 }
 
+async function getTripByUserAndStatus(userId: string, tripSatus: number) {
+  const trip = await db
+    .table('trips')
+    .where('clientId', userId)
+    .orWhere('driverId', userId)
+    .andWhere('status', tripSatus)
+    .select()
+    .first();
+
+  if (!trip) {
+    return undefined;
+  }
+
+  return trip.id;
+}
+
 export default {
   getTrips,
   getTripById,
@@ -139,4 +155,5 @@ export default {
   updateTripStatus,
   assignDriverToTrip,
   getRoute,
+  getTripByUserAndStatus,
 };

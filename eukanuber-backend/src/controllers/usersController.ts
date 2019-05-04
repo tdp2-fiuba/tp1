@@ -1,7 +1,8 @@
 import Express from 'express';
-import { IUser } from '../models';
+import { IUser, TripStatus } from '../models';
 import { userService } from '../services';
 import ICreateUserData from '../models/ICreateUserData';
+import { tripsService } from '../services';
 
 var fs = require('fs');
 const jwt = require('jsonwebtoken');
@@ -217,6 +218,27 @@ async function userLogout(req: Express.Request, res: Express.Response) {
       .send();
   }
 }
+async function activeTripId(req: Express.Request, res: Express.Response) {
+  try {
+    console.log('GET ACTIVE TRIP ID');
+    const userId = req.params.id; //= await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
+      return;
+    }
+
+    const tripId = await tripsService.getTripByUserAndStatus(userId, TripStatus.IN_TRAVEL);
+
+    res
+      .status(200)
+      .json({ tripId: tripId })
+      .send();
+  } catch (e) {
+    res
+      .status(500)
+      .json({ message: e.message })
+      .send();
+  }
+}
 
 export default {
   getUsers,
@@ -228,4 +250,5 @@ export default {
   userLogin,
   userLogout,
   deleteUser,
+  activeTripId,
 };

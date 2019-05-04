@@ -71,10 +71,11 @@ async function createUser(newUser: ICreateUserData) {
     firstName: newUser.firstName,
     lastName: newUser.lastName,
     position: newUser.position,
+    fbAccessToken: newUser.fbAccessToken,
     fbId: newUser.fbId,
   };
 
-  const accountValidation = await validateFacebookAccount(newUser.fbId);
+  const accountValidation = await validateFacebookAccount(newUser.fbAccessToken);
   if (!accountValidation.validAccount) {
     throw new Error(accountValidation.message);
   }
@@ -192,8 +193,8 @@ async function deleteUser(fbId: string) {
     .where({ fbId: fbId });
 }
 
-async function validateFacebookAccount(id: string) {
-  const friendCount: string = await facebookService.getFacebookFriendCount(id);
+async function validateFacebookAccount(fbAccessToken: string) {
+  const friendCount: string = await facebookService.getFacebookFriendCount(fbAccessToken);
   const validAccount = parseInt(friendCount, 10) >= MIN_FRIEND_COUNT;
   return { validAccount: validAccount, message: validAccount ? '' : 'Required: Minimum friend count ' + MIN_FRIEND_COUNT };
 }
