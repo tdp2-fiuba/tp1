@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,11 +18,16 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
+import com.google.gson.JsonObject;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.tdp2.eukanuber.R;
+import com.tdp2.eukanuber.manager.AppSecurityManager;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +39,9 @@ import java.util.Date;
 
 public class RegisterDriverUserActivity extends BaseActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
-    File photoFile = null;
+    public static final String USER_REGISTER_SETTINGS = "USER_REGISTER";
+
+    File profilePictureFile = null;
     Activity mActivity;
 
     @Override
@@ -46,8 +54,6 @@ public class RegisterDriverUserActivity extends BaseActivity {
 
         getSupportActionBar().setTitle("Registro Conductor");
         AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
-    //    ImageView profilePicture = findViewById(R.id.profilePicture);
-   //     profilePicture.setVisibility(View.GONE);
         GraphRequest request = GraphRequest.newMeRequest(
                 accessTokenFacebook,
                 (object, response) -> {
@@ -74,16 +80,13 @@ public class RegisterDriverUserActivity extends BaseActivity {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             String encodedBase64 = null;
             try {
-                FileInputStream fileInputStreamReader = new FileInputStream(photoFile);
-                byte[] bytes = new byte[(int) photoFile.length()];
+                FileInputStream fileInputStreamReader = new FileInputStream(profilePictureFile);
+                byte[] bytes = new byte[(int) profilePictureFile.length()];
                 fileInputStreamReader.read(bytes);
-                encodedBase64 = new String(Base64.encodeToString(bytes, Base64.DEFAULT));
                 Bitmap bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 Bitmap bitmapImageRotated = rotateBitmapIfNecessary(bitmapImage);
-                ImageView profilePicture = findViewById(R.id.profilePicture);
-                profilePicture.setImageBitmap(bitmapImageRotated);
-          //      profilePicture.setVisibility(View.VISIBLE);
-                System.out.print(encodedBase64);
+                ImageView profilePictureImage = findViewById(R.id.profilePicture);
+                profilePictureImage.setImageBitmap(bitmapImageRotated);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -91,13 +94,17 @@ public class RegisterDriverUserActivity extends BaseActivity {
             }
 
         }
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_CANCELED) {
+            profilePictureFile = null;
+        }
+
     }
 
     private Bitmap rotateBitmapIfNecessary(Bitmap bitmap) {
         Bitmap rotatedBitmap = null;
 
         try {
-            ExifInterface ei = new ExifInterface(photoFile.getAbsolutePath());
+            ExifInterface ei = new ExifInterface(profilePictureFile.getAbsolutePath());
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -134,9 +141,36 @@ public class RegisterDriverUserActivity extends BaseActivity {
     }
 
     public void goRegisterDriverCar(View view) {
-        Intent intent = new Intent(this, RegisterDriverCarActivity.class);
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        EditText name = mActivity.findViewById(R.id.inputRegisterName);
+        EditText lastname = mActivity.findViewById(R.id.inputRegisterLastname);
+        if (name.getText().toString().isEmpty()) {
+            showMessage("El nombre es obligatorio");
+            return;
+        }
+        if (lastname.getText().toString().isEmpty()) {
+            showMessage("El apellido es obligatorio");
+            return;
+        }
+        if (profilePictureFile == null) {
+            showMessage("La imagen de perfil es obligatoria");
+            return;
+        }
+        JsonObject userRegister = new JsonObject();
+        try {
+            userRegister.addProperty("name", name.getText().toString());
+            userRegister.addProperty("lastname", lastname.getText().toString());
+            userRegister.addProperty("profilePicture", getBase64FromFile(profilePictureFile));
+            SharedPreferences settings = getSharedPreferences(RegisterDriverUserActivity.USER_REGISTER_SETTINGS, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("userRegister", userRegister.toString());
+            editor.commit();
+            Intent intent = new Intent(this, RegisterDriverCarActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        }catch (Exception ex){
+            System.out.print(ex.getMessage());
+        }
+
 
     }
 
@@ -167,22 +201,42 @@ public class RegisterDriverUserActivity extends BaseActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            photoFile = null;
+            profilePictureFile = null;
             try {
-                photoFile = createImageFile();
+                profilePictureFile = createImageFile();
             } catch (IOException ex) {
                 System.out.print(ex.getMessage());
             }
             // Continue only if the File was successfully created
-            if (photoFile != null) {
+            if (profilePictureFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.tdp2.eukanuber.fileprovider",
-                        photoFile);
+                        profilePictureFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
     }
+    private String getBase64FromFile(File file) {
+        String base64File = "";
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            fileInputStreamReader.read(bytes);
+            base64File = new String(Base64.encodeToString(bytes, Base64.DEFAULT));
+        } catch (Exception ex) {
+            System.out.print(ex.getMessage());
+        }
+        return base64File;
 
+    }
+
+    public void showMessage(String message) {
+        Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
+    }
 
 }
