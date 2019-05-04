@@ -26,13 +26,8 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
 
   // { driverId: <id> } assigns a trip to a driver
   if (trip.driverId) {
-    try {
-      const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
-      return res.json(updatedTrip);
-    } catch (e) {
-      console.error(e);
-      return res.status(403).send({ error: true, message: e.message });
-    }
+    const updatedTrip = await tripsService.assignDriverToTrip(tripId, trip.driverId);
+    return res.json(updatedTrip);
   }
 
   // { status: <status> } updates trip status
