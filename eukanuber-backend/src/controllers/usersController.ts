@@ -99,7 +99,7 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
     if (req.headers.authorization == undefined) {
       res
         .status(403)
-        .json({ message: 'Must provide authorization credentials!' })
+        .json({ message: 'Debe proveer credenciales de autenticación!' })
         .send();
       return '';
     }
@@ -112,7 +112,7 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
     } catch (e) {
       res
         .status(401)
-        .json({ message: 'Invalid credentials!' })
+        .json({ message: 'Credenciales inválidas!' })
         .send();
       return '';
     }
@@ -121,7 +121,7 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
     if (!isUserLoggedIn) {
       res
         .status(403)
-        .json({ message: 'User must be logged in to perform this operation!' })
+        .json({ message: 'El usuario debe estar loggeado para realizar esta operación!' })
         .send();
       return '';
     }
@@ -161,8 +161,9 @@ async function createUser(req: Express.Request, res: Express.Response) {
     //otherwise user approval should remain as PENDING.
 
     //Create user will create a new user if facebook account is valid
-    const user = await userService.createUser(userData);
-    res.send(user);
+    await userService.createUser(userData);
+    const loggedUserAndToken = await loginUserWithFbId(userData.fbId);
+    res.send(loggedUserAndToken);
   } catch (e) {
     res
       .status(500)
@@ -179,26 +180,29 @@ async function userLogin(req: Express.Request, res: Express.Response) {
   try {
     console.log('LOGIN');
     const fbId = req.params.fbId;
-    const userId = await userService.getUserByFbId(fbId);
-
-    if (!userId || userId == undefined) {
-      //return 409 if user was not found:
-      res.status(409).send({ message: 'User not found! Please register!' });
-      return;
-    }
-    //User exists, so generate token and send it:
-    const data = { id: userId };
-    const token = jwt.sign(data, secret);
-    console.log('USER LOGGED IN ' + userId);
-    await userService.userLogin(userId);
-
-    res.status(200).send({ token });
+    const userAndToken = await loginUserWithFbId(fbId);
+    res.status(200).send(userAndToken);
   } catch (e) {
     res
-      .status(500)
+      .status(409)
       .json({ message: e.message })
       .send();
   }
+}
+
+async function loginUserWithFbId(fbId: string) {
+  const userId = await userService.getUserByFbId(fbId);
+
+  if (!userId || userId == undefined) {
+    //return 409 if user was not found:
+    throw new Error('El usuario que desea ingresar no existe! Por favor regístrese!');
+  }
+  //User exists, so generate token and send it:
+  const data = { id: userId };
+  const token = jwt.sign(data, secret);
+  console.log('USER LOGGED IN ' + userId);
+  const user = await userService.userLogin(userId);
+  return { token, user: user };
 }
 
 async function userLogout(req: Express.Request, res: Express.Response) {

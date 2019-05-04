@@ -95,7 +95,7 @@ async function createUser(newUser: ICreateUserData) {
   } catch (err) {
     transaction.rollback();
     console.error(`User creation transaction aborted!"${err}"`);
-    throw new Error('User creation transaction aborted!');
+    throw new Error('Creación de usuario abortada!');
   }
 }
 
@@ -155,7 +155,7 @@ async function userLogin(id: string) {
       .where('id', id)
       .update({ loggedIn: true });
 
-    return true;
+    return getUserById(id);
   } catch (e) {
     return false;
   }
@@ -196,7 +196,10 @@ async function deleteUser(fbId: string) {
 async function validateFacebookAccount(fbAccessToken: string) {
   const friendCount: string = await facebookService.getFacebookFriendCount(fbAccessToken);
   const validAccount = parseInt(friendCount, 10) >= MIN_FRIEND_COUNT;
-  return { validAccount: validAccount, message: validAccount ? '' : 'Required: Minimum friend count ' + MIN_FRIEND_COUNT };
+  return {
+    validAccount: validAccount,
+    message: validAccount ? '' : 'Se requiere que la cuenta posea una cantidad de amigos mínima ' + MIN_FRIEND_COUNT,
+  };
 }
 
 export default {
