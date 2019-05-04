@@ -102,26 +102,27 @@ async function calculateTripData(routes: string, pets: string[]) {
 async function computeTripCost(distance: number, pets: string[]) {
   const distanceMultiplier = 0.2;
   const defaultTimeSlotPrice = 20;
-  /*const petSizeMultiplier: { [name: string]: number } = { S: 0.1, M: 0.3, L: 0.5 };
+  const petSizeMultiplier: { [name: string]: number } = { S: 0.1, M: 0.3, L: 0.5 };
 
   const now = Date.now();
 
   var minutes = 1000 * 60;
   var hours = minutes * 60;
 
-  let timeSlotCost: number = await db
+  let timeSlotCost: number = 1; /*await db
     .table('timeSlots')
     .select('price')
     .where('hourStart', '<=', Math.round(now / hours))
     .andWhere('hourEnd', '>', Math.round(now / hours))
+    .orWhere('hourStart', '=', Math.round(now / hours))
+    .andWhere('hourEnd', '=', Math.round(now / hours))
     .andWhere('minStart', '<=', Math.round(now / minutes))
-    .andWhere('minEnd', '<=', Math.round(now / minutes));
-
+    .andWhere('minEnd', '>=', Math.round(now / minutes));*/
   if (timeSlotCost == undefined) {
     timeSlotCost = defaultTimeSlotPrice;
   }
 
-  let costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);*/
+  let costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);
 
   return distance * distanceMultiplier; // + costPets + timeSlotCost;
 }
