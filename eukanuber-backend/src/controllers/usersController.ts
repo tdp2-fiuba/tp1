@@ -1,13 +1,11 @@
-import Express from 'express';
-import { IUser, TripStatus } from '../models';
-import { userService } from '../services';
-import ICreateUserData from '../models/ICreateUserData';
-import { tripsService } from '../services';
+import Express from "express";
+import jwt from "jsonwebtoken";
+import { IUser, TripStatus } from "../models";
+import ICreateUserData from "../models/ICreateUserData";
+import { userService } from "../services";
+import { tripsService } from "../services";
 
-var fs = require('fs');
-const jwt = require('jsonwebtoken');
-
-var secret = 'ALOHOMORA';
+const secret = "ALOHOMORA";
 
 async function getUsers(req: Express.Request, res: Express.Response) {
   try {
@@ -27,7 +25,7 @@ async function getUserById(req: Express.Request, res: Express.Response) {
     if (userId.length <= 0) {
       return;
     }
-    let user = await userService.getUserById(userId);
+    const user = await userService.getUserById(userId);
     if (user == undefined) {
       res
         .status(200)
@@ -99,31 +97,31 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
     if (req.headers.authorization == undefined) {
       res
         .status(403)
-        .json({ message: 'Debe proveer credenciales de autenticación!' })
+        .json({ message: "Debe proveer credenciales de autenticación!" })
         .send();
-      return '';
+      return "";
     }
 
-    const token = req.headers.authorization.replace('Bearer ', '');
+    const token = req.headers.authorization.replace("Bearer ", "");
     try {
       signature = jwt.verify(token, secret);
       userId = signature.id;
-      console.log('DECODE USER ID' + userId);
+      console.log("DECODE USER ID" + userId);
     } catch (e) {
       res
         .status(401)
-        .json({ message: 'Credenciales inválidas!' })
+        .json({ message: "Credenciales inválidas!" })
         .send();
-      return '';
+      return "";
     }
     const isUserLoggedIn = await userService.isUserLogged(userId);
-    console.log('CHECK USER LOGGED IN ' + isUserLoggedIn);
+    console.log("CHECK USER LOGGED IN " + isUserLoggedIn);
     if (!isUserLoggedIn) {
       res
         .status(403)
-        .json({ message: 'El usuario debe estar loggeado para realizar esta operación!' })
+        .json({ message: "El usuario debe estar loggeado para realizar esta operación!" })
         .send();
-      return '';
+      return "";
     }
     return userId;
   } catch (e) {
@@ -131,18 +129,18 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
       .status(500)
       .json({ message: e.message })
       .send();
-    return '';
+    return "";
   }
 }
 
 async function deleteUser(req: Express.Request, res: Express.Response) {
   try {
     const fbId = req.params.fbId;
-    console.log('DELETE USER ' + fbId);
-    let result = await userService.deleteUser(fbId);
+    console.log("DELETE USER " + fbId);
+    const result = await userService.deleteUser(fbId);
     res
       .status(201)
-      .json({ message: 'SUCCESS' })
+      .json({ message: "SUCCESS" })
       .send();
   } catch (e) {
     console.log(e);
@@ -153,14 +151,14 @@ async function deleteUser(req: Express.Request, res: Express.Response) {
 async function createUser(req: Express.Request, res: Express.Response) {
   try {
     const data = req.body;
-    let userData: ICreateUserData = req.body;
+    const userData: ICreateUserData = req.body;
     userData.images = data.images.map(function(img: any) {
       return { fileName: img.fileName, file: ImgBase64StringToBuffer(img.file) };
     });
-    //TODO #2: if user is Passenger state should be valid if fb account check successful
-    //otherwise user approval should remain as PENDING.
+    // TODO #2: if user is Passenger state should be valid if fb account check successful
+    // otherwise user approval should remain as PENDING.
 
-    //Create user will create a new user if facebook account is valid
+    // Create user will create a new user if facebook account is valid
     await userService.createUser(userData);
     const loggedUserAndToken = await loginUserWithFbId(userData.fbId);
     res.send(loggedUserAndToken);
@@ -173,12 +171,12 @@ async function createUser(req: Express.Request, res: Express.Response) {
 }
 
 function ImgBase64StringToBuffer(img: string) {
-  return Buffer.from(img, 'base64');
+  return Buffer.from(img, "base64");
 }
 
 async function userLogin(req: Express.Request, res: Express.Response) {
   try {
-    console.log('LOGIN');
+    console.log("LOGIN");
     const fbId = req.params.fbId;
     const userAndToken = await loginUserWithFbId(fbId);
     res.status(200).send(userAndToken);
@@ -194,26 +192,26 @@ async function loginUserWithFbId(fbId: string) {
   const userId = await userService.getUserByFbId(fbId);
 
   if (!userId || userId == undefined) {
-    //return 409 if user was not found:
-    throw new Error('El usuario que desea ingresar no existe! Por favor regístrese!');
+    // return 409 if user was not found:
+    throw new Error("El usuario que desea ingresar no existe! Por favor regístrese!");
   }
-  //User exists, so generate token and send it:
+  // User exists, so generate token and send it:
   const data = { id: userId };
   const token = jwt.sign(data, secret);
-  console.log('USER LOGGED IN ' + userId);
+  console.log("USER LOGGED IN " + userId);
   const user = await userService.userLogin(userId);
-  return { token, user: user };
+  return { token, user };
 }
 
 async function userLogout(req: Express.Request, res: Express.Response) {
   try {
-    console.log('LOGOUT');
+    console.log("LOGOUT");
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
     if (userId.length <= 0) {
       return;
     }
     await userService.userLogout(userId);
-    console.log('USER LOGGED OUT ' + userId);
+    console.log("USER LOGGED OUT " + userId);
     res.status(200).send();
   } catch (e) {
     res
@@ -224,7 +222,7 @@ async function userLogout(req: Express.Request, res: Express.Response) {
 }
 async function activeTripId(req: Express.Request, res: Express.Response) {
   try {
-    console.log('GET ACTIVE TRIP ID');
+    console.log("GET ACTIVE TRIP ID");
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
     if (userId.length <= 0) {
       return;
@@ -234,7 +232,7 @@ async function activeTripId(req: Express.Request, res: Express.Response) {
 
     res
       .status(200)
-      .json({ tripId: tripId })
+      .json({ tripId })
       .send();
   } catch (e) {
     res
@@ -254,5 +252,5 @@ export default {
   userLogin,
   userLogout,
   deleteUser,
-  activeTripId,
+  activeTripId
 };
