@@ -2,8 +2,18 @@ import axios from 'axios';
 
 const url = 'https://graph.facebook.com/v3.3/';
 
+interface FBData {
+  id: string;
+  friends: {
+    data: Array<string>;
+    summary: {
+      total_count: number;
+    };
+  };
+}
+
 async function getFacebookFriendCount(fbAccessToken: string) {
-  const result = await axios.get(`${url}/me?fields=friends`, { headers: { Authorization: 'Bearer ' + fbAccessToken } });
+  const result = await axios.get(`${url}/me?fields=id,friends`, { headers: { Authorization: 'Bearer ' + fbAccessToken } });
 
   if (result.status !== 200) {
     throw new Error(result.statusText);
@@ -13,8 +23,9 @@ async function getFacebookFriendCount(fbAccessToken: string) {
     throw new Error("Google API didn't return data when requesting coordinates");
   }
 
-  const accountData = result.data.friends.summary.total_count;
-  return `${accountData}`;
+  let fbData: FBData = { ...result.data };
+
+  return fbData;
 }
 
 export default {
