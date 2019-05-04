@@ -221,7 +221,7 @@ async function userLogout(req: Express.Request, res: Express.Response) {
 async function activeTripId(req: Express.Request, res: Express.Response) {
   try {
     console.log('GET ACTIVE TRIP ID');
-    const userId = req.params.id; //= await getUserIdIfLoggedWithValidCredentials(req, res);
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
     if (userId.length <= 0) {
       return;
     }
