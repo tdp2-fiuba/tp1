@@ -11,4 +11,9 @@ export default interface ICreateUserData {
   position: string;
   fbId: string;
   images: Array<Image>;
+  car?: {
+    brand: string;
+    model: string;
+    plateNumber: string;
+  };
 }

@@ -19,6 +19,7 @@ async function getUsers() {
 
 async function getUserById(id: string) {
   let users = await db('users')
+    .leftJoin('cars', 'users.id', '=', 'cars.userId')
     .innerJoin('userMedia', 'users.id', '=', 'userMedia.userId')
     .where('users.id', id)
     .select();
@@ -40,6 +41,10 @@ async function getUserById(id: string) {
     images: userImages,
     loggedIn: userData.loggedIn,
   };
+
+  if (user.userType.toLowerCase() == 'driver') {
+    return { ...user, car: { model: userData.model, brand: userData.brand, plateNumber: userData.plateNumber } };
+  }
 
   return user;
 }
@@ -75,7 +80,8 @@ async function createUser(newUser: ICreateUserData) {
     fbId: newUser.fbId,
   };
 
-  const accountValidation = await validateFacebookAccount(newUser.fbAccessToken);
+  const accountValidation = await validateFacebookAccount(newUser.fbId, newUser.fbAccessToken);
+
   if (!accountValidation.validAccount) {
     throw new Error(accountValidation.message);
   }
@@ -88,8 +94,19 @@ async function createUser(newUser: ICreateUserData) {
       .returning('id');
     const userId = userInsertResult[0];
     const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.file }));
-
     await transaction('userMedia').insert(fields);
+
+    if (newUser.userType.toLowerCase() == 'driver') {
+      if (!newUser.car) {
+        throw new Error('Debe registrar un vehículo!');
+      }
+      const car = {
+        ...newUser.car,
+        userId,
+      };
+      await transaction('cars').insert(car);
+    }
+
     await transaction.commit();
     return { userId: userId, ...user } as any;
   } catch (err) {
@@ -193,12 +210,13 @@ async function deleteUser(fbId: string) {
     .where({ fbId: fbId });
 }
 
-async function validateFacebookAccount(fbAccessToken: string) {
-  const friendCount: string = await facebookService.getFacebookFriendCount(fbAccessToken);
-  const validAccount = parseInt(friendCount, 10) >= MIN_FRIEND_COUNT;
+async function validateFacebookAccount(fbId: string, fbAccessToken: string) {
+  const accountData = await facebookService.getFacebookFriendCount(fbAccessToken);
+  const validAccount: boolean = fbId == accountData.id && accountData.friends.summary.total_count >= MIN_FRIEND_COUNT;
+  console.log(`FB VALIDATION WAS ${validAccount} WITH FB DATA ${JSON.stringify(accountData)}.`);
   return {
     validAccount: validAccount,
-    message: validAccount ? '' : 'Se requiere que la cuenta posea una cantidad de amigos mínima ' + MIN_FRIEND_COUNT,
+    message: validAccount ? '' : 'Cuenta de facebook invalida!',
   };
 }
 
