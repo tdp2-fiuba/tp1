@@ -1,6 +1,6 @@
 import Knex from "knex";
 import db from "../db/db";
-import { ICreateTripData, ITrip, TripStatus } from "../models";
+import { ICreateTripData, ITrip, TripStatus, UserStatus, UserTypes } from "../models";
 import googleMapsService from "./googleMapsService";
 
 async function getTrips(status: TripStatus) {
@@ -89,8 +89,10 @@ async function assignDriverToTrip(id: string, driverId: string) {
 }
 
 async function calculateTripData(routes: string, pets: string[]) {
+  const driversAvailability = await getDriversAvailability();
+
   const route = JSON.parse(routes)[0];
-  const price = await calculateTripCost(route.legs[0].distance.value, pets);
+  const price = await calculateTripCost(route.legs[0].distance.value, pets, driversAvailability);
 
   return {
     distance: route.legs[0].distance.text,
@@ -99,8 +101,22 @@ async function calculateTripData(routes: string, pets: string[]) {
   };
 }
 
-async function calculateTripCost(distance: number, pets: string[]) {
-  const distanceMultiplier = 0.2;
+async function getDriversAvailability(): Promise<number> {
+  const driversWithTrips = (await db
+    .table("trips")
+    .whereNotNull("driverId")
+    .andWhereNot("status", TripStatus.COMPLETED)
+    .count("id"))[0].count;
+  const activeDrivers = (await db
+    .table("users")
+    .where("userType", UserTypes.Driver)
+    .andWhere("status", UserStatus.USER_VALIDATED)
+    .count("id"))[0].count;
+
+  return activeDrivers / driversWithTrips;
+}
+
+async function calculateTripCost(distance: number, pets: string[], activeDrivers: number) {
   const getPetSizeExtraCost = (petSize: string) => (petSize === "S" ? 0 : petSize === "M" ? 20 : 40);
   const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
@@ -110,10 +126,13 @@ async function calculateTripCost(distance: number, pets: string[]) {
   // Dependiendo la hora, obtenemos un recargo (desde las 0 horas hasta las 6 hay un recargo)
   const timeExtraCost = getUtcTimeExtraCost(new Date().getUTCHours());
 
-  // Hay un costo por distancia (a mayor distancia, más caro)
-  const distanceCost = distance * distanceMultiplier;
+  // Si hay menos del 50% de los conductores disponibles, se agrega un recargo
+  const driversExtraCost = activeDrivers > 0.5 ? 0 : 50;
 
-  return petsExtraCost + timeExtraCost + distanceCost;
+  // Hay un costo por distancia (a mayor distancia, más caro)
+  const distanceCost = distance * 0.2;
+
+  return petsExtraCost + timeExtraCost + driversExtraCost + distanceCost;
 }
 
 async function getRoute(origin: string, destination: string) {

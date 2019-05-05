@@ -132,7 +132,7 @@ async function createUser(req: Express.Request, res: Express.Response) {
     const userData: ICreateUserData = req.body;
     userData.images = data.images.map((img: any) => ({ fileName: img.fileName, fileContent: ImgBase64StringToBuffer(img.fileContent) }));
 
-    // TODO #2: if user is Passenger state should be valid if fb account check successful
+    // TODO #2: if user is Client state should be valid if fb account check successful
     // otherwise user approval should remain as PENDING.
 
     // Create user will create a new user if facebook account is valid

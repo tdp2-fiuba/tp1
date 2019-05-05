@@ -42,7 +42,7 @@ async function getUserById(id: string) {
     loggedIn: userData.loggedIn
   };
 
-  if (user.userType.toLowerCase() == "driver") {
+  if (user.userType.toLowerCase() === "driver") {
     return { ...user, car: { model: userData.model, brand: userData.brand, plateNumber: userData.plateNumber } };
   }
 
@@ -96,7 +96,7 @@ async function createUser(newUser: ICreateUserData) {
     const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.fileContent }));
     await transaction("userMedia").insert(fields);
 
-    if (newUser.userType.toLowerCase() == "driver") {
+    if (newUser.userType.toLowerCase() === "driver") {
       if (!newUser.car) {
         throw new Error("Debe registrar un vehículo!");
       }

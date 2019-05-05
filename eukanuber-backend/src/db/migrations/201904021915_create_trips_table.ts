@@ -11,7 +11,7 @@ function up(knex: Knex) {
 
     tableBuilder.string("createdDate").defaultTo("");
     tableBuilder.string("clientId").notNullable();
-    tableBuilder.string("driverId").defaultTo("");
+    tableBuilder.string("driverId");
 
     tableBuilder.string("pets").notNullable();
 

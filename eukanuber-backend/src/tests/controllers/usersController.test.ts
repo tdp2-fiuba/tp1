@@ -1,13 +1,13 @@
-import { expect } from 'chai';
-import Express from 'express';
-import { before } from 'mocha';
-import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
-import usersController from '../../controllers/usersController';
-import { userService } from '../../services';
-const jwt = require('jsonwebtoken');
+import { expect } from "chai";
+import Express from "express";
+import { before } from "mocha";
+import Sinon from "sinon";
+import { mockReq, mockRes } from "sinon-express-mock";
+import usersController from "../../controllers/usersController";
+import { userService } from "../../services";
+const jwt = require("jsonwebtoken");
 
-describe('usersController', () => {
+describe("usersController", () => {
   let request: Express.Request;
   let response: Express.Response;
   let userServiceMock: Sinon.SinonMock;
@@ -22,14 +22,14 @@ describe('usersController', () => {
     userServiceMock.restore();
   });
 
-  describe('someTest', () => {
+  describe("someTest", () => {
     before(() => {
       // This section should be similar as createUser, except that
       // you need to mock the usersService.updateUser instead
     });
 
-    it('should call the users service with the proper parameters', () => {});
-    it('should return the updated user', () => {});
+    it("should call the users service with the proper parameters", () => {});
+    it("should return the updated user", () => {});
   });
 
   /*describe('updateUserWithInvalidCredentials', () => {
@@ -43,7 +43,7 @@ describe('usersController', () => {
       updatedUser = {
         firstName: 'Terry',
         lastName: 'Pratchett',
-        userType: 'Passenger',
+        userType: 'Client',
         position: '-33.8696, 151.2094',
         fbId: '100000524659075',
       };
@@ -70,17 +70,17 @@ describe('usersController', () => {
     });
   });*/
 
-  describe('getById', () => {
+  describe("getById", () => {
     let user: any;
     let userId: any;
     let getUserByIdStub: Sinon.SinonStub;
     let responseJsonSpy: any;
     before(async () => {
-      userId = { id: 'tp88' };
-      user = { id: 'tp88', userType: 'Driver', firstName: 'Terry', lastName: 'Pratchett' };
-      //TODO: check user has registered.
+      userId = { id: "tp88" };
+      user = { id: "tp88", userType: "Driver", firstName: "Terry", lastName: "Pratchett" };
+      // TODO: check user has registered.
 
-      getUserByIdStub = userServiceMock.expects('getUserById').returns(Promise.resolve(user));
+      getUserByIdStub = userServiceMock.expects("getUserById").returns(Promise.resolve(user));
 
       responseJsonSpy = Sinon.spy();
 
@@ -90,29 +90,29 @@ describe('usersController', () => {
       await usersController.getUserById(request, response);
     });
 
-    it('should call the users service', () => {
-      //expect(getUserByIdStub).calledOnceWith(user.id as string);
+    it("should call the users service", () => {
+      // expect(getUserByIdStub).calledOnceWith(user.id as string);
     });
-    it('should get user', () => {
-      //TODO: fix test
-      //expect(responseJsonSpy).calledOnceWith(user);
+    it("should get user", () => {
+      // TODO: fix test
+      // expect(responseJsonSpy).calledOnceWith(user);
     });
   });
 
-  describe('getAll', () => {
+  describe("getAll", () => {
     let users: any;
     let getAllUsersStub: Sinon.SinonStub;
     let responseJsonSpy: any;
     before(async () => {
       users = [
         {
-          userType: 'Passenger',
-          firstName: 'Arthur',
-          lastName: 'Dent',
-        },
+          userType: "Client",
+          firstName: "Arthur",
+          lastName: "Dent"
+        }
       ];
 
-      getAllUsersStub = userServiceMock.expects('getUsers').returns(Promise.resolve(users));
+      getAllUsersStub = userServiceMock.expects("getUsers").returns(Promise.resolve(users));
 
       responseJsonSpy = Sinon.spy();
 
@@ -122,10 +122,10 @@ describe('usersController', () => {
       await usersController.getUsers(request, response);
     });
 
-    it('should call the users service with the proper parameters', () => {
+    it("should call the users service with the proper parameters", () => {
       expect(getAllUsersStub).to.have.been.calledOnce;
     });
-    it('should return all users', () => {
+    it("should return all users", () => {
       expect(responseJsonSpy).calledOnceWith(users);
     });
   });

@@ -228,12 +228,16 @@ describe("tripsService", () => {
     mock.table.returnsThis();
     mock.orderBy.returnsThis();
     mock.where.returnsThis();
-    mock.orWhere.returnsThis();
+    mock.whereNotNull.returnsThis();
     mock.andWhere.returnsThis();
+    mock.orWhere.returnsThis();
+    mock.orWhereNot.returnsThis();
     mock.update.returnsThis();
     mock.insert.returnsThis();
     mock.into.returnsThis();
     mock.returning.returnsThis();
+    mock.count.returns([{ count: 1 }] as any);
+    (mock as any).andWhereNot = () => mock;
     (mock as any).modify = () => mock;
 
     return mock;
