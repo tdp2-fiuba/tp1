@@ -36,7 +36,7 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary_trip);
-        this.createMenu();
+        this.createMenu(userLogged);
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");

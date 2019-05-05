@@ -54,7 +54,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     private Runnable runnableRequestTrips;
     private Integer delayRequestTrips;
     private Boolean popupOpen;
-    private User userLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +61,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         mActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_driver);
-        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-        userLogged = AppSecurityManager.getUserLogged(settings);
-        if (userLogged == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            return;
-        }
-        this.createMenu();
+        this.createMenu(userLogged);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         popupOpen = false;

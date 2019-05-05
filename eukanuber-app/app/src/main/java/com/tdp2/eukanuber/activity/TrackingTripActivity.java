@@ -45,7 +45,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
-        this.createMenu();
+        this.createMenu(userLogged);
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");

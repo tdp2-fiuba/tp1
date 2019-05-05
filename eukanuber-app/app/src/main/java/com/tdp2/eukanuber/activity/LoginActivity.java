@@ -88,13 +88,14 @@ public class LoginActivity extends AppCompatActivity {
 
     public void completeLoginAction(View view) {
         LoginButton loginButton = findViewById(R.id.login_button);
-        AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
+
+      /*  AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
         boolean isLoggedInFacebook = accessTokenFacebook != null && !accessTokenFacebook.isExpired();
-        if (!isLoggedInFacebook) {
-            loginButton.performClick();
-            return;
+        if (!isLoggedInFacebook) {*/
+        loginButton.performClick();
+         /*   return;
         }
-        appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());
+        appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());*/
     }
 
     private void appLoginAction(String fbTokenKey, String fbUserId) {

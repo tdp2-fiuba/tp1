@@ -131,7 +131,7 @@ public class RegisterClientActivity extends BaseActivity {
         String profileImageB64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
         UserImage profileImage = new UserImage();
         profileImage.setFileName(User.PROFILE_IMAGE_NAME);
-        profileImage.setFile(profileImageB64);
+        profileImage.setFileContent(profileImageB64);
         userRegisterRequest.addImage(profileImage);
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
         UserService userService = new UserService(this);

@@ -326,22 +326,22 @@ public class RegisterDriverCarActivity extends BaseActivity {
         userRegisterRequest.setPosition("");
         UserImage profileImage = new UserImage();
         profileImage.setFileName(User.PROFILE_IMAGE_NAME);
-        profileImage.setFile(userRegister.get("profilePicture").toString());
+        profileImage.setFileContent(userRegister.get("profilePicture").toString());
         userRegisterRequest.addImage(profileImage);
 
         UserImage carImage = new UserImage();
         carImage.setFileName(User.CAR_IMAGE_NAME);
-        carImage.setFile(userRegister.get("carPicture").toString());
+        carImage.setFileContent(userRegister.get("carPicture").toString());
         userRegisterRequest.addImage(carImage);
 
         UserImage licenseImage = new UserImage();
         licenseImage.setFileName(User.LICENSE_IMAGE_NAME);
-        licenseImage.setFile(userRegister.get("licensePicture").toString());
+        licenseImage.setFileContent(userRegister.get("licensePicture").toString());
         userRegisterRequest.addImage(licenseImage);
 
         UserImage insuranceImage = new UserImage();
         insuranceImage.setFileName(User.INSURANCE_IMAGE_NAME);
-        insuranceImage.setFile(userRegister.get("insurancePicture").toString());
+        insuranceImage.setFileContent(userRegister.get("insurancePicture").toString());
         userRegisterRequest.addImage(insuranceImage);
 
         UserCar userCar = new UserCar();

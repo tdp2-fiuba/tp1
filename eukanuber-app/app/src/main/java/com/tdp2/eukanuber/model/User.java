@@ -74,4 +74,18 @@ public class User implements Serializable {
     public void setCar(UserCar car) {
         this.car = car;
     }
+
+    public String getFullName(){
+        return this.firstName + " " + this.lastName;
+    }
+
+    public String getImageByType(String type){
+        String imageB64 = "";
+        for (UserImage image: images){
+            if(image.getFileName().equals(type)){
+                imageB64 = image.getFileContent();
+            }
+        }
+        return imageB64;
+    }
 }

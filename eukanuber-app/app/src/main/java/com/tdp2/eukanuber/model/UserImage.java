@@ -5,7 +5,7 @@ import java.util.List;
 
 public class UserImage implements Serializable {
     private String fileName;
-    private String file;
+    private String fileContent;
 
     public String getFileName() {
         return fileName;
@@ -15,12 +15,12 @@ public class UserImage implements Serializable {
         this.fileName = fileName;
     }
 
-    public String getFile() {
-        return file;
+    public String getFileContent() {
+        return fileContent;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public void setFileContent(String fileContent) {
+        this.fileContent = fileContent;
     }
 }
 

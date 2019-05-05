@@ -53,7 +53,7 @@ public class NewTripActivity extends SecureActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_trip);
-        this.createMenu();
+        this.createMenu(userLogged);
         initPlacesApi();
         initFromInput();
         initToInput();

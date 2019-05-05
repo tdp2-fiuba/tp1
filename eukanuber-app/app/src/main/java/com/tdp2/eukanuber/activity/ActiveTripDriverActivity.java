@@ -52,20 +52,12 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     private LocationManager locationManager;
     private Marker markerCar;
     private Activity mActivity;
-    private User userLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active_trip_driver);
-        SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-        userLogged = AppSecurityManager.getUserLogged(settings);
-        if(userLogged == null){
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            return;
-        }
-        this.createMenu();
+        this.createMenu(userLogged);
         mActivity = this;
         Intent intent = getIntent();
 
