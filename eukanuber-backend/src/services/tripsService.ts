@@ -47,7 +47,7 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
     pets: trip.pets.join(",").replace(/\s/g, ""),
     originCoordinates,
     destinationCoordinates,
-    clientId: "dummyClientId", // TODO: remove
+    clientId: trip.clientId,
     status: TripStatus.PENDING,
     createdDate: new Date().toISOString(),
     ...routeData,
