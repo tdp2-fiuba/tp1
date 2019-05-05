@@ -177,45 +177,23 @@ describe("tripsService", () => {
     });
   });
 
-  describe("#getTripByUserAndStatus", () => {
+  describe("#getUserLastTrip", () => {
     describe("when the trip is found", () => {
       before(async () => {
         sandbox.reset();
         expectedResult = { id: 1 };
         dbMock.select.returnsThis();
         dbMock.first.resolves(expectedResult);
-        result = await tripsService.getTripByUserAndStatus("userId", TripStatus.PENDING);
+        result = await tripsService.getUserLastTrip("userId");
       });
 
       it("should call the db to get the db to get the trip", () => {
         expect(dbMock.table).calledWith("trips");
         expect(dbMock.where).calledWith("clientId", "userId");
         expect(dbMock.orWhere).calledWith("driverId", "userId");
-        expect(dbMock.andWhere).calledWith("status", TripStatus.PENDING);
       });
 
-      it("should return the trip id", () => {
-        expect(result).to.deep.equal(expectedResult.id);
-      });
-    });
-
-    describe("when the trip is not found", () => {
-      before(async () => {
-        sandbox.reset();
-        expectedResult = undefined;
-        dbMock.select.returnsThis();
-        dbMock.first.resolves(expectedResult);
-        result = await tripsService.getTripByUserAndStatus("userId", TripStatus.PENDING);
-      });
-
-      it("should call the db to get the db to get the trip", () => {
-        expect(dbMock.table).calledWith("trips");
-        expect(dbMock.where).calledWith("clientId", "userId");
-        expect(dbMock.orWhere).calledWith("driverId", "userId");
-        expect(dbMock.andWhere).calledWith("status", TripStatus.PENDING);
-      });
-
-      it("should return undefined", () => {
+      it("should return the trip", () => {
         expect(result).to.deep.equal(expectedResult);
       });
     });

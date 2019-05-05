@@ -101,19 +101,19 @@ async function calculateTripData(routes: string, pets: string[]) {
 
 async function calculateTripCost(distance: number, pets: string[]) {
   const distanceMultiplier = 0.2;
-  const getPetSizeExtraCost = (petSize: string) => (petSize === "S" ? 0 : petSize === "M" ? 25 : 50);
+  const getPetSizeExtraCost = (petSize: string) => (petSize === "S" ? 0 : petSize === "M" ? 20 : 40);
   const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
-  // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M son $25 más, L son $50 más)
-  const petsMultiplier = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
+  // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M y L tienen recargo)
+  const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
 
-  // Dependiendo la hora, obtenemos un recargo (desde las 0 horas hasta las 6 hay un recargo de $50)
-  const utcHourCost = getUtcTimeExtraCost(new Date().getUTCHours());
+  // Dependiendo la hora, obtenemos un recargo (desde las 0 horas hasta las 6 hay un recargo)
+  const timeExtraCost = getUtcTimeExtraCost(new Date().getUTCHours());
 
   // Hay un costo por distancia (a mayor distancia, más caro)
   const distanceCost = distance * distanceMultiplier;
 
-  return petsMultiplier + utcHourCost + distanceCost;
+  return petsExtraCost + timeExtraCost + distanceCost;
 }
 
 async function getRoute(origin: string, destination: string) {
@@ -121,20 +121,14 @@ async function getRoute(origin: string, destination: string) {
   return JSON.parse(routes)[0] as any;
 }
 
-async function getTripByUserAndStatus(userId: string, tripSatus: number) {
-  const trip = await db
+async function getUserLastTrip(userId: string) {
+  return await db
     .table("trips")
     .where("clientId", userId)
     .orWhere("driverId", userId)
-    .andWhere("status", tripSatus)
+    .orderBy("createdDate", "desc")
     .select()
     .first();
-
-  if (!trip) {
-    return undefined;
-  }
-
-  return trip.id;
 }
 
 export default {
@@ -144,5 +138,5 @@ export default {
   updateTripStatus,
   assignDriverToTrip,
   getRoute,
-  getTripByUserAndStatus
+  getUserLastTrip
 };

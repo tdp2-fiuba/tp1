@@ -1,6 +1,6 @@
 import Express from "express";
 import jwt from "jsonwebtoken";
-import { IUser, TripStatus } from "../models";
+import { IUser } from "../models";
 import ICreateUserData from "../models/ICreateUserData";
 import { userService } from "../services";
 import { tripsService } from "../services";
@@ -13,7 +13,7 @@ async function getUsers(req: Express.Request, res: Express.Response) {
     res.json(users);
   } catch (e) {
     res
-      .status(500)
+      .status(409)
       .json({ message: e.message })
       .send();
   }
@@ -22,34 +22,22 @@ async function getUsers(req: Express.Request, res: Express.Response) {
 async function getUserById(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
-    }
     const user = await userService.getUserById(userId);
-    if (user == undefined) {
-      res
-        .status(200)
-        .json({})
-        .send();
-    }
     res
       .status(200)
       .json(user)
       .send();
   } catch (e) {
-    res.sendStatus(500).json({ message: e });
+    res.sendStatus(409).json({ message: e });
   }
 }
 
 async function updateUser(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
-    }
     const userData: Partial<IUser> = req.body;
     const updatedUser = await userService.updateUser(userId, userData);
-    res.status(201).json(updatedUser);
+    res.status(200).json(updatedUser);
   } catch (e) {
     res
       .status(500)
@@ -58,35 +46,28 @@ async function updateUser(req: Express.Request, res: Express.Response) {
   }
 }
 
-
 async function getUserPosition(req: Express.Request, res: Express.Response) {
-    try {
-        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-        if (userId.length <= 0) {
-            return;
-        }
-        const userPos = await userService.getUserPosition(req.params.userId);
-        res.status(200).json(userPos);
-    } catch (e) {
-        res
-            .status(500)
-            .json({ message: e.message })
-            .send();
-    }
+  try {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    const userPos = await userService.getUserPosition(userId);
+    res.status(200).json(userPos);
+  } catch (e) {
+    res
+      .status(409)
+      .json({ message: e.message })
+      .send();
+  }
 }
 
 async function updateUserPosition(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
-    }
     const position = req.body;
     const user = await userService.updateUserPosition(userId, position);
-    res.status(201).json(user);
+    res.status(200).json(user);
   } catch (e) {
     res
-      .status(500)
+      .status(409)
       .json({ message: e.message })
       .send();
   }
@@ -138,14 +119,9 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
 async function deleteUser(req: Express.Request, res: Express.Response) {
   try {
     const fbId = req.params.fbId;
-    console.log("DELETE USER " + fbId);
     await userService.deleteUser(fbId);
-    return res
-      .status(201)
-      .json({ message: "SUCCESS" })
-      .send();
+    return res.sendStatus(201);
   } catch (e) {
-    console.log(e);
     res.sendStatus(500);
   }
 }
@@ -177,7 +153,6 @@ function ImgBase64StringToBuffer(img: string) {
 
 async function userLogin(req: Express.Request, res: Express.Response) {
   try {
-    console.log("LOGIN");
     const fbId = req.params.fbId;
     const userAndToken = await loginUserWithFbId(fbId);
     res.status(200).send(userAndToken);
@@ -192,48 +167,36 @@ async function userLogin(req: Express.Request, res: Express.Response) {
 async function loginUserWithFbId(fbId: string) {
   const userId = await userService.getUserByFbId(fbId);
 
-  if (!userId || userId == undefined) {
-    // return 409 if user was not found:
+  if (!userId) {
     throw new Error("El usuario que desea ingresar no existe! Por favor regístrese!");
   }
-  // User exists, so generate token and send it:
+
   const data = { id: userId };
   const token = jwt.sign(data, secret);
-  console.log("USER LOGGED IN " + userId);
   const user = await userService.userLogin(userId);
   return { token, user };
 }
 
 async function userLogout(req: Express.Request, res: Express.Response) {
   try {
-    console.log("LOGOUT");
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
-    }
     await userService.userLogout(userId);
-    console.log("USER LOGGED OUT " + userId);
     res.status(200).send();
   } catch (e) {
     res
-      .status(500)
+      .status(409)
       .json({ message: e.message })
       .send();
   }
 }
-async function activeTripId(req: Express.Request, res: Express.Response) {
+async function getUserLastTrip(req: Express.Request, res: Express.Response) {
   try {
-    console.log("GET ACTIVE TRIP ID");
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
-    }
-
-    const tripId = await tripsService.getTripByUserAndStatus(userId, TripStatus.IN_TRAVEL);
+    const trip = await tripsService.getUserLastTrip(userId);
 
     res
       .status(200)
-      .json({ tripId })
+      .json({ trip })
       .send();
   } catch (e) {
     res
@@ -246,12 +209,12 @@ async function activeTripId(req: Express.Request, res: Express.Response) {
 export default {
   getUsers,
   getUserById,
+  getUserLastTrip,
   createUser,
   updateUser,
   getUserPosition,
   updateUserPosition,
   userLogin,
   userLogout,
-  deleteUser,
-  activeTripId
+  deleteUser
 };
