@@ -77,4 +77,15 @@ public class UserService extends ClientService{
         BackendService postService = retrofit.create(BackendService.class);
         return postService.registerUser(userRegisterRequest);
     }
+
+    public Call<Void> logout() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.logoutUser();
+    }
 }

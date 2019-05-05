@@ -62,4 +62,8 @@ public interface BackendService {
 
     @POST("users/register")
     Call<LoginResponse> registerUser(@Body UserRegisterRequest userRegisterRequest);
+
+    @POST("users/logout")
+    Call<Void> logoutUser();
+
 }

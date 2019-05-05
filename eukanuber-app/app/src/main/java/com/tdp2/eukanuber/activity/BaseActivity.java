@@ -1,5 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -12,23 +14,34 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.services.UserService;
+
+import java.net.HttpURLConnection;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 abstract class BaseActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     public static final String PREFS_NAME = "Eukanuber";
-
+    Activity baseActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        baseActivity = this;
     }
 
     protected void createMenu(User userLogged) {
@@ -90,10 +103,30 @@ abstract class BaseActivity extends AppCompatActivity
 
         } else if (id == R.id.logout){
             SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
-            AppSecurityManager.logout(settings);
-            LoginManager.getInstance().logOut();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+            UserService userService = new UserService(this);
+            Call<Void> call = userService.logout();
+            ProgressDialog dialog = new ProgressDialog(BaseActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    dialog.dismiss();
+                    AppSecurityManager.logout(settings);
+                    LoginManager.getInstance().logOut();
+                    Intent intent = new Intent(baseActivity, LoginActivity.class);
+                    startActivity(intent);
+                    return;
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    dialog.dismiss();
+                    Log.v("Logout Error", t.getMessage());
+                    showMessage("Ha ocurrido un error. Intente luego.");
+                }
+            });
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -101,4 +134,11 @@ abstract class BaseActivity extends AppCompatActivity
         return true;
     }
 
+    public void showMessage(String message) {
+        Toast.makeText(
+                this,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
+    }
 }
