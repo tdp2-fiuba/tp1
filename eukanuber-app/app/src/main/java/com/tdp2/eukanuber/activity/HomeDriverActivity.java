@@ -231,7 +231,10 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 User userUpdated = response.body();
-                Log.d("USER UPDATED", userUpdated.getId());
+                if(userUpdated != null){
+                    Log.d("USER UPDATED", userUpdated.getId());
+                }
+
 
             }
 

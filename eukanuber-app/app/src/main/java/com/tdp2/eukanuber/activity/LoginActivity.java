@@ -14,6 +14,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.tdp2.eukanuber.R;
@@ -89,13 +90,12 @@ public class LoginActivity extends AppCompatActivity {
     public void completeLoginAction(View view) {
         LoginButton loginButton = findViewById(R.id.login_button);
 
-      /*  AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
+       AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
         boolean isLoggedInFacebook = accessTokenFacebook != null && !accessTokenFacebook.isExpired();
-        if (!isLoggedInFacebook) {*/
-        loginButton.performClick();
-         /*   return;
+        if (isLoggedInFacebook) {
+            LoginManager.getInstance().logOut();
         }
-        appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());*/
+        loginButton.performClick();
     }
 
     private void appLoginAction(String fbTokenKey, String fbUserId) {

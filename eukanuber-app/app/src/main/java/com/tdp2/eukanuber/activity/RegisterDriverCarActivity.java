@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tdp2.eukanuber.R;
@@ -360,7 +361,17 @@ public class RegisterDriverCarActivity extends BaseActivity {
                 dialog.dismiss();
                 if (response.code() == HttpURLConnection.HTTP_CONFLICT ||
                         response.code() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                    showMessage(response.message());
+                    try{
+                        if(response.errorBody() != null && response.errorBody().string() != null){
+                            Gson gson = new Gson();
+                            JsonObject errorBody = gson.fromJson(response.errorBody().string(), JsonObject.class);
+                            showMessage(errorBody.get("message").getAsString());
+
+                        }
+                    }catch (Exception ex){
+
+                    }
+
                     return;
                 }
                 LoginResponse loginResponse = response.body();
