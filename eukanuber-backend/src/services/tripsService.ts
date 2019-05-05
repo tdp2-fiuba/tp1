@@ -1,5 +1,4 @@
 import Knex from "knex";
-import moment = require("moment");
 import db from "../db/db";
 import { ICreateTripData, ITrip, TripStatus } from "../models";
 import googleMapsService from "./googleMapsService";
@@ -119,7 +118,6 @@ async function calculateTripCost(distance: number, pets: string[]) {
 
 async function getRoute(origin: string, destination: string) {
   const routes = await googleMapsService.getDirections(origin, destination);
-
   return JSON.parse(routes)[0] as any;
 }
 

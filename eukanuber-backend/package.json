@@ -8,7 +8,7 @@
     "build": "rm -rf dist && tsc",
     "debug": "tsnd --respawn --transpileOnly --debug --inspect=9229 --nolazy -- ./src/app.ts",
     "start": "node .",
-    "test": "mocha -r ts-node/register src/tests/init-tests.ts src/**/*.test.ts",
+    "test": "mocha --inspect -r ts-node/register src/tests/init-tests.ts src/**/*.test.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test && nyc report",
     "db:migrate": "npm run build && node ./dist/db/cli.js --migrate",
     "db:rollback": "npm run build && node ./dist/db/cli.js --rollback",
