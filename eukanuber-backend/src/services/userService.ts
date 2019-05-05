@@ -93,7 +93,7 @@ async function createUser(newUser: ICreateUserData) {
       .insert(user)
       .returning("id");
     const userId = userInsertResult[0];
-    const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.file }));
+    const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.fileContent }));
     await transaction("userMedia").insert(fields);
 
     if (newUser.userType.toLowerCase() == "driver") {
