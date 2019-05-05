@@ -7,19 +7,26 @@ import { TripStatus } from "../../models";
 import googleMapsService from "../../services/googleMapsService";
 import tripsService from "../../services/tripsService";
 
-describe.only("tripsService", () => {
+describe("tripsService", () => {
   let sandbox: Sinon.SinonSandbox;
   let dbMock: SinonStubbedInstance<Knex>;
+  let googleMapsServiceMock: SinonStubbedInstance<any>;
   let result: any;
   let expectedResult: any;
 
-  before(() => (sandbox = Sinon.sandbox.create()));
+  before(() => {
+    sandbox = Sinon.createSandbox();
+    dbMock = getDbMock();
+    googleMapsServiceMock = sandbox.stub(googleMapsService);
+  });
+
+  after(() => sandbox.restore());
 
   describe("#getTrips", () => {
     before(async () => {
+      sandbox.reset();
       const dbOutput = [{ pets: "" }, { pets: "" }, { pets: "" }];
       expectedResult = [{ pets: [""] }, { pets: [""] }, { pets: [""] }];
-      initDbMock();
       dbMock.select.resolves(dbOutput);
       result = await tripsService.getTrips(TripStatus.PENDING);
     });
@@ -38,10 +45,10 @@ describe.only("tripsService", () => {
 
     describe("when the trip is found", () => {
       before(async () => {
+        sandbox.reset();
         tripId = "tripId";
         const dbOutput = { tripId, pets: "" };
         expectedResult = { tripId, pets: [""] };
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves(dbOutput);
         result = await tripsService.getTripById(tripId);
@@ -59,9 +66,9 @@ describe.only("tripsService", () => {
 
     describe("when the trip is not", () => {
       before(async () => {
+        sandbox.reset();
         tripId = "tripId";
         expectedResult = undefined;
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves(undefined);
         result = await tripsService.getTripById(tripId);
@@ -83,11 +90,11 @@ describe.only("tripsService", () => {
     let status: TripStatus;
 
     before(async () => {
+      sandbox.reset();
       tripId = "tripId";
       status = TripStatus.CLIENT_ACCEPTED;
       const dbOutput = { tripId, pets: "" };
       expectedResult = { tripId, pets: [""] };
-      initDbMock();
       dbMock.select.returnsThis();
       dbMock.first.resolves(dbOutput);
       result = await tripsService.updateTripStatus(tripId, status);
@@ -110,10 +117,9 @@ describe.only("tripsService", () => {
 
     describe("when there is no driver assigned to a trip", () => {
       before(async () => {
+        sandbox.reset();
         tripId = "tripId";
         driverId = "driverId";
-
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves({ tripId, pets: "" });
 
@@ -129,10 +135,9 @@ describe.only("tripsService", () => {
 
     describe("when there is no driver assigned to a trip", () => {
       before(async () => {
+        sandbox.reset();
         tripId = "tripId";
         driverId = "driverId";
-
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves({ tripId, pets: "", driverId: "otherDriver" });
 
@@ -154,13 +159,11 @@ describe.only("tripsService", () => {
   describe("#getRoute", () => {
     let origin: string;
     let destination: string;
-    let googleMapsServiceMock: SinonStubbedInstance<any>;
 
     before(async () => {
       origin = "origin";
       destination = "destination";
       expectedResult = "result";
-      googleMapsServiceMock = sandbox.stub(googleMapsService);
       googleMapsServiceMock.getDirections.resolves(JSON.stringify([expectedResult]));
       result = await tripsService.getRoute(origin, destination);
     });
@@ -177,8 +180,8 @@ describe.only("tripsService", () => {
   describe("#getTripByUserAndStatus", () => {
     describe("when the trip is found", () => {
       before(async () => {
+        sandbox.reset();
         expectedResult = { id: 1 };
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves(expectedResult);
         result = await tripsService.getTripByUserAndStatus("userId", TripStatus.PENDING);
@@ -198,8 +201,8 @@ describe.only("tripsService", () => {
 
     describe("when the trip is not found", () => {
       before(async () => {
+        sandbox.reset();
         expectedResult = undefined;
-        initDbMock();
         dbMock.select.returnsThis();
         dbMock.first.resolves(expectedResult);
         result = await tripsService.getTripByUserAndStatus("userId", TripStatus.PENDING);
@@ -219,15 +222,12 @@ describe.only("tripsService", () => {
   });
 
   describe("#createTrip", () => {
-    let googleMapsServiceMock: SinonStubbedInstance<any>;
-
     before(async () => {
+      sandbox.reset();
       const routes = JSON.stringify([{ legs: [{ distance: { value: 5000, text: "500km" }, duration: { text: "20min" } }] }]);
       const pets = ["S", "M", "L"];
       const trip = { pets };
 
-      initDbMock();
-      googleMapsServiceMock = sandbox.stub(googleMapsService);
       googleMapsServiceMock.getDirections.resolves(routes);
 
       result = await tripsService.createTrip(trip as any);
@@ -245,12 +245,7 @@ describe.only("tripsService", () => {
     });
   });
 
-  function initDbMock(): SinonStubbedInstance<Knex> {
-    if (dbMock) {
-      sandbox.restore();
-      return;
-    }
-
+  function getDbMock(): SinonStubbedInstance<Knex> {
     const mock = sandbox.stub<Knex>(db);
     mock.table.returnsThis();
     mock.orderBy.returnsThis();
@@ -263,6 +258,6 @@ describe.only("tripsService", () => {
     mock.returning.returnsThis();
     (mock as any).modify = () => mock;
 
-    dbMock = mock;
+    return mock;
   }
 });
