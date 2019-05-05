@@ -17,7 +17,8 @@ public class AppSecurityManager {
         String fbToken = settings.getString(FB_TOKEN_KEY, null);
         String fbUserId = settings.getString(FB_USER_ID, null);
         String appToken = settings.getString(APP_TOKEN_KEY, null);
-        return (fbToken != null && fbUserId != null && appToken != null);
+        User userLogged = getUserLogged(settings);
+        return (fbToken != null && fbUserId != null && appToken != null && userLogged != null);
     }
 
     public static final void login(SharedPreferences settings, String fbTokenKey, String fbUserId, String appTokenKey, User user) {
@@ -43,7 +44,7 @@ public class AppSecurityManager {
     public static final User getUserLogged(SharedPreferences settings){
         User userLogged = null;
         String userJson = settings.getString(APP_USER_LOGGED, null);
-        if(isUserLogged(settings) && userJson != null){
+        if(userJson != null){
             Gson gson = new Gson();
             userLogged = gson.fromJson(userJson, User.class);
         }

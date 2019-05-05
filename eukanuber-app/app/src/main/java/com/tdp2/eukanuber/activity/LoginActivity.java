@@ -44,10 +44,11 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
         if (AppSecurityManager.isUserLogged(settings)) {
             User user = AppSecurityManager.getUserLogged(settings);
-            if(user.getUserType().equals(User.USER_TYPE_DRIVER)){
+
+            if (user.getUserType().equals(User.USER_TYPE_DRIVER)) {
                 Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
                 startActivity(intent);
-            }else{
+            } else {
                 Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
                 startActivity(intent);
             }
@@ -55,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         LoginButton loginButton = findViewById(R.id.login_button);
-        loginButton.setReadPermissions("email");
+        loginButton.setReadPermissions("email, user_friends");
         loginButton.setVisibility(View.GONE);
         callbackManager = CallbackManager.Factory.create();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -94,11 +95,11 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         appLoginAction(accessTokenFacebook.getToken(), accessTokenFacebook.getUserId());
-
     }
 
     private void appLoginAction(String fbTokenKey, String fbUserId) {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+
         UserService userService = new UserService(this);
 
         Call<LoginResponse> call = userService.login(fbUserId);
@@ -116,10 +117,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 LoginResponse loginResponse = response.body();
                 AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken(), loginResponse.getUser());
-                if(loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)){
+                if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
                     Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
                     startActivity(intent);
-                }else{
+                } else {
                     Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
                     startActivity(intent);
                 }

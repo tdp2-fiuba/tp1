@@ -17,6 +17,7 @@ public class User implements Serializable {
     private String lastName;
     private String position;
     private List<UserImage> images;
+    private UserCar car;
 
     public String getId() {
         return id;
@@ -64,5 +65,13 @@ public class User implements Serializable {
 
     public void setImages(List<UserImage> images) {
         this.images = images;
+    }
+
+    public UserCar getCar() {
+        return car;
+    }
+
+    public void setCar(UserCar car) {
+        this.car = car;
     }
 }

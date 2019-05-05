@@ -12,6 +12,7 @@ public class UserRegisterRequest implements Serializable {
     private String fbId;
     private String fbAccessToken;
     private List<UserImage> images;
+    private UserCar car;
 
     public UserRegisterRequest() {
         this.images = new ArrayList<>();
@@ -73,8 +74,16 @@ public class UserRegisterRequest implements Serializable {
         this.images = images;
     }
 
-    public void addImage(UserImage image){
+    public void addImage(UserImage image) {
         this.images.add(image);
+    }
+
+    public UserCar getCar() {
+        return car;
+    }
+
+    public void setCar(UserCar car) {
+        this.car = car;
     }
 }
 

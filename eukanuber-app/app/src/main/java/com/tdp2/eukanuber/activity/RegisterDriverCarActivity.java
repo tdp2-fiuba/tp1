@@ -28,6 +28,7 @@ import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserCar;
 import com.tdp2.eukanuber.model.UserImage;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
 import com.tdp2.eukanuber.services.UserService;
@@ -304,6 +305,8 @@ public class RegisterDriverCarActivity extends BaseActivity {
             return;
         }
         SharedPreferences settings = getSharedPreferences(RegisterDriverUserActivity.USER_REGISTER_SETTINGS, 0);
+        SharedPreferences settingsSecurity = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+
         String userRegisterStr = settings.getString("userRegister", null);
         JsonParser parser = new JsonParser();
         JsonObject userRegister = (JsonObject) parser.parse(userRegisterStr);
@@ -341,6 +344,11 @@ public class RegisterDriverCarActivity extends BaseActivity {
         insuranceImage.setFile(userRegister.get("insurancePicture").toString());
         userRegisterRequest.addImage(insuranceImage);
 
+        UserCar userCar = new UserCar();
+        userCar.setBrand(userRegister.get("carBrand").toString());
+        userCar.setModel(userRegister.get("carModel").toString());
+        userCar.setPlateNumber(userRegister.get("carPatent").toString());
+        userRegisterRequest.setCar(userCar);
         UserService userService = new UserService(this);
         Call<LoginResponse> call = userService.register(userRegisterRequest);
         ProgressDialog dialog = new ProgressDialog(RegisterDriverCarActivity.this);
@@ -356,7 +364,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
                     return;
                 }
                 LoginResponse loginResponse = response.body();
-                AppSecurityManager.login(settings, userRegisterRequest.getFbAccessToken(), userRegisterRequest.getFbId(), loginResponse.getToken(), loginResponse.getUser());
+                AppSecurityManager.login(settingsSecurity, userRegisterRequest.getFbAccessToken(), userRegisterRequest.getFbId(), loginResponse.getToken(), loginResponse.getUser());
                 if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
                     Intent intent = new Intent(mActivity, HomeDriverActivity.class);
                     startActivity(intent);
@@ -376,8 +384,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
         });
         SharedPreferences.Editor editor = settings.edit();
         editor.remove("userRegister");
-        dialog.dismiss();
-        showMessage("Send iser register!!!!");
+        editor.commit();
     }
 
     private Bitmap getBitmapFromFile(File file) {

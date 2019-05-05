@@ -301,7 +301,10 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     @Override
     protected void onStop() {
         super.onStop();
-        handlerRequestTrips.removeCallbacks(runnableRequestTrips);
+        if(handlerRequestTrips != null && runnableRequestTrips != null){
+            handlerRequestTrips.removeCallbacks(runnableRequestTrips);
+        }
+
     }
 
 }
