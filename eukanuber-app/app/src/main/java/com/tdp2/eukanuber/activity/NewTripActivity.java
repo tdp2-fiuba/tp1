@@ -262,6 +262,7 @@ public class NewTripActivity extends SecureActivity implements
             newTripRequest.setEscort(switchEscort.isChecked());
             newTripRequest.setPayment(payment);
             newTripRequest.setPets(pets.values());
+            newTripRequest.setClientId(userLogged.getId());
             if(newTripRequest.getOrigin().isEmpty()){
                 Toast.makeText(this, "Ingrese el origen",Toast.LENGTH_SHORT).show();
                 return;

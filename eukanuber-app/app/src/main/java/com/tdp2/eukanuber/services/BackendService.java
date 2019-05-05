@@ -9,6 +9,7 @@ import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
 
 import java.util.List;
@@ -49,6 +50,9 @@ public interface BackendService {
     // Users
     @PUT("users/position")
     Call<User> updatePositionUser(@Body UpdateUserPositionRequest updateUserPositionRequest);
+
+    @GET("users/position/{userId}")
+    Call<UserPositionResponse> getPositionUser(@Path("userId") String userId);
 
     @GET("users/")
     Call<User> getUser();

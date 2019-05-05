@@ -11,6 +11,7 @@ import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
 
 import java.util.List;
@@ -34,6 +35,17 @@ public class UserService extends ClientService{
 
         BackendService postService = retrofit.create(BackendService.class);
         return postService.updatePositionUser(updateUserPositionRequest);
+    }
+
+    public Call<UserPositionResponse> getPositionUser(String userId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.getPositionUser(userId);
     }
     public Call<User> getUser() {
         Retrofit retrofit = new Retrofit.Builder()

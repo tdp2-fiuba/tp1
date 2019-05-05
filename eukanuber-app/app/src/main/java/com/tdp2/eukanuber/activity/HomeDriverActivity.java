@@ -167,7 +167,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         Integer large = Collections.frequency(pets, "L");
 
         if (small > 0) {
-            toReturn += toReturn.toString() + " chica/s";
+            toReturn += small.toString() + " chica/s";
 
             if (medium > 0 || large > 0) {
                 toReturn += ", ";

@@ -23,6 +23,7 @@ import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
@@ -63,12 +64,12 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
             @Override
             public void run() {
                 UserService userService = new UserService(mContext);
-                Call<User> call = userService.getUser();
-                call.enqueue(new Callback<User>() {
+                Call<UserPositionResponse> call = userService.getPositionUser(currentTrip.getDriverId());
+                call.enqueue(new Callback<UserPositionResponse>() {
                     @Override
-                    public void onResponse(Call<User> call, Response<User> response) {
-                        User driver = response.body();
-                        String[] positionSplit = driver.getPosition().split(",");
+                    public void onResponse(Call<UserPositionResponse> call, Response<UserPositionResponse> response) {
+                        UserPositionResponse userPositionResponse = response.body();
+                        String[] positionSplit = userPositionResponse.getPosition().split(",");
                         LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
                         if(!driverPath.contains(position)){
                             driverPath.add(position);
@@ -77,9 +78,9 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     }
 
                     @Override
-                    public void onFailure(Call<User> call, Throwable t) {
+                    public void onFailure(Call<UserPositionResponse> call, Throwable t) {
                         Log.v("TRIP", t.getMessage());
-                        showMessage("Ha ocurrido un error al obtener el driver.");
+                        showMessage("Ha ocurrido un error al obtener la posicion del conductor.");
 
                     }
 

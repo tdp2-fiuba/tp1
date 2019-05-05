@@ -9,6 +9,7 @@ public class NewTripRequest {
     private Collection<String> pets;
     private Boolean escort;
     private String payment;
+    private String clientId;
 
     public NewTripRequest() {
         pets = new ArrayList<>();
@@ -52,5 +53,13 @@ public class NewTripRequest {
 
     public void setPayment(String payment) {
         this.payment = payment;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }

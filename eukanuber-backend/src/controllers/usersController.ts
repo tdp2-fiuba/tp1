@@ -58,20 +58,21 @@ async function updateUser(req: Express.Request, res: Express.Response) {
   }
 }
 
+
 async function getUserPosition(req: Express.Request, res: Express.Response) {
-  try {
-    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
-      return;
+    try {
+        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+        if (userId.length <= 0) {
+            return;
+        }
+        const userPos = await userService.getUserPosition(req.params.userId);
+        res.status(200).json(userPos);
+    } catch (e) {
+        res
+            .status(500)
+            .json({ message: e.message })
+            .send();
     }
-    const userPos = await userService.getUserPosition(userId);
-    res.status(200).json(userPos);
-  } catch (e) {
-    res
-      .status(500)
-      .json({ message: e.message })
-      .send();
-  }
 }
 
 async function updateUserPosition(req: Express.Request, res: Express.Response) {
