@@ -1,4 +1,5 @@
 import Knex from "knex";
+import moment = require("moment");
 import db from "../db/db";
 import { ICreateTripData, ITrip, TripStatus } from "../models";
 import googleMapsService from "./googleMapsService";
@@ -90,7 +91,7 @@ async function assignDriverToTrip(id: string, driverId: string) {
 
 async function calculateTripData(routes: string, pets: string[]) {
   const route = JSON.parse(routes)[0];
-  const price = await computeTripCost(route.legs[0].distance.value, pets);
+  const price = await calculateTripCost(route.legs[0].distance.value, pets);
 
   return {
     distance: route.legs[0].distance.text,
@@ -99,32 +100,21 @@ async function calculateTripData(routes: string, pets: string[]) {
   };
 }
 
-async function computeTripCost(distance: number, pets: string[]) {
+async function calculateTripCost(distance: number, pets: string[]) {
   const distanceMultiplier = 0.2;
-  const defaultTimeSlotPrice = 20;
-  const petSizeMultiplier: { [name: string]: number } = { S: 0.1, M: 0.3, L: 0.5 };
+  const getPetSizeExtraCost = (petSize: string) => (petSize === "S" ? 0 : petSize === "M" ? 25 : 50);
+  const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
-  const now = Date.now();
+  // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M son $25 más, L son $50 más)
+  const petsMultiplier = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
 
-  const minutes = 1000 * 60;
-  const hours = minutes * 60;
+  // Dependiendo la hora, obtenemos un recargo (desde las 0 horas hasta las 6 hay un recargo de $50)
+  const utcHourCost = getUtcTimeExtraCost(new Date().getUTCHours());
 
-  let timeSlotCost: number = 1; /*await db
-    .table('timeSlots')
-    .select('price')
-    .where('hourStart', '<=', Math.round(now / hours))
-    .andWhere('hourEnd', '>', Math.round(now / hours))
-    .orWhere('hourStart', '=', Math.round(now / hours))
-    .andWhere('hourEnd', '=', Math.round(now / hours))
-    .andWhere('minStart', '<=', Math.round(now / minutes))
-    .andWhere('minEnd', '>=', Math.round(now / minutes));*/
-  if (timeSlotCost == undefined) {
-    timeSlotCost = defaultTimeSlotPrice;
-  }
+  // Hay un costo por distancia (a mayor distancia, más caro)
+  const distanceCost = distance * distanceMultiplier;
 
-  const costPets: number = pets.map(petSize => petSizeMultiplier[petSize] * distance).reduce((p1, p2) => p1 + p2);
-
-  return distance * distanceMultiplier; // + costPets + timeSlotCost;
+  return petsMultiplier + utcHourCost + distanceCost;
 }
 
 async function getRoute(origin: string, destination: string) {
