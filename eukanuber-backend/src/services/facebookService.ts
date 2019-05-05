@@ -15,12 +15,12 @@ interface IFBData {
 async function getFacebookFriendCount(fbAccessToken: string): Promise<IFBData> {
   const result = await axios.get(`${url}/me?fields=id,friends`, { headers: { Authorization: "Bearer " + fbAccessToken } });
 
-  if (result.status !== 200) {
-    throw new Error(result.statusText);
+  if (!result.data) {
+    throw new Error("Facebook API didn't return data");
   }
 
-  if (!result.data || !result.data) {
-    throw new Error("Google API didn't return data when requesting coordinates");
+  if (result.status !== 200) {
+    throw new Error(result.statusText);
   }
 
   return { ...result.data };

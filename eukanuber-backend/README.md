@@ -1,4 +1,4 @@
-# EukanUber Backend [![Build Status](https://travis-ci.org/tdp2-fiuba/tp1.svg?branch=master)](https://travis-ci.org/tdp2-fiuba/tp1)
+# EukanUber Backend [![Build Status](https://travis-ci.org/tdp2-fiuba/tp1.svg?branch=master)](https://travis-ci.org/tdp2-fiuba/tp1) [![Coverage Status](https://coveralls.io/repos/github/tdp2-fiuba/tp1/badge.svg)](https://coveralls.io/github/tdp2-fiuba/tp1)
 
 [Go to the backend in Heroku](https://quiet-ravine-53171.herokuapp.com/ping)
 
