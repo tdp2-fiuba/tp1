@@ -80,10 +80,10 @@ async function createUser(newUser: ICreateUserData) {
     fbId: newUser.fbId
   };
 
-  const accountValidation = await validateFacebookAccount(newUser.fbId, newUser.fbAccessToken);
+  const validationResult = await validateFacebookAccount(newUser.fbId, newUser.fbAccessToken);
 
-  if (!accountValidation.validAccount) {
-    throw new Error(accountValidation.message);
+  if (!validationResult.isValid) {
+    throw new Error(validationResult.errorMessage);
   }
 
   const transaction = (await createTransaction()) as Knex.Transaction;
@@ -212,12 +212,9 @@ async function deleteUser(fbId: string) {
 
 async function validateFacebookAccount(fbId: string, fbAccessToken: string) {
   const accountData = await facebookService.getFacebookFriendCount(fbAccessToken);
-  const validAccount: boolean = fbId == accountData.id && accountData.friends.summary.total_count >= MIN_FRIEND_COUNT;
-  console.log(`FB VALIDATION WAS ${validAccount} WITH FB DATA ${JSON.stringify(accountData)}.`);
-  return {
-    validAccount,
-    message: validAccount ? "" : "Cuenta de facebook invalida!"
-  };
+  const isValid = fbId === accountData.id && accountData.friends.summary.total_count >= MIN_FRIEND_COUNT;
+
+  return { isValid, errorMessage: !isValid && `Cuenta de facebook invalida. Debe tener más de ${MIN_FRIEND_COUNT} amigos en la cuenta` };
 }
 
 export default {

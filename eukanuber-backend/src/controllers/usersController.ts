@@ -163,10 +163,10 @@ async function createUser(req: Express.Request, res: Express.Response) {
     await userService.createUser(userData);
     const loggedUserAndToken = await loginUserWithFbId(userData.fbId);
     res.send(loggedUserAndToken);
-  } catch (e) {
+  } catch (err) {
     res
-      .status(500)
-      .json({ message: e.message })
+      .status(409)
+      .json({ message: err.message })
       .send();
   }
 }
