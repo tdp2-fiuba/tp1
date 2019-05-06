@@ -110,7 +110,7 @@ async function getDriversAvailability(): Promise<number> {
   const activeDrivers = (await db
     .table("users")
     .where("userType", UserTypes.Driver)
-    .andWhere("status", UserStatus.USER_VALIDATED)
+    .andWhere("state", UserStatus.USER_VALIDATED)
     .count("id"))[0].count;
 
   return activeDrivers / driversWithTrips;
