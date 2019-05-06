@@ -321,34 +321,34 @@ public class RegisterDriverCarActivity extends BaseActivity {
         UserRegisterRequest userRegisterRequest = new UserRegisterRequest();
         userRegisterRequest.setFbId(accessTokenFacebook.getUserId());
         userRegisterRequest.setFbAccessToken(accessTokenFacebook.getToken());
-        userRegisterRequest.setFirstName(userRegister.get("name").toString());
-        userRegisterRequest.setLastName(userRegister.get("lastname").toString());
+        userRegisterRequest.setFirstName(userRegister.get("name").getAsString());
+        userRegisterRequest.setLastName(userRegister.get("lastname").getAsString());
         userRegisterRequest.setUserType(User.USER_TYPE_DRIVER);
         userRegisterRequest.setPosition("");
         UserImage profileImage = new UserImage();
         profileImage.setFileName(User.PROFILE_IMAGE_NAME);
-        profileImage.setFileContent(userRegister.get("profilePicture").toString());
+        profileImage.setFileContent(userRegister.get("profilePicture").getAsString());
         userRegisterRequest.addImage(profileImage);
 
         UserImage carImage = new UserImage();
         carImage.setFileName(User.CAR_IMAGE_NAME);
-        carImage.setFileContent(userRegister.get("carPicture").toString());
+        carImage.setFileContent(userRegister.get("carPicture").getAsString());
         userRegisterRequest.addImage(carImage);
 
         UserImage licenseImage = new UserImage();
         licenseImage.setFileName(User.LICENSE_IMAGE_NAME);
-        licenseImage.setFileContent(userRegister.get("licensePicture").toString());
+        licenseImage.setFileContent(userRegister.get("licensePicture").getAsString());
         userRegisterRequest.addImage(licenseImage);
 
         UserImage insuranceImage = new UserImage();
         insuranceImage.setFileName(User.INSURANCE_IMAGE_NAME);
-        insuranceImage.setFileContent(userRegister.get("insurancePicture").toString());
+        insuranceImage.setFileContent(userRegister.get("insurancePicture").getAsString());
         userRegisterRequest.addImage(insuranceImage);
 
         UserCar userCar = new UserCar();
-        userCar.setBrand(userRegister.get("carBrand").toString());
-        userCar.setModel(userRegister.get("carModel").toString());
-        userCar.setPlateNumber(userRegister.get("carPatent").toString());
+        userCar.setBrand(userRegister.get("carBrand").getAsString());
+        userCar.setModel(userRegister.get("carModel").getAsString());
+        userCar.setPlateNumber(userRegister.get("carPatent").getAsString());
         userRegisterRequest.setCar(userCar);
         UserService userService = new UserService(this);
         Call<LoginResponse> call = userService.register(userRegisterRequest);

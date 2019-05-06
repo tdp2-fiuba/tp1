@@ -8,6 +8,7 @@ public class Trip implements Serializable {
 
     private String id;
     private String origin;
+    private String createdDate;
     private String destination;
     private String originCoordinates;
     private String destinationCoordinates;
@@ -137,5 +138,14 @@ public class Trip implements Serializable {
 
     public void setDriverId(String driverId) {
         this.driverId = driverId;
+    }
+
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
     }
 }

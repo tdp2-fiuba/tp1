@@ -22,7 +22,6 @@ import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
-import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
@@ -42,6 +41,8 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private Marker markerCar;
     private List<LatLng> driverPath;
     private Context mContext;
+    private Boolean initializeDriver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +51,14 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
+        initializeDriver = intent.getBooleanExtra("fromHome", false);
         currentStatus = currentTrip.getStatus();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         this.driverPath = new ArrayList<>();
         checkTripStatus();
+        checkDriverPosition();
+
     }
 
     private void checkDriverPosition() {
@@ -69,23 +73,23 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     @Override
                     public void onResponse(Call<UserPositionResponse> call, Response<UserPositionResponse> response) {
                         UserPositionResponse userPositionResponse = response.body();
-                        String[] positionSplit = userPositionResponse.getPosition().split(",");
-                        LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
-                        if(!driverPath.contains(position)){
-                            driverPath.add(position);
+                        if (userPositionResponse != null) {
+                            String[] positionSplit = userPositionResponse.getPosition().split(",");
+                            LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
+                            if (!driverPath.contains(position)) {
+                                driverPath.add(position);
+                            }
                         }
-
                     }
 
                     @Override
                     public void onFailure(Call<UserPositionResponse> call, Throwable t) {
                         Log.v("TRIP", t.getMessage());
-                        showMessage("Ha ocurrido un error al obtener la posicion del conductor.");
 
                     }
 
                 });
-                if (currentTrip.getStatus() != TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                if (currentTrip.getStatus() != TripStatus.COMPLETED.ordinal()) {
                     handler.postDelayed(this, delay);
                 }
             }
@@ -104,7 +108,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
             @Override
             public void run() {
-                if(index < driverPath.size()){
+                if (index < driverPath.size()) {
                     if (index == driverPath.size() - 1) {
                         next = index;
                     } else {
@@ -113,7 +117,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                     startPosition = driverPath.get(index);
                     endPosition = driverPath.get(next);
-                    if(markerCar == null) {
+                    if (markerCar == null) {
                         markerCar = mapManager.addMarkerCar(startPosition);
                     }
                     ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
@@ -136,7 +140,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                         index++;
                     }
                 }
-                if (currentStatus != TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                if (currentStatus != TripStatus.COMPLETED.ordinal()) {
                     handler.postDelayed(this, delay);
                 }
 
@@ -165,8 +169,8 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                             if (currentStatus == TripStatus.IN_TRAVEL.ordinal()) {
                                 initTripInTravel();
                             }
-                            if (currentStatus == TripStatus.ARRIVED_DESTINATION.ordinal()) {
-                                initTripArrivedDestination();
+                            if (currentStatus == TripStatus.COMPLETED.ordinal()) {
+                                initTripCompleted();
                             }
                         }
                     }
@@ -178,7 +182,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                     }
                 });
-                if (currentStatus != TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                if (currentStatus != TripStatus.COMPLETED.ordinal()) {
                     handler.postDelayed(this, delay);
                 }
 
@@ -193,15 +197,27 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         textStatus.setText("En Camino");
         checkDriverPosition();
         updateDriverPosition();
+        initializeDriver = false;
     }
 
 
     private void initTripInTravel() {
+        if (initializeDriver) {
+            checkDriverPosition();
+            updateDriverPosition();
+        }
+        initializeDriver = false;
+
         TextView textStatus = findViewById(R.id.tripStatus);
         textStatus.setText("En Viaje");
     }
 
-    private void initTripArrivedDestination() {
+    private void initTripCompleted() {
+        if (initializeDriver) {
+            checkDriverPosition();
+            updateDriverPosition();
+        }
+        initializeDriver = false;
         Intent intent = new Intent(this, HomeClientActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         showMessage("Viaje finalizado con exito!");

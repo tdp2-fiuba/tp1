@@ -210,7 +210,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         buttonStatusFinish.setVisibility(View.VISIBLE);
         showStatus();
         buttonStatusFinish.setOnClickListener(v -> {
-            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.ARRIVED_DESTINATION.ordinal());
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.COMPLETED.ordinal());
             TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
             call.enqueue(new Callback<Trip>() {

@@ -29,6 +29,7 @@ import com.tdp2.eukanuber.manager.AppSecurityManager;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -223,12 +224,11 @@ public class RegisterDriverUserActivity extends BaseActivity {
             FileInputStream fileInputStreamReader = new FileInputStream(file);
             byte[] bytes = new byte[(int) file.length()];
             fileInputStreamReader.read(bytes);
-            base64File = new String(Base64.encodeToString(bytes, Base64.DEFAULT));
+            base64File = Base64.encodeToString(bytes, Base64.DEFAULT);
         } catch (Exception ex) {
             System.out.print(ex.getMessage());
         }
         return base64File;
-
     }
 
     public void showMessage(String message) {

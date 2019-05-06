@@ -68,12 +68,13 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
                 Trip trip = response.body();
-                if (trip.getId() != null &&
+                if (trip != null &&
                     (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
-                    trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
-                    trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
+                    trip.getStatus() == TripStatus.IN_TRAVEL.ordinal())) {
+
                     Intent trackingTripActivity = new Intent(mActivity, TrackingTripActivity.class);
                     trackingTripActivity.putExtra("currentTrip", trip);
+                    trackingTripActivity.putExtra("fromHome", true);
                     trackingTripActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(trackingTripActivity);
                 }
