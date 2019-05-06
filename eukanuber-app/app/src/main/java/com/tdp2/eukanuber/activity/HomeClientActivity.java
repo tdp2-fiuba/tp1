@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -16,20 +17,32 @@ import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
+import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
+import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.services.TripService;
+import com.tdp2.eukanuber.services.UserService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeClientActivity extends SecureActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
+    private Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_client);
         this.createMenu(userLogged);
+        mActivity = this;
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initClientHome();
+        getLastTrip();
 
 
     }
@@ -45,6 +58,32 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
             Intent intent = new Intent(HomeClientActivity.this, NewTripActivity.class);
             fam.collapse();
             startActivity(intent);
+        });
+    }
+
+    private void getLastTrip() {
+        UserService userService = new UserService(this);
+        Call<Trip> call = userService.getLastTrip();
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                Trip trip = response.body();
+                if (trip.getId() != null &&
+                    (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
+                    trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
+                    trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
+                    Intent trackingTripActivity = new Intent(mActivity, TrackingTripActivity.class);
+                    trackingTripActivity.putExtra("currentTrip", trip);
+                    trackingTripActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(trackingTripActivity);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                System.out.print("Ha ocurrido un error al recuperar el viaje.");
+            }
         });
     }
 
@@ -94,6 +133,7 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
                 Toast.LENGTH_LONG
         ).show();
     }
+
     @Override
     public void onBackPressed() {
         finishAffinity();

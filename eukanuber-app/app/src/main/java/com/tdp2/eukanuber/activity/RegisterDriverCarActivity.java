@@ -361,17 +361,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
                 dialog.dismiss();
                 if (response.code() == HttpURLConnection.HTTP_CONFLICT ||
                         response.code() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                    try{
-                        if(response.errorBody() != null && response.errorBody().string() != null){
-                            Gson gson = new Gson();
-                            JsonObject errorBody = gson.fromJson(response.errorBody().string(), JsonObject.class);
-                            showMessage(errorBody.get("message").getAsString());
-
-                        }
-                    }catch (Exception ex){
-
-                    }
-
+                    showMessage("Cuenta de facebook inválida. Debe tener más de 10 amigos para poder utilizarla.");
                     return;
                 }
                 LoginResponse loginResponse = response.body();

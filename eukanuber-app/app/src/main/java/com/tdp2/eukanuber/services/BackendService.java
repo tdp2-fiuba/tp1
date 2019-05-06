@@ -66,4 +66,8 @@ public interface BackendService {
     @POST("users/logout")
     Call<Void> logoutUser();
 
+
+    @GET("users/lastTrip")
+    Call<Trip> getLastTrip();
+
 }

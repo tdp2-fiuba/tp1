@@ -146,7 +146,7 @@ public class RegisterClientActivity extends BaseActivity {
                 dialog.dismiss();
                 if (response.code() == HttpURLConnection.HTTP_CONFLICT ||
                         response.code() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                    showMessage(response.message());
+                    showMessage("Cuenta de facebook inválida. Debe tener más de 10 amigos para poder utilizarla.");
                     return;
                 }
                 LoginResponse loginResponse = response.body();
