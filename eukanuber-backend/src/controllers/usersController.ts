@@ -49,7 +49,10 @@ async function updateUser(req: Express.Request, res: Express.Response) {
 async function getUserPosition(req: Express.Request, res: Express.Response) {
     try {
         const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-        const userPos = await userService.getUserPosition(userId);
+        if (userId.length <= 0) {
+            return;
+        }
+        const userPos = await userService.getUserPosition(req.params.userId);
         res.status(200).json(userPos);
     } catch (e) {
         res
