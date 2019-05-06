@@ -141,13 +141,18 @@ async function getRoute(origin: string, destination: string) {
 }
 
 async function getUserLastTrip(userId: string) {
-  return await db
+    const result = await db
     .table("trips")
     .where("clientId", userId)
     .orWhere("driverId", userId)
     .orderBy("createdDate", "desc")
     .select()
     .first();
+
+    return {
+        ...result,
+        pets: result.pets.split(",")
+    };
 }
 
 export default {
