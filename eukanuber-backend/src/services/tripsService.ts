@@ -130,7 +130,7 @@ async function calculateTripCost(distance: number, pets: string[], activeDrivers
   const driversExtraCost = activeDrivers > 0.5 ? 0 : 50;
 
   // Hay un costo por distancia (a mayor distancia, más caro)
-  const distanceCost = distance * 0.2;
+  const distanceCost = distance * 0.05;
 
   return petsExtraCost + timeExtraCost + driversExtraCost + distanceCost;
 }
