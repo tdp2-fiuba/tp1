@@ -1,9 +1,9 @@
-import Express from "express";
-import Knex from "knex";
-import db from "../db/db";
-import { IUser } from "../models";
-import ICreateUserData from "../models/ICreateUserData";
-import facebookService from "./facebookService";
+import Express from 'express';
+import Knex from 'knex';
+import db from '../db/db';
+import { IUser } from '../models';
+import ICreateUserData from '../models/ICreateUserData';
+import facebookService from './facebookService';
 
 const MIN_FRIEND_COUNT = 10;
 
@@ -13,15 +13,15 @@ interface IPosition {
 }
 
 async function getUsers() {
-  const rows = await db.table("users").select();
+  const rows = await db.table('users').select();
   return rows;
 }
 
 async function getUserById(id: string) {
-  const users = await db("users")
-    .leftJoin("cars", "users.id", "=", "cars.userId")
-    .innerJoin("userMedia", "users.id", "=", "userMedia.userId")
-    .where("users.id", id)
+  const users = await db('users')
+    .leftJoin('cars', 'users.id', '=', 'cars.userId')
+    .innerJoin('userMedia', 'users.id', '=', 'userMedia.userId')
+    .where('users.id', id)
     .select();
 
   if (!users) {
@@ -29,7 +29,7 @@ async function getUserById(id: string) {
   }
 
   const userData = users[0];
-  const userImages = users.map((u: any) => ({ fileName: u.fileName, fileContent: Buffer.from(u.fileContent).toString("base64") }));
+  const userImages = users.map((u: any) => ({ fileName: u.fileName, fileContent: Buffer.from(u.fileContent).toString('base64') }));
 
   const user = {
     id,
@@ -39,10 +39,10 @@ async function getUserById(id: string) {
     position: userData.position,
     state: userData.state,
     images: userImages,
-    loggedIn: userData.loggedIn
+    loggedIn: userData.loggedIn,
   };
 
-  if (user.userType.toLowerCase() === "driver") {
+  if (user.userType.toLowerCase() === 'driver') {
     return { ...user, car: { model: userData.model, brand: userData.brand, plateNumber: userData.plateNumber } };
   }
 
@@ -52,8 +52,8 @@ async function getUserById(id: string) {
 async function getUserByFbId(fbId: string) {
   try {
     const user = await db
-      .table("users")
-      .where("fbId", fbId)
+      .table('users')
+      .where('fbId', fbId)
       .select()
       .first();
 
@@ -62,6 +62,25 @@ async function getUserByFbId(fbId: string) {
     }
 
     return user.id;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+async function getUserRating(id: string) {
+  try {
+    const rating = await db
+      .table('users')
+      .where('id', id)
+      .select()
+      .column('rating')
+      .first();
+
+    if (!rating) {
+      return undefined;
+    }
+
+    return rating;
   } catch (e) {
     return undefined;
   }
@@ -77,7 +96,7 @@ async function createUser(newUser: ICreateUserData) {
     lastName: newUser.lastName,
     position: newUser.position,
     fbAccessToken: newUser.fbAccessToken,
-    fbId: newUser.fbId
+    fbId: newUser.fbId,
   };
 
   const validationResult = await validateFacebookAccount(newUser.fbId, newUser.fbAccessToken);
@@ -89,22 +108,22 @@ async function createUser(newUser: ICreateUserData) {
   const transaction = (await createTransaction()) as Knex.Transaction;
 
   try {
-    const userInsertResult = await transaction("users")
+    const userInsertResult = await transaction('users')
       .insert(user)
-      .returning("id");
+      .returning('id');
     const userId = userInsertResult[0];
     const fields = newUser.images.map(img => ({ userId, fileName: img.fileName, fileContent: img.fileContent }));
-    await transaction("userMedia").insert(fields);
+    await transaction('userMedia').insert(fields);
 
-    if (newUser.userType.toLowerCase() === "driver") {
+    if (newUser.userType.toLowerCase() === 'driver') {
       if (!newUser.car) {
-        throw new Error("Debe registrar un vehículo!");
+        throw new Error('Debe registrar un vehículo!');
       }
       const car = {
         ...newUser.car,
-        userId
+        userId,
       };
-      await transaction("cars").insert(car);
+      await transaction('cars').insert(car);
     }
 
     await transaction.commit();
@@ -112,55 +131,73 @@ async function createUser(newUser: ICreateUserData) {
   } catch (err) {
     transaction.rollback();
     console.error(`User creation transaction aborted!"${err}"`);
-    throw new Error("Creación de usuario abortada!");
+    throw new Error('Creación de usuario abortada!');
   }
 }
 
 async function updateUser(id: string, userData: Partial<IUser>) {
   const user = await db
-    .table("users")
-    .where("id", id)
+    .table('users')
+    .where('id', id)
     .select()
     .first();
 
   const updateData = {
     firstName: userData.firstName ? userData.firstName : user.firstName,
     lastName: userData.lastName ? userData.lastName : user.lastName,
-    position: userData.position ? userData.position : user.position
+    position: userData.position ? userData.position : user.position,
   };
 
+  return await updateUserWithData(id, updateData);
+}
+
+async function rateUser(id: string, rating: number) {
+  const user = await db
+    .table('users')
+    .where('id', id)
+    .select()
+    .first();
+
+  const updateData = {
+    rating: { sum: user.rating.sum + rating, n: user.rating.n + 1 },
+  };
+
+  return await updateUserWithData(id, updateData);
+}
+
+async function updateUserWithData(id: string, updateData: any) {
   await db
-    .table("users")
-    .where("id", id)
+    .table('users')
+    .where('id', id)
     .update(updateData);
 
   return ((await db
-    .table("users")
-    .where("id", id)
+    .table('users')
+    .where('id', id)
     .select()) as string[])[0];
 }
 
 async function getUserPosition(id: string) {
   const currentLoc = await db
-    .table("users")
-    .where("id", id)
-    .select("position")
+    .table('users')
+    .where('id', id)
+    .select('position')
     .first();
 
   return currentLoc as any;
 }
 
 async function updateUserPosition(id: string, pos: IPosition) {
-  const newPos: string = pos.lat + "," + pos.lng;
+  const newPos: string = pos.lat + ',' + pos.lng;
 
   const user = await db
-    .table("users")
-    .where("id", id)
-    .update("position", newPos);
+    .table('users')
+    .where('id', id)
+    .update('position', newPos);
 
   return await db
-    .table("users")
-    .where("id", id)
+    .table('users')
+    .where('id', id)
     .select()
     .first();
 }
@@ -168,8 +205,8 @@ async function updateUserPosition(id: string, pos: IPosition) {
 async function userLogin(id: string) {
   try {
     await db
-      .table("users")
-      .where("id", id)
+      .table('users')
+      .where('id', id)
       .update({ loggedIn: true });
 
     return getUserById(id);
@@ -181,12 +218,12 @@ async function userLogin(id: string) {
 async function userLogout(id: string) {
   try {
     const updateData = {
-      loggedIn: false
+      loggedIn: false,
     };
 
     await db
-      .table("users")
-      .where("id", id)
+      .table('users')
+      .where('id', id)
       .update(updateData);
 
     return true;
@@ -205,7 +242,7 @@ async function isUserLogged(id: string) {
 }
 async function deleteUser(fbId: string) {
   return await db
-    .table("users")
+    .table('users')
     .del()
     .where({ fbId });
 }
@@ -226,7 +263,9 @@ export default {
   userLogin,
   userLogout,
   isUserLogged,
+  rateUser,
+  getUserRating,
   getUserPosition,
   updateUserPosition,
-  deleteUser
+  deleteUser,
 };
