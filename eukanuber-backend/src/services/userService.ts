@@ -4,6 +4,7 @@ import db from '../db/db';
 import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import facebookService from './facebookService';
+var moment = require('moment');
 
 const MIN_FRIEND_COUNT = 10;
 
@@ -67,14 +68,12 @@ async function getUserByFbId(fbId: string) {
   }
 }
 
-async function getUserRating(id: string) {
+async function getUserReviews(id: string) {
   try {
     const rating = await db
-      .table('users')
-      .where('id', id)
-      .select()
-      .column('rating')
-      .first();
+      .table('userReview')
+      .where('reviewee', id)
+      .select();
 
     if (!rating) {
       return undefined;
@@ -151,18 +150,23 @@ async function updateUser(id: string, userData: Partial<IUser>) {
   return await updateUserWithData(id, updateData);
 }
 
-async function rateUser(id: string, rating: number) {
-  const user = await db
-    .table('users')
-    .where('id', id)
-    .select()
-    .first();
+async function submitUserReview(raterId: string, ratedId: string, tripId: string, review: any) {
+  try {
+    const newReview = {
+      reviewer: raterId,
+      reviewee: ratedId,
+      tripId: tripId,
+      stars: review.stars,
+      comment: review.comment,
+      dateTime: moment().format('yyyy-mm-dd:hh:mm:ss'),
+    };
 
-  const updateData = {
-    rating: { sum: user.rating.sum + rating, n: user.rating.n + 1 },
-  };
+    await db.table('userReview').insert(newReview);
 
-  return await updateUserWithData(id, updateData);
+    return newReview as any;
+  } catch (err) {
+    throw new Error(err);
+  }
 }
 
 async function updateUserWithData(id: string, updateData: any) {
@@ -263,8 +267,8 @@ export default {
   userLogin,
   userLogout,
   isUserLogged,
-  rateUser,
-  getUserRating,
+  submitUserReview,
+  getUserReviews,
   getUserPosition,
   updateUserPosition,
   deleteUser,

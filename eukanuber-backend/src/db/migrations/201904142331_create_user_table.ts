@@ -19,7 +19,6 @@ export async function up(knex: Knex): Promise<any> {
     tableBuilder.string('fbAccessToken').notNullable();
 
     tableBuilder.string('userType').notNullable();
-    tableBuilder.jsonb('rating').notNullable();
     tableBuilder.integer('state').defaultTo(0);
 
     tableBuilder.boolean('loggedIn').defaultTo(false);

@@ -4,6 +4,7 @@ import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import { userService } from '../services';
 import { tripsService } from '../services';
+import { map } from 'bluebird';
 
 const secret = 'ALOHOMORA';
 
@@ -129,16 +130,21 @@ async function deleteUser(req: Express.Request, res: Express.Response) {
   }
 }
 
-async function rateUser(req: Express.Request, res: Express.Response) {
+async function submitUserReview(req: Express.Request, res: Express.Response) {
   try {
-    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    if (userId.length <= 0) {
+    //TODO: this should check the user is not rating him/herself
+    //and that rater is user (not driver) who just completed a trip.
+    //TODO: missing comment/actual review. This will probably require
+    //extracting this to a different table.
+    const raterUserId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (raterUserId.length <= 0) {
       return;
     }
 
-    const ratedUserId = req.params.userId;
-    const rating: number = req.body.rating;
-    await userService.rateUser(ratedUserId, rating);
+    const ratedUserId = req.body.userId;
+    const tripId = req.body.tripId;
+    const review = req.body.review; //{stars: 5, comment: "..."}
+    await userService.submitUserReview(raterUserId, ratedUserId, tripId, review);
     return res.sendStatus(200);
   } catch (e) {
     res.sendStatus(500);
@@ -152,12 +158,13 @@ async function getUserRating(req: Express.Request, res: Express.Response) {
       return;
     }
     const ratedUserId = req.params.userId;
-    const rating = await userService.getUserRating(ratedUserId);
-    let stars = 0;
-    if (rating != undefined && rating.n > 0) {
-      stars = rating.sum / rating.n;
+    const reviews: Array<any> = await userService.getUserReviews(ratedUserId);
+    let avgRating = 0;
+    if (reviews != undefined && reviews.length > 0) {
+      let totalStars = reviews.reduce((reviewA: any, reviewB: any) => reviewA.stars + reviewB.stars, { stars: 0 });
+      avgRating = totalStars / reviews.length;
     }
-    return res.sendStatus(200).json({ rating: stars });
+    return res.status(200).json({ rating: avgRating });
   } catch (e) {
     res.sendStatus(500);
   }
@@ -252,7 +259,7 @@ export default {
   getUserById,
   getUserLastTrip,
   createUser,
-  rateUser,
+  submitUserReview,
   getUserRating,
   updateUser,
   getUserPosition,
