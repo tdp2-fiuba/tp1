@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
                 startActivity(intent);
             } else {
-                Intent intent = new Intent(mLoginActivity, HomeClientActivity.class);
+                Intent intent = new Intent(mLoginActivity, FeedbackActivity.class);
                 startActivity(intent);
             }
             return;
