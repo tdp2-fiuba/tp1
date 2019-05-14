@@ -70,9 +70,11 @@
                     android:layout_weight="3">
 
                     <ImageView
+                        android:id="@+id/score1"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/full_star" />
+                        android:src="@drawable/empty_star"
+                        android:onClick="checkScore"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -81,9 +83,11 @@
                     android:layout_weight="3">
 
                     <ImageView
+                        android:id="@+id/score2"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/empty_star" />
+                        android:src="@drawable/empty_star"
+                        android:onClick="checkScore"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -92,9 +96,11 @@
                     android:layout_weight="3">
 
                     <ImageView
+                        android:id="@+id/score3"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/empty_star" />
+                        android:src="@drawable/empty_star"
+                        android:onClick="checkScore"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -103,9 +109,11 @@
                     android:layout_weight="3">
 
                     <ImageView
+                        android:id="@+id/score4"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/empty_star" />
+                        android:src="@drawable/empty_star"
+                        android:onClick="checkScore"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -114,9 +122,11 @@
                     android:layout_weight="3">
 
                     <ImageView
+                        android:id="@+id/score5"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/empty_star" />
+                        android:src="@drawable/empty_star"
+                        android:onClick="checkScore"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -141,7 +151,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:paddingLeft="15dp"
+                android:paddingLeft="25dp"
 
                 >
                 <ImageView
@@ -150,7 +160,6 @@
                     android:src="@drawable/ic_time_white"
                     android:gravity="center_vertical"
                     android:paddingRight="10dp"
-
                     />
                 <TextView
                     android:layout_width="match_parent"
@@ -208,6 +217,7 @@
                 android:id="@+id/feedbackComment"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
+                android:inputType="textMultiLine"
                 android:hint="Escriba comentarios sobre su experiencia con el conductor"
                 />
             <LinearLayout
@@ -223,7 +233,8 @@
                     android:text="ENVIAR CALIFICACIÓN"
                     android:textSize="18dp"
                     android:textColor="@color/colorWhite"
-                    android:layout_gravity="bottom"/>
+                    android:layout_gravity="bottom"
+                    android:onClick="submitFeedback"/>
             </LinearLayout>
 
         </LinearLayout>

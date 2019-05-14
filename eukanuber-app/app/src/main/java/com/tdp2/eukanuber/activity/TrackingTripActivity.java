@@ -178,7 +178,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     @Override
                     public void onFailure(Call<Trip> call, Throwable t) {
                         Log.v("TRIP", t.getMessage());
-                        showMessage("Ha ocurrido un error al solicitar el viaje.");
+                       // showMessage("Ha ocurrido un error al solicitar el viaje.");
 
                     }
                 });
@@ -218,8 +218,9 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
             updateDriverPosition();
         }
         initializeDriver = false;
-        Intent intent = new Intent(this, HomeClientActivity.class);
+        Intent intent = new Intent(this, FeedbackActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("currentTrip", currentTrip);
         showMessage("Viaje finalizado con exito!");
         startActivity(intent);
     }

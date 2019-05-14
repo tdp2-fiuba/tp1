@@ -34,6 +34,7 @@ import com.tdp2.eukanuber.model.UserImage;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
 import com.tdp2.eukanuber.services.UserService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -235,6 +236,23 @@ public class RegisterDriverCarActivity extends BaseActivity {
         return image;
     }
 
+    private Bitmap rotateAndResizeFile(File file) {
+        Bitmap image = null;
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            fileInputStreamReader.read(bytes);
+            Bitmap bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            Bitmap bitmapImageRotated = rotateBitmapIfNecessary(bitmapImage, file);
+            image = resizeImage(bitmapImageRotated);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+
+    }
 
     private Bitmap rotateBitmapIfNecessary(Bitmap bitmap, File file) {
         Bitmap rotatedBitmap = null;
@@ -276,8 +294,31 @@ public class RegisterDriverCarActivity extends BaseActivity {
                 matrix, true);
     }
 
+    private Bitmap resizeImage(Bitmap source) {
+        int srcWidth = source.getWidth();
+        int srcHeight = source.getHeight();
+        int dstWidth = 0;
+        int dstHeight = 0;
+        if (srcWidth > srcHeight) {
+            dstWidth = 500;
+            dstHeight = (dstWidth * srcHeight) / srcWidth;
+        }
+        if (srcWidth <= srcHeight) {
+            dstHeight = 500;
+            dstWidth = (dstHeight * srcWidth) / srcHeight;
+        }
+        return Bitmap.createScaledBitmap(source, dstWidth, dstHeight, false);
+    }
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
 
     public void submitRegisterDriver(View view) {
+
         EditText carBrand = findViewById(R.id.inputRegisterCarBrand);
         EditText carModel = findViewById(R.id.inputRegisterCarModel);
         EditText carPatent = findViewById(R.id.inputRegisterCarPatent);
@@ -305,6 +346,10 @@ public class RegisterDriverCarActivity extends BaseActivity {
             showMessage("La imagen del seguro es obligatoria");
             return;
         }
+        ProgressDialog dialog = new ProgressDialog(RegisterDriverCarActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+
         SharedPreferences settings = getSharedPreferences(RegisterDriverUserActivity.USER_REGISTER_SETTINGS, 0);
         SharedPreferences settingsSecurity = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
 
@@ -314,9 +359,12 @@ public class RegisterDriverCarActivity extends BaseActivity {
         userRegister.addProperty("carBrand", carBrand.getText().toString());
         userRegister.addProperty("carModel", carModel.getText().toString());
         userRegister.addProperty("carPatent", carPatent.getText().toString());
-        userRegister.addProperty("carPicture", getBase64FromFile(carPictureFile));
-        userRegister.addProperty("licensePicture", getBase64FromFile(licensePictureFile));
-        userRegister.addProperty("insurancePicture", getBase64FromFile(insurancePictureFile));
+        Bitmap carPictureBitmap = rotateAndResizeFile(carPictureFile);
+        userRegister.addProperty("carPicture", bitmapToBase64(carPictureBitmap));
+        Bitmap licensePictureBitmap = rotateAndResizeFile(licensePictureFile);
+        userRegister.addProperty("licensePicture", bitmapToBase64(licensePictureBitmap));
+        Bitmap insurancePictureBitmap = rotateAndResizeFile(insurancePictureFile);
+        userRegister.addProperty("insurancePicture", bitmapToBase64(insurancePictureBitmap));
         AccessToken accessTokenFacebook = AccessToken.getCurrentAccessToken();
         UserRegisterRequest userRegisterRequest = new UserRegisterRequest();
         userRegisterRequest.setFbId(accessTokenFacebook.getUserId());
@@ -352,9 +400,7 @@ public class RegisterDriverCarActivity extends BaseActivity {
         userRegisterRequest.setCar(userCar);
         UserService userService = new UserService(this);
         Call<LoginResponse> call = userService.register(userRegisterRequest);
-        ProgressDialog dialog = new ProgressDialog(RegisterDriverCarActivity.this);
-        dialog.setMessage("Espere un momento por favor");
-        dialog.show();
+
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -388,34 +434,4 @@ public class RegisterDriverCarActivity extends BaseActivity {
         editor.commit();
     }
 
-    private Bitmap getBitmapFromFile(File file) {
-        Bitmap bitmapReponse = null;
-        try {
-            FileInputStream fileInputStreamReader = new FileInputStream(file);
-            byte[] bytes = new byte[(int) file.length()];
-            fileInputStreamReader.read(bytes);
-            Bitmap bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            bitmapReponse = rotateBitmapIfNecessary(bitmapImage, file);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bitmapReponse;
-    }
-
-    private String getBase64FromFile(File file) {
-        String base64File = "";
-        try {
-            FileInputStream fileInputStreamReader = new FileInputStream(file);
-            byte[] bytes = new byte[(int) file.length()];
-            fileInputStreamReader.read(bytes);
-            base64File = new String(Base64.encodeToString(bytes, Base64.DEFAULT));
-        } catch (Exception ex) {
-            System.out.print(ex.getMessage());
-        }
-        return base64File;
-
-    }
 }

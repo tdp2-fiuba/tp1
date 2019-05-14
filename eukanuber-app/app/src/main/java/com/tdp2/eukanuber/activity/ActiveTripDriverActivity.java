@@ -159,7 +159,10 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 User userUpdated = response.body();
-                Log.d("USER UPDATED", userUpdated.getId());
+                if(userUpdated != null){
+                    Log.d("USER UPDATED", userUpdated.getId());
+                }
+
 
             }
 
@@ -217,8 +220,9 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
                     currentTrip = response.body();
-                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                    Intent intent = new Intent(mActivity, FeedbackActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("currentTrip", currentTrip);
                     showMessage("Viaje finalizado con exito!");
                     startActivity(intent);
                 }
