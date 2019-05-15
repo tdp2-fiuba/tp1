@@ -1,5 +1,5 @@
-import UserStatus from "./UserStatus";
-import UserTypes from "./UserTypes";
+import UserValidationStatus from './UserValidationStatus';
+import UserTypes from './UserTypes';
 
 export default interface IUser {
   id: string;
@@ -7,6 +7,6 @@ export default interface IUser {
   lastName: string;
   rating: number;
   position: string;
-  status: UserStatus;
+  access: UserValidationStatus;
   userType: UserTypes;
 }

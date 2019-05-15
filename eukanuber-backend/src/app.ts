@@ -17,13 +17,16 @@ app.post('/users/register', usersController.createUser);
 app.get('/users', usersController.getUserById);
 app.put('/users', usersController.updateUser);
 app.put('/users/review', usersController.submitUserReview);
-app.get('/users/review/:userId/rating', usersController.getUserRating);
+app.get('/users/:userId/rating', usersController.getUserRating);
+app.get('/users/:userId/reviews', usersController.getUserReviews);
 app.get('/users/lastTrip', usersController.getUserLastTrip);
 app.get('/users/position/:userId', usersController.getUserPosition);
 app.put('/users/position', usersController.updateUserPosition);
 app.post('/users/login/:fbId', usersController.userLogin);
 app.delete('/users/:fbId', usersController.deleteUser);
 app.post('/users/logout', usersController.userLogout);
+
+//app.post('/users/closest', tr.getProspectiveDrivers);
 
 // Trips endpoints
 app.get('/trips', tripsController.getAll);

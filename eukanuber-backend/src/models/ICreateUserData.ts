@@ -1,6 +1,6 @@
 interface Image {
   fileName: string;
-  fileContent: Buffer;
+  fileContent: string;
 }
 
 export default interface ICreateUserData {

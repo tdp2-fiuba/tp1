@@ -19,11 +19,13 @@ export async function up(knex: Knex): Promise<any> {
     tableBuilder.string('fbAccessToken').notNullable();
 
     tableBuilder.string('userType').notNullable();
+    tableBuilder.integer('access').defaultTo(0);
     tableBuilder.integer('state').defaultTo(0);
 
     tableBuilder.boolean('loggedIn').defaultTo(false);
 
-    tableBuilder.string('position').notNullable();
+    tableBuilder.string('latitude').notNullable();
+    tableBuilder.string('longitude').notNullable();
   });
 }
 

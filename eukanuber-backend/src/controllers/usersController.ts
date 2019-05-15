@@ -4,7 +4,6 @@ import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import { userService } from '../services';
 import { tripsService } from '../services';
-import { map } from 'bluebird';
 
 const secret = 'ALOHOMORA';
 
@@ -151,6 +150,20 @@ async function submitUserReview(req: Express.Request, res: Express.Response) {
   }
 }
 
+async function getUserReviews(req: Express.Request, res: Express.Response) {
+  try {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    if (userId.length <= 0) {
+      return;
+    }
+    const ratedUserId = req.params.userId;
+    const reviews = await userService.getUserReviews(ratedUserId);
+    return res.status(200).json(reviews);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+}
+
 async function getUserRating(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
@@ -158,13 +171,8 @@ async function getUserRating(req: Express.Request, res: Express.Response) {
       return;
     }
     const ratedUserId = req.params.userId;
-    const reviews: Array<any> = await userService.getUserReviews(ratedUserId);
-    let avgRating = 0;
-    if (reviews != undefined && reviews.length > 0) {
-      let totalStars = reviews.reduce((reviewA: any, reviewB: any) => reviewA.stars + reviewB.stars, { stars: 0 });
-      avgRating = totalStars / reviews.length;
-    }
-    return res.status(200).json({ rating: avgRating });
+    const avgRating = await userService.getUserRating(ratedUserId);
+    return res.status(200).json(avgRating);
   } catch (e) {
     res.sendStatus(500);
   }
@@ -267,4 +275,5 @@ export default {
   userLogin,
   userLogout,
   deleteUser,
+  getUserReviews,
 };
