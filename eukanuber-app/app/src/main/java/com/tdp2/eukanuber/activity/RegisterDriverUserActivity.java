@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -23,18 +22,13 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.google.gson.JsonObject;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.tdp2.eukanuber.R;
-import com.tdp2.eukanuber.manager.AppSecurityManager;
-
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -79,21 +73,9 @@ public class RegisterDriverUserActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            String encodedBase64 = null;
-            try {
-                FileInputStream fileInputStreamReader = new FileInputStream(profilePictureFile);
-                byte[] bytes = new byte[(int) profilePictureFile.length()];
-                fileInputStreamReader.read(bytes);
-                Bitmap bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                Bitmap bitmapImageRotated = rotateBitmapIfNecessary(bitmapImage);
-                ImageView profilePictureImage = findViewById(R.id.profilePicture);
-                profilePictureImage.setImageBitmap(bitmapImageRotated);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            Bitmap image = rotateAndResizeFile(profilePictureFile);
+            ImageView profilePictureImage = findViewById(R.id.profilePicture);
+            profilePictureImage.setImageBitmap(image);
         }
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_CANCELED) {
             profilePictureFile = null;
@@ -101,11 +83,29 @@ public class RegisterDriverUserActivity extends BaseActivity {
 
     }
 
-    private Bitmap rotateBitmapIfNecessary(Bitmap bitmap) {
+    private Bitmap rotateAndResizeFile(File file) {
+        Bitmap image = null;
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            fileInputStreamReader.read(bytes);
+            Bitmap bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            Bitmap bitmapImageRotated = rotateBitmapIfNecessary(bitmapImage, file);
+            image = resizeImage(bitmapImageRotated);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+
+    }
+
+    private Bitmap rotateBitmapIfNecessary(Bitmap bitmap, File file) {
         Bitmap rotatedBitmap = null;
 
         try {
-            ExifInterface ei = new ExifInterface(profilePictureFile.getAbsolutePath());
+            ExifInterface ei = new ExifInterface(file.getAbsolutePath());
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -141,6 +141,22 @@ public class RegisterDriverUserActivity extends BaseActivity {
                 matrix, true);
     }
 
+    private Bitmap resizeImage(Bitmap source) {
+        int srcWidth = source.getWidth();
+        int srcHeight = source.getHeight();
+        int dstWidth = 0;
+        int dstHeight = 0;
+        if (srcWidth > srcHeight) {
+            dstWidth = 500;
+            dstHeight = (dstWidth * srcHeight) / srcWidth;
+        }
+        if (srcWidth <= srcHeight) {
+            dstHeight = 500;
+            dstWidth = (dstHeight * srcWidth) / srcHeight;
+        }
+        return Bitmap.createScaledBitmap(source, dstWidth, dstHeight, false);
+    }
+
     public void goRegisterDriverCar(View view) {
         EditText name = mActivity.findViewById(R.id.inputRegisterName);
         EditText lastname = mActivity.findViewById(R.id.inputRegisterLastname);
@@ -160,7 +176,8 @@ public class RegisterDriverUserActivity extends BaseActivity {
         try {
             userRegister.addProperty("name", name.getText().toString());
             userRegister.addProperty("lastname", lastname.getText().toString());
-            userRegister.addProperty("profilePicture", getBase64FromFile(profilePictureFile));
+            Bitmap profileImage = rotateAndResizeFile(profilePictureFile);
+            userRegister.addProperty("profilePicture", bitmapToBase64(profileImage));
             SharedPreferences settings = getSharedPreferences(RegisterDriverUserActivity.USER_REGISTER_SETTINGS, 0);
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("userRegister", userRegister.toString());
@@ -168,7 +185,7 @@ public class RegisterDriverUserActivity extends BaseActivity {
             Intent intent = new Intent(this, RegisterDriverCarActivity.class);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             System.out.print(ex.getMessage());
         }
 
@@ -218,17 +235,12 @@ public class RegisterDriverUserActivity extends BaseActivity {
             }
         }
     }
-    private String getBase64FromFile(File file) {
-        String base64File = "";
-        try {
-            FileInputStream fileInputStreamReader = new FileInputStream(file);
-            byte[] bytes = new byte[(int) file.length()];
-            fileInputStreamReader.read(bytes);
-            base64File = Base64.encodeToString(bytes, Base64.DEFAULT);
-        } catch (Exception ex) {
-            System.out.print(ex.getMessage());
-        }
-        return base64File;
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
     public void showMessage(String message) {

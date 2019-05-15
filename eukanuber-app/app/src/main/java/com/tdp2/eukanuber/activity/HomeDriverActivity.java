@@ -146,6 +146,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
                     intentActiveTripDriver.putExtra("currentTrip", trip);
                     intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    popupOpen = false;
                     showMessage("El viaje ha sido confirmado.");
                     startActivity(intentActiveTripDriver);
                 }
@@ -294,8 +295,8 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         if(handlerRequestTrips != null && runnableRequestTrips != null){
             handlerRequestTrips.removeCallbacks(runnableRequestTrips);
         }
