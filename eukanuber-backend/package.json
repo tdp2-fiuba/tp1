@@ -25,8 +25,10 @@
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.16.5",
     "knex-migrate": "^1.7.2",
+    "knex-postgis": "^0.8.0",
     "moment": "^2.24.0",
     "multer": "^1.4.1",
+    "objection": "^1.6.8",
     "pg": "^7.9.0",
     "shelljs": "^0.8.3",
     "sqlite3": "^4.0.6"

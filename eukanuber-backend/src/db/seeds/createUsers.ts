@@ -5,11 +5,13 @@ async function seed(knex: Knex) {
 
   const newUser = {
     userType: 'Client',
-    position: '43.017218,-89.831479',
+    latitude: '43.017218',
+    longitude: '-89.831479',
     firstName: 'Arthur',
     lastName: 'Dent',
     fbAccessToken: '1232323222',
     fbId: 'afa2a272-6b8d-11e9-a923-1681be663d3e',
+    access: '0',
     state: '0',
   };
 

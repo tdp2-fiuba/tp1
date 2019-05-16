@@ -5,8 +5,9 @@ import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import facebookService from './facebookService';
 var moment = require('moment');
+const { raw } = require('objection');
 
-const MIN_FRIEND_COUNT = 10;
+const MIN_FRIEND_COUNT = 0; //10;
 
 interface IPosition {
   lat: string;
@@ -37,7 +38,8 @@ async function getUserById(id: string) {
     userType: userData.userType,
     firstName: userData.firstName,
     lastName: userData.lastName,
-    position: userData.position,
+    position: userData.latitude + ',' + userData.longitude,
+    access: userData.access,
     state: userData.state,
     images: userImages,
     loggedIn: userData.loggedIn,
@@ -70,16 +72,33 @@ async function getUserByFbId(fbId: string) {
 
 async function getUserReviews(id: string) {
   try {
-    const rating = await db
+    const reviews = await db
       .table('userReview')
       .where('reviewee', id)
       .select();
 
-    if (!rating) {
+    if (!reviews) {
       return undefined;
     }
 
-    return rating;
+    return reviews;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+async function getUserRating(id: string) {
+  try {
+    const avgRating = await db
+      .table('userReview')
+      .where('reviewee', id)
+      .avg('stars');
+
+    if (!avgRating.avg) {
+      return { avg: 0 };
+    }
+
+    return avgRating[0];
   } catch (e) {
     return undefined;
   }
@@ -89,11 +108,21 @@ const createTransaction = () => new Promise(resolve => db.transaction(resolve));
 
 async function createUser(newUser: ICreateUserData) {
   // TODO: ver por que esto no me deja castear usando ...newUser
+
+  const pos =
+    newUser.position
+      .trim()
+      .replace(' ', '')
+      .split(',').length > 1
+      ? newUser.position.split(',')
+      : ['', ''];
+
   const user = {
-    userType: newUser.userType,
+    userType: newUser.userType.toLowerCase(),
     firstName: newUser.firstName,
     lastName: newUser.lastName,
-    position: newUser.position,
+    latitude: pos[0],
+    longitude: pos[1],
     fbAccessToken: newUser.fbAccessToken,
     fbId: newUser.fbId,
   };
@@ -134,6 +163,10 @@ async function createUser(newUser: ICreateUserData) {
   }
 }
 
+async function updateUserState(id: string, state: number) {
+  return await updateUserWithData(id, { state: state });
+}
+
 async function updateUser(id: string, userData: Partial<IUser>) {
   const user = await db
     .table('users')
@@ -141,10 +174,14 @@ async function updateUser(id: string, userData: Partial<IUser>) {
     .select()
     .first();
 
+  const pos = userData.position != undefined ? userData.position.split(',') : '';
+
   const updateData = {
     firstName: userData.firstName ? userData.firstName : user.firstName,
     lastName: userData.lastName ? userData.lastName : user.lastName,
-    position: userData.position ? userData.position : user.position,
+    latitude: pos.length > 1 ? pos[0] : user.latitude,
+    longitude: pos.length > 1 ? pos[1] : user.longitude,
+    state: userData.state ? userData.state : user.state,
   };
 
   return await updateUserWithData(id, updateData);
@@ -185,19 +222,19 @@ async function getUserPosition(id: string) {
   const currentLoc = await db
     .table('users')
     .where('id', id)
-    .select('position')
+    .select('longitude', 'latitude')
     .first();
 
-  return currentLoc as any;
+  return currentLoc.latitude + ',' + currentLoc.longitude;
 }
 
 async function updateUserPosition(id: string, pos: IPosition) {
-  const newPos: string = pos.lat + ',' + pos.lng;
+  const newPos = { latitude: pos.lat, longitude: pos.lng };
 
   const user = await db
     .table('users')
     .where('id', id)
-    .update('position', newPos);
+    .update(newPos);
 
   return await db
     .table('users')
@@ -258,6 +295,35 @@ async function validateFacebookAccount(fbId: string, fbAccessToken: string) {
   return { isValid, errorMessage: !isValid && `Cuenta de facebook invalida. Debe tener más de ${MIN_FRIEND_COUNT} amigos en la cuenta` };
 }
 
+async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> {
+  const origin = tripOrigin.split(',');
+  //const limitDrivers = 20;
+  const args = [origin[0], origin[0], origin[1]]; //[lat, lat, lng]
+  try {
+    const users = await db
+      .table('users')
+      .select(
+        db.raw(
+          `users.id, 
+          ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
+    * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 as distance`,
+          args
+        )
+      )
+      .where(
+        db.raw(
+          `ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
+      * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 <= 2.48548 and users.state=0`,
+          args
+        )
+      );
+    return users;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
 export default {
   getUsers,
   getUserById,
@@ -270,6 +336,9 @@ export default {
   submitUserReview,
   getUserReviews,
   getUserPosition,
+  getProspectiveDrivers,
   updateUserPosition,
   deleteUser,
+  getUserRating,
+  updateUserState,
 };

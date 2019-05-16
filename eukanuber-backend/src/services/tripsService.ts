@@ -1,26 +1,27 @@
-import Knex from "knex";
-import db from "../db/db";
-import { ICreateTripData, ITrip, TripStatus, UserStatus, UserTypes } from "../models";
-import googleMapsService from "./googleMapsService";
+import Knex from 'knex';
+import db from '../db/db';
+import { ICreateTripData, ITrip, TripStatus, UserValidationStatus, UserTypes, IUser } from '../models';
+import googleMapsService from './googleMapsService';
+import UserState from '../models/UserState';
 
 async function getTrips(status: TripStatus) {
   const trips = await db
-    .table("trips")
-    .orderBy("createdDate", "desc")
+    .table('trips')
+    .orderBy('createdDate', 'desc')
     .modify((queryBuilder: Knex.QueryBuilder) => {
       if (status) {
-        queryBuilder.where("status", status);
+        queryBuilder.where('status', status);
       }
     })
     .select();
 
-  return trips.map((trip: any) => ({ ...trip, pets: trip.pets.split(",") }));
+  return trips.map((trip: any) => ({ ...trip, pets: trip.pets.split(',') }));
 }
 
 async function getTripById(id: string): Promise<ITrip> {
   const result = await db
-    .table("trips")
-    .where("id", id)
+    .table('trips')
+    .where('id', id)
     .select()
     .first();
 
@@ -30,7 +31,7 @@ async function getTripById(id: string): Promise<ITrip> {
 
   return {
     ...result,
-    pets: result.pets.split(",")
+    pets: result.pets.split(','),
   };
 }
 
@@ -43,49 +44,113 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
 
   const newTrip = {
     ...trip,
-    pets: trip.pets.join(",").replace(/\s/g, ""),
+    pets: trip.pets.join(',').replace(/\s/g, ''),
     originCoordinates,
     destinationCoordinates,
     clientId: trip.clientId,
     status: TripStatus.PENDING,
     createdDate: new Date().toISOString(),
     ...routeData,
-    routes
+    routes,
   };
 
   const tripCreated = await db
     .insert(newTrip)
-    .into("trips")
-    .returning("*");
+    .into('trips')
+    .returning('*');
 
   return {
     ...tripCreated[0],
-    pets: trip.pets
+    pets: trip.pets,
   };
+}
+
+async function driverAcceptedTrip(tripId: string) {
+  try {
+    const status = await db
+      .table('trips')
+      .where('id', tripId)
+      .select('status');
+    return status[0].status === 4; // TripStatus.DRIVER_GOING_ORIGIN; //TODO: el TripStatus le da undefined... revisar esto...
+  } catch (e) {
+    return false;
+  }
+}
+
+const updateTransaction = () => new Promise(resolve => db.transaction(resolve));
+
+async function driverAcceptTrip(tripId: string, driverId: string) {
+  return await changeDriverTripStatus(tripId, driverId, TripStatus.DRIVER_GOING_ORIGIN, UserState.TRAVELLING);
+}
+
+async function driverRejectTrip(tripId: string, driverId: string) {
+  return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
+}
+
+async function changeDriverTripStatus(tripId: string, driverId: string, tripState: TripStatus, driverState: UserState) {
+  const transaction = (await updateTransaction()) as Knex.Transaction;
+
+  try {
+    //trip state changes to confirmed.
+    const trip = await transaction('trips')
+      .where('id', tripId)
+      .update({ driverId: driverId, status: tripState });
+
+    //driver status changes to busy/travelling.
+    await transaction('users')
+      .update({ state: driverState })
+      .where('id', driverId);
+
+    await transaction.commit();
+    return trip as any;
+  } catch (err) {
+    transaction.rollback();
+    console.error(`Assign driver to trip aborted! "${err}"`);
+    return {};
+  }
 }
 
 async function updateTripStatus(id: string, status: TripStatus) {
   await db
-    .table("trips")
-    .where("id", id)
-    .update({ status });
+    .table('trips')
+    .where('id', id)
+    .update({ status: status });
 
   return await this.getTripById(id);
 }
 
-async function assignDriverToTrip(id: string, driverId: string) {
-  const tripToUpdate = await getTripById(id);
+const assignTransaction = () => new Promise(resolve => db.transaction(resolve));
 
-  if (tripToUpdate.driverId && tripToUpdate.driverId !== driverId) {
-    throw new Error(`The trip '${id}' is already assigned to driver '${tripToUpdate.driverId}'`);
+async function assignDriverToTrip(tripId: string, driverId: string) {
+  const transaction = (await assignTransaction()) as Knex.Transaction;
+
+  try {
+    const bookedDriver = await transaction('users')
+      .select('*')
+      .where('id', driverId)
+      .first();
+
+    if (bookedDriver.state != UserState.IDLE) {
+      throw new Error('Driver unavailable!');
+    }
+
+    //book driver (cannot be selected for other trips while handling this one).
+    await transaction('users')
+      .update({ state: UserState.WAITING_TRIP_CONFIRM })
+      .where('id', driverId);
+
+    //temporarily assign driver to trip
+    let trip = await transaction('trips')
+      .update({ driverId: driverId, status: TripStatus.DRIVER_CONFIRM_PENDING })
+      .where('id', tripId);
+
+    await transaction.commit();
+    return trip as any;
+  } catch (err) {
+    transaction.rollback();
+    console.error(`User creation transaction aborted!"${err}"`);
+    return {};
   }
-
-  await db
-    .table("trips")
-    .where("id", id)
-    .update({ driverId, status: TripStatus.DRIVER_GOING_ORIGIN });
-
-  return await getTripById(id);
 }
 
 async function calculateTripData(routes: string, pets: string[]) {
@@ -97,27 +162,27 @@ async function calculateTripData(routes: string, pets: string[]) {
   return {
     distance: route.legs[0].distance.text,
     duration: route.legs[0].duration.text,
-    price: `$${price.toFixed(2)}`
+    price: `$${price.toFixed(2)}`,
   };
 }
 
 async function getDriversAvailability(): Promise<number> {
   const driversWithTrips = (await db
-    .table("trips")
-    .whereNotNull("driverId")
-    .andWhereNot("status", TripStatus.COMPLETED)
-    .count("id"))[0].count;
+    .table('trips')
+    .whereNotNull('driverId')
+    .andWhereNot('status', TripStatus.COMPLETED)
+    .count('id'))[0].count;
   const activeDrivers = (await db
-    .table("users")
-    .where("userType", UserTypes.Driver)
-    .andWhere("state", UserStatus.USER_VALIDATED)
-    .count("id"))[0].count;
+    .table('users')
+    .where('userType', UserTypes.Driver)
+    .andWhere('access', UserValidationStatus.USER_VALIDATED)
+    .count('id'))[0].count;
 
   return activeDrivers / driversWithTrips;
 }
 
 async function calculateTripCost(distance: number, pets: string[], activeDrivers: number) {
-  const getPetSizeExtraCost = (petSize: string) => (petSize === "S" ? 0 : petSize === "M" ? 20 : 40);
+  const getPetSizeExtraCost = (petSize: string) => (petSize === 'S' ? 0 : petSize === 'M' ? 20 : 40);
   const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
   // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M y L tienen recargo)
@@ -141,18 +206,18 @@ async function getRoute(origin: string, destination: string) {
 }
 
 async function getUserLastTrip(userId: string) {
-    const result = await db
-    .table("trips")
-    .where("clientId", userId)
-    .orWhere("driverId", userId)
-    .orderBy("createdDate", "desc")
+  const result = await db
+    .table('trips')
+    .where('clientId', userId)
+    .orWhere('driverId', userId)
+    .orderBy('createdDate', 'desc')
     .select()
     .first();
 
-    return {
-        ...result,
-        pets: result.pets.split(",")
-    };
+  return {
+    ...result,
+    pets: result.pets.split(','),
+  };
 }
 
 export default {
@@ -162,5 +227,8 @@ export default {
   updateTripStatus,
   assignDriverToTrip,
   getRoute,
-  getUserLastTrip
+  getUserLastTrip,
+  driverAcceptedTrip,
+  driverAcceptTrip,
+  driverRejectTrip,
 };
