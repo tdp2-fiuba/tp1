@@ -255,6 +255,7 @@ async function getUserLastTrip(req: Express.Request, res: Express.Response) {
       .json(trip)
       .send();
   } catch (e) {
+    console.log(e.message);
     res
       .status(500)
       .json({ message: e.message })
