@@ -276,4 +276,5 @@ export default {
   userLogout,
   deleteUser,
   getUserReviews,
+  getUserIdIfLoggedWithValidCredentials,
 };

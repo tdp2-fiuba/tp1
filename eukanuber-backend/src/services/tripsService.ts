@@ -71,7 +71,7 @@ async function driverAcceptedTrip(tripId: string) {
       .table('trips')
       .where('id', tripId)
       .select('status');
-    return status === TripStatus.DRIVER_GOING_ORIGIN;
+    return status[0].status === 4; // TripStatus.DRIVER_GOING_ORIGIN; //TODO: el TripStatus le da undefined... revisar esto...
   } catch (e) {
     return false;
   }
@@ -84,7 +84,7 @@ async function driverAcceptTrip(tripId: string, driverId: string) {
 }
 
 async function driverRejectTrip(tripId: string, driverId: string) {
-  return await changeDriverTripStatus(tripId, driverId, TripStatus.CLIENT_ACCEPTED, UserState.IDLE);
+  return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
 }
 
 async function changeDriverTripStatus(tripId: string, driverId: string, tripState: TripStatus, driverState: UserState) {
@@ -94,7 +94,7 @@ async function changeDriverTripStatus(tripId: string, driverId: string, tripStat
     //trip state changes to confirmed.
     const trip = await transaction('trips')
       .where('id', tripId)
-      .update({ status: tripState });
+      .update({ driverId: driverId, status: tripState });
 
     //driver status changes to busy/travelling.
     await transaction('users')
@@ -105,7 +105,7 @@ async function changeDriverTripStatus(tripId: string, driverId: string, tripStat
     return trip as any;
   } catch (err) {
     transaction.rollback();
-    console.error(`User creation transaction aborted!"${err}"`);
+    console.error(`Assign driver to trip aborted! "${err}"`);
     return {};
   }
 }
@@ -114,7 +114,7 @@ async function updateTripStatus(id: string, status: TripStatus) {
   await db
     .table('trips')
     .where('id', id)
-    .update({ status });
+    .update({ status: status });
 
   return await this.getTripById(id);
 }
@@ -141,7 +141,7 @@ async function assignDriverToTrip(tripId: string, driverId: string) {
 
     //temporarily assign driver to trip
     let trip = await transaction('trips')
-      .update({ driver: driverId, state: TripStatus.DRIVER_CONFIRM_PENDING })
+      .update({ driverId: driverId, status: TripStatus.DRIVER_CONFIRM_PENDING })
       .where('id', tripId);
 
     await transaction.commit();

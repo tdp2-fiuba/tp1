@@ -163,6 +163,10 @@ async function createUser(newUser: ICreateUserData) {
   }
 }
 
+async function updateUserState(id: string, state: number) {
+  return await updateUserWithData(id, { state: state });
+}
+
 async function updateUser(id: string, userData: Partial<IUser>) {
   const user = await db
     .table('users')
@@ -177,6 +181,7 @@ async function updateUser(id: string, userData: Partial<IUser>) {
     lastName: userData.lastName ? userData.lastName : user.lastName,
     latitude: pos.length > 1 ? pos[0] : user.latitude,
     longitude: pos.length > 1 ? pos[1] : user.longitude,
+    state: userData.state ? userData.state : user.state,
   };
 
   return await updateUserWithData(id, updateData);
@@ -335,4 +340,5 @@ export default {
   updateUserPosition,
   deleteUser,
   getUserRating,
+  updateUserState,
 };

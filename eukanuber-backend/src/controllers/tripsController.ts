@@ -1,6 +1,8 @@
 import Express from 'express';
 import { ICreateTripData, ILocation, ITrip, TripStatus, IUser } from '../models';
 import { tripsService, userService } from '../services';
+import usersController from './usersController';
+import UserState from '../models/UserState';
 
 async function getAll(req: Express.Request, res: Express.Response) {
   const status: TripStatus = req.query.status;
@@ -28,14 +30,29 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
     if (trip.status) {
       let updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
       if (trip.status == TripStatus.CLIENT_ACCEPTED) {
-        // trigger async algorithm to assign driver.
-        updatedTrip = await assignDriverToTrip(tripId);
-      }
+        let trip = await tripsService.getTripById(tripId);
+        let drivers: Array<IUser> = await userService.getProspectiveDrivers(trip.originCoordinates);
 
-      return res
-        .status(200)
-        .json(updatedTrip)
-        .send();
+        //TODO: separar en subgrupos y ordenarlos por nota
+        if (!(drivers.length > 0)) {
+          //trip remains in state CLIENT_ACCEPTED if
+          //no drivers are found in the area.
+          return res
+            .status(200)
+            .json(updatedTrip)
+            .send();
+        }
+
+        //change trip status to DRIVER_CONFIRM_PENDING so client knows driver is being assigned...
+        updatedTrip = await tripsService.updateTripStatus(tripId, TripStatus.DRIVER_CONFIRM_PENDING);
+        res
+          .status(200)
+          .json(updatedTrip)
+          .send();
+
+        //trigger async algorithm to assign driver.
+        return await assignDriverToTrip(trip, drivers);
+      }
     }
 
     // Send a Bad request
@@ -48,48 +65,41 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
   }
 }
 
-async function assignDriverToTrip(tripId: string) {
+async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
   let driverPicked = false;
   try {
-    let trip = await tripsService.getTripById(tripId);
-    let drivers: Array<IUser> = await userService.getProspectiveDrivers(trip.origin);
-
-    //TODO: separar en subgrupos y ordenarlos por nota
-
-    //assign driver to a trip:
-    await tripsService.assignDriverToTrip(trip.id, drivers[0].id);
-
     while (!driverPicked && drivers.length > 0) {
-      let timeout = new Promise(function(resolve, reject) {
-        //timeout for driver to confirm/reject trip.
-        setTimeout(resolve, 60, 'Driver timeout reached!');
-      });
+      //assign driver to a trip:
+      await tripsService.assignDriverToTrip(trip.id, drivers[0].id);
 
-      let tripAccepted = new Promise(async function(resolve, reject) {
-        //wait for driver to confirm or reject trip.
-        let accepted = false;
-        while (!accepted) {
-          console.log('Wating on driver...');
-          accepted = await tripsService.driverAcceptedTrip(trip.id);
-        }
-        console.log('Driver successfully assigned!');
-      });
+      let timeoutReached = false;
+      let timeout = setTimeout(function() {
+        timeoutReached = true;
+        console.log('Driver timeout reached');
+      }, 60000);
 
-      Promise.race([tripAccepted, timeout]).then(function(assigned) {
-        driverPicked = assigned as boolean;
-        if (!assigned) {
-          //penalize driver if status is idle.
-          //TODO:if unavailable, driver perhaps signed off or is out of workhours, check with client whether they should
-          //be penalized in this case.
-          //remove driver from prospective driver's list and continue with algorithm:
-          drivers.pop();
-        } else {
-          //permanently assign driver to trip
-          return true; //return trip
-        }
-      });
+      let accepted = false;
+      while (!accepted && !timeoutReached) {
+        console.log('Wating on driver...');
+        accepted = await tripsService.driverAcceptedTrip(trip.id);
+      }
+
+      if (!accepted) {
+        //penalize driver if status is idle.
+        //TODO:if unavailable, driver perhaps signed off or is out of workhours, check with client whether they should
+        //be penalized in this case.
+        //TODO: check if rejected by driver.
+        //remove driver from prospective driver's list and continue with algorithm:
+        await userService.updateUserState(drivers[0].id, UserState.IDLE);
+        drivers.pop();
+      } else {
+        clearTimeout(timeout);
+        console.log('Driver accepted trip!');
+        return;
+      }
     }
-    return false; //return {}
+    //driver was not found so trip goes back to state CLIENT_ACCEPTED.
+    return await tripsService.updateTripStatus(trip.id, TripStatus.CLIENT_ACCEPTED);
   } catch (e) {
     console.log('Error assigning driver to trip: ' + e);
     return {};
@@ -104,10 +114,31 @@ async function getRoute(req: Express.Request, res: Express.Response) {
   return res.json(route);
 }
 
+async function acceptTrip(req: Express.Request, res: Express.Response) {
+  try {
+    const tripId = req.params.id;
+    const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
+    await tripsService.driverAcceptTrip(tripId, driverId);
+    res.status(200).send();
+  } catch (e) {
+    res.status(500).send();
+  }
+}
+
+async function rejectTrip(req: Express.Request, res: Express.Response) {
+  try {
+    res.status(200).send();
+  } catch (e) {
+    res.status(500).send();
+  }
+}
+
 export default {
   getAll,
   getById,
   createTrip,
   updateTrip,
   getRoute,
+  acceptTrip,
+  rejectTrip,
 };
