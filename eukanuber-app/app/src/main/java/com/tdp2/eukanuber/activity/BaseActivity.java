@@ -93,14 +93,19 @@ abstract class BaseActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_profile) {
-            // Handle the camera action
+        if (id == R.id.nav_home) {
+            SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
+            User user = AppSecurityManager.getUserLogged(settings);
+            if (user.getUserType().equals(User.USER_TYPE_DRIVER)) {
+                Intent intent = new Intent(baseActivity, HomeDriverActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(baseActivity, HomeClientActivity.class);
+                startActivity(intent);
+            }
         } else if (id == R.id.nav_trips) {
-
-        } else if (id == R.id.nav_prices) {
-
-        } else if (id == R.id.nav_terms) {
-
+            Intent intent = new Intent(baseActivity, TripHistoryActivity.class);
+            startActivity(intent);
         } else if (id == R.id.logout){
             SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
             UserService userService = new UserService(this);

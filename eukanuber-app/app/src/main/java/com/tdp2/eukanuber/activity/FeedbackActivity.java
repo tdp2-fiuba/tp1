@@ -38,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FeedbackActivity extends BaseActivity {
+public class FeedbackActivity extends SecureActivity {
     Activity mActivity;
     Bitmap bitmapImageProfile;
     Integer score;
