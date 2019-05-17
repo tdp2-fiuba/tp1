@@ -1,8 +1,9 @@
 import Knex from 'knex';
 import db from '../db/db';
-import { ICreateTripData, ITrip, TripStatus, UserValidationStatus, UserTypes, IUser } from '../models';
+import { ICreateTripData, ITrip, TripStatus, UserValidationStatus, UserTypes } from '../models';
 import googleMapsService from './googleMapsService';
 import UserState from '../models/UserState';
+import userService from './userService';
 
 async function getTrips(status: TripStatus) {
   const trips = await db
@@ -84,7 +85,9 @@ async function driverAcceptTrip(tripId: string, driverId: string) {
 }
 
 async function driverRejectTrip(tripId: string, driverId: string) {
-  return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
+  await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
+  //TODO: change the stars depending on how long it took to reject and number of existing reviews.
+  return await userService.penalizeDriverRejectTrip(driverId, tripId);
 }
 
 async function changeDriverTripStatus(tripId: string, driverId: string, tripState: TripStatus, driverState: UserState) {
@@ -220,6 +223,20 @@ async function getUserLastTrip(userId: string) {
   };
 }
 
+async function getDriverPendingTrips(driverId: string) {
+  try {
+    const pendingTrips = await db
+      .table('trips')
+      .where('driverId', driverId)
+      .andWhere('status', TripStatus.DRIVER_CONFIRM_PENDING)
+      .first();
+    return pendingTrips;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
 export default {
   getTrips,
   getTripById,
@@ -231,4 +248,5 @@ export default {
   driverAcceptedTrip,
   driverAcceptTrip,
   driverRejectTrip,
+  getDriverPendingTrips,
 };

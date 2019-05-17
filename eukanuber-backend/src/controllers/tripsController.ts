@@ -69,13 +69,17 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
   let driverPicked = false;
   try {
     while (!driverPicked && drivers.length > 0) {
+      const driver = drivers.shift();
+      const driverId: string = driver.id;
+      console.log(`New candidate driver: '${driverId}'`);
+
       //assign driver to a trip:
-      await tripsService.assignDriverToTrip(trip.id, drivers[0].id);
+      await tripsService.assignDriverToTrip(trip.id, driverId);
 
       let timeoutReached = false;
       let timeout = setTimeout(function() {
         timeoutReached = true;
-        console.log('Driver timeout reached');
+        console.log('Driver timeout reached!');
       }, 60000);
 
       let accepted = false;
@@ -84,20 +88,22 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
         accepted = await tripsService.driverAcceptedTrip(trip.id);
       }
 
-      if (!accepted) {
-        //penalize driver if status is idle.
-        //TODO:if unavailable, driver perhaps signed off or is out of workhours, check with client whether they should
-        //be penalized in this case.
-        //TODO: check if rejected by driver.
-        //remove driver from prospective driver's list and continue with algorithm:
-        await userService.updateUserState(drivers[0].id, UserState.IDLE);
-        drivers.pop();
-      } else {
-        clearTimeout(timeout);
+      clearTimeout(timeout);
+
+      if (accepted) {
         console.log('Driver accepted trip!');
         return;
       }
+
+      if (timeoutReached) {
+        //penalize driver for timeout.
+        await userService.penalizeDriverIgnoredTrip(driverId, trip.id);
+      }
+
+      //remove driver from prospective driver's list and continue with algorithm:
+      await userService.updateUserState(driverId, UserState.IDLE);
     }
+
     //driver was not found so trip goes back to state CLIENT_ACCEPTED.
     return await tripsService.updateTripStatus(trip.id, TripStatus.CLIENT_ACCEPTED);
   } catch (e) {
@@ -127,6 +133,9 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
 
 async function rejectTrip(req: Express.Request, res: Express.Response) {
   try {
+    const tripId = req.params.id;
+    const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
+    await tripsService.driverRejectTrip(tripId, driverId);
     res.status(200).send();
   } catch (e) {
     res.status(500).send();

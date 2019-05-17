@@ -262,6 +262,19 @@ async function getUserLastTrip(req: Express.Request, res: Express.Response) {
   }
 }
 
+async function getDriverPendingTrips(req: Express.Request, res: Express.Response) {
+  try {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    return await tripsService.getDriverPendingTrips(userId);
+  } catch (e) {
+    console.log(e.message);
+    res
+      .status(500)
+      .json({ message: e.message })
+      .send();
+  }
+}
+
 export default {
   getUsers,
   getUserById,
@@ -277,4 +290,5 @@ export default {
   deleteUser,
   getUserReviews,
   getUserIdIfLoggedWithValidCredentials,
+  getDriverPendingTrips,
 };

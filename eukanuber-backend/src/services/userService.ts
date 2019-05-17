@@ -187,6 +187,17 @@ async function updateUser(id: string, userData: Partial<IUser>) {
   return await updateUserWithData(id, updateData);
 }
 
+async function penalizeDriverIgnoredTrip(driverId: string, tripId: string) {
+  //TODO: consider number of reviews the driver has to moderate impact on avg.
+  //TODO:if unavailable, driver perhaps signed off or is out of workhours, check with client whether they should
+  //be penalized in this case.
+  return await submitUserReview(driverId, driverId, tripId, { stars: 1, comment: `IGNORED TRIP '${tripId}'` });
+}
+
+async function penalizeDriverRejectTrip(driverId: string, tripId: string) {
+  return await submitUserReview(driverId, driverId, tripId, { stars: 3, review: `REJECTED TRIP '${tripId}'.` });
+}
+
 async function submitUserReview(raterId: string, ratedId: string, tripId: string, review: any) {
   try {
     const newReview = {
@@ -195,7 +206,7 @@ async function submitUserReview(raterId: string, ratedId: string, tripId: string
       tripId: tripId,
       stars: review.stars,
       comment: review.comment,
-      dateTime: moment().format('yyyy-mm-dd:hh:mm:ss'),
+      dateTime: moment().format('LLLL'),
     };
 
     await db.table('userReview').insert(newReview);
@@ -316,7 +327,8 @@ async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> 
       * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 <= 2.48548 and users.state=0`,
           args
         )
-      );
+      )
+      .andWhere('users.userType', 'driver');
     return users;
   } catch (e) {
     console.log(e);
@@ -341,4 +353,6 @@ export default {
   deleteUser,
   getUserRating,
   updateUserState,
+  penalizeDriverIgnoredTrip,
+  penalizeDriverRejectTrip,
 };
