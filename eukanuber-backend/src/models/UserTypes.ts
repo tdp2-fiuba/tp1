@@ -1,6 +1,6 @@
 enum UserTypes {
-  Client = "Client",
-  Driver = "Driver"
+  Client = "client",
+  Driver = "driver"
 }
 
 export default UserTypes;

@@ -25,8 +25,11 @@ import retrofit2.http.Query;
 public interface BackendService {
 
     String API_PATH = "http://192.168.0.27:3000/";
-   // String API_PATH = "http://10.0.2.2:3000/";
+    // String API_PATH = "http://10.0.2.2:3000/";
     //String API_PATH = "https://eukanuber-backend.herokuapp.com/";
+
+    @GET("trips")
+    Call<List<Trip>> getAll();
 
     @GET("trips")
     Call<List<Trip>> getAll(@Query("status") String status);

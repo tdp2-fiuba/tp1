@@ -216,7 +216,9 @@ async function getUserLastTrip(userId: string) {
     .orderBy('createdDate', 'desc')
     .select()
     .first();
-
+  if (result === undefined) {
+    return {};
+  }
   return {
     ...result,
     pets: result.pets.split(','),

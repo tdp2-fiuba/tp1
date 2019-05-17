@@ -68,7 +68,7 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
                 Trip trip = response.body();
-                if (trip != null &&
+                if (trip != null && trip.getId() != null &&
                     (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
                     trip.getStatus() == TripStatus.IN_TRAVEL.ordinal())) {
 

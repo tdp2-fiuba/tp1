@@ -5,23 +5,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_profile"
-            android:title="Perfil" />
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_location_black"
+            android:title="Home" />
         <item
             android:id="@+id/nav_trips"
             android:icon="@drawable/ic_menu_trip"
             android:title="Mis viajes" />
-        <item
-            android:id="@+id/nav_prices"
-            android:icon="@drawable/ic_menu_price"
-            android:title="Tarifas" />
-
-        <item
-            android:id="@+id/nav_terms"
-            android:icon="@drawable/ic_menu_terms"
-            android:title="Terminos y Condiciones" />
-
         <item
             android:id="@+id/logout"
             android:icon="@drawable/ic_logout"
