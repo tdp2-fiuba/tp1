@@ -223,6 +223,31 @@ describe("tripsService", () => {
     });
   });
 
+  describe("#tripPricing", () => {
+    before(async () => {
+      sandbox.reset();
+      const routes = JSON.stringify([{ legs: [{ distance: { value: 5000, text: "5km" }, duration: { text: "20min", value: "20" } }] }]);
+      const pets = ["S", "M", "L"];
+      const trip = { pets };
+
+      googleMapsServiceMock.getDirections.resolves(routes);
+
+      result = await tripsService.createTrip(trip as any);
+    });
+
+    it("should call the db to retrieve the trips", () => {
+      expect(googleMapsService.getGeocode).calledTwice;
+      expect(googleMapsService.getDirections).calledOnce;
+      expect(dbMock.insert).calledOnce;
+      expect(dbMock.into).calledWith("trips");
+    });
+
+    it("should return a list of trips", () => {
+      expect(result).to.be.ok;
+      expect(result.tripPricing).equal();
+    });
+  });
+
   function getDbMock(): SinonStubbedInstance<Knex> {
     const mock = sandbox.stub<Knex>(db);
     mock.table.returnsThis();

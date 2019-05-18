@@ -200,7 +200,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
     }
 
     // Hay un costo por distancia: 25 pesos por km
-    const distanceCost = distance * 25;
+    const distanceCost = (distance / 1000) * 25;
 
     //const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
