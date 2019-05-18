@@ -66,9 +66,8 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
 }
 
 async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
-  let driverPicked = false;
   try {
-    while (!driverPicked && drivers.length > 0) {
+    while (drivers.length > 0) {
       const driver = drivers.shift();
       const driverId: string = driver.id;
       console.log(`New candidate driver: '${driverId}'`);
@@ -100,12 +99,6 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
       if (timeoutReached) {
         //penalize driver for timeout.
         await userService.penalizeDriverIgnoredTrip(driverId, trip.id);
-      }
-
-      if (rejected) {
-        //penalize driver for rejecting.
-        //TODO: change the stars depending on how long it took to reject and number of existing reviews.
-        await userService.penalizeDriverRejectTrip(driverId, trip.id);
       }
 
       //remove driver from prospective driver's list and continue with algorithm:
@@ -142,8 +135,9 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
 async function rejectTrip(req: Express.Request, res: Express.Response) {
   try {
     const tripId = req.params.id;
+    const responseTime: number = req.body.time;
     const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-    await tripsService.driverRejectTrip(tripId, driverId);
+    await tripsService.driverRejectTrip(tripId, driverId, responseTime);
     res.status(200).send();
   } catch (e) {
     res.status(500).send();

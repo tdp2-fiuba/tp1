@@ -84,7 +84,9 @@ async function driverAcceptTrip(tripId: string, driverId: string) {
   return await changeDriverTripStatus(tripId, driverId, TripStatus.DRIVER_GOING_ORIGIN, UserState.TRAVELLING);
 }
 
-async function driverRejectTrip(tripId: string, driverId: string) {
+async function driverRejectTrip(tripId: string, driverId: string, responseTime: number) {
+  await userService.penalizeDriverRejectTrip(driverId, tripId, responseTime);
+
   return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
 }
 
@@ -231,9 +233,9 @@ async function getDriverPendingTrips(driverId: string) {
       .andWhere('status', TripStatus.DRIVER_CONFIRM_PENDING)
       .first();
     return {
-        ...pendingTrip,
-        pets: pendingTrip.pets.split(','),
-    }
+      ...pendingTrip,
+      pets: pendingTrip.pets.split(','),
+    };
   } catch (e) {
     console.log(e);
     return [];

@@ -8,6 +8,7 @@ var moment = require('moment');
 const { raw } = require('objection');
 
 const MIN_FRIEND_COUNT = 0; //10;
+const REJECTION_TIME_LIMIT = 10;
 
 interface IPosition {
   lat: string;
@@ -75,7 +76,8 @@ async function getUserReviews(id: string) {
     const reviews = await db
       .table('userReview')
       .where('reviewee', id)
-      .select();
+      .andWhereNot('reviewer', id) //If reviewer is user, then those correspond to penalizations, should not be returned.
+      .select('*');
 
     if (!reviews) {
       return undefined;
@@ -89,16 +91,18 @@ async function getUserReviews(id: string) {
 
 async function getUserRating(id: string) {
   try {
-    const avgRating = await db
+    const rating = await db
       .table('userReview')
       .where('reviewee', id)
-      .avg('stars');
+      .sum({ sum: 'stars' })
+      .count({ count: 'stars' })
+      .groupBy('reviewee');
 
-    if (!avgRating.avg) {
-      return { avg: 0 };
+    if (!rating) {
+      return { sum: 0, count: 0 };
     }
 
-    return avgRating[0];
+    return rating;
   } catch (e) {
     return undefined;
   }
@@ -194,8 +198,14 @@ async function penalizeDriverIgnoredTrip(driverId: string, tripId: string) {
   return await submitUserReview(driverId, driverId, tripId, { stars: 1, comment: `IGNORED TRIP '${tripId}'` });
 }
 
-async function penalizeDriverRejectTrip(driverId: string, tripId: string) {
-  return await submitUserReview(driverId, driverId, tripId, { stars: 3, review: `REJECTED TRIP '${tripId}'.` });
+async function penalizeDriverRejectTrip(driverId: string, tripId: string, responseTime: number) {
+  //penalize driver by submitting a review with driverId as reviewer id.
+  if (responseTime > REJECTION_TIME_LIMIT) {
+    console.log('MAX REJECTION TIME REACHED: Applying penalization to driver.');
+    return await submitUserReview(driverId, driverId, tripId, { stars: 2, comment: `REJECTED TRIP '${tripId}'.` });
+  }
+  console.log('REJECTED WITHIN ACCEPTED TIME: Applying penalization to driver.');
+  return await submitUserReview(driverId, driverId, tripId, { stars: 3, comment: `REJECTED TRIP '${tripId}'.` });
 }
 
 async function submitUserReview(raterId: string, ratedId: string, tripId: string, review: any) {

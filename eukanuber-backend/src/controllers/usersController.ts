@@ -171,8 +171,8 @@ async function getUserRating(req: Express.Request, res: Express.Response) {
       return;
     }
     const ratedUserId = req.params.userId;
-    const avgRating = await userService.getUserRating(ratedUserId);
-    return res.status(200).json(avgRating);
+    const rating = await userService.getUserRating(ratedUserId);
+    return res.status(200).json(rating);
   } catch (e) {
     res.sendStatus(500);
   }
