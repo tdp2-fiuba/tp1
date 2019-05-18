@@ -8,6 +8,7 @@ enum TripStatus {
   ARRIVED_DESTINATION, // "Llegamos a destino"
   COMPLETED, // "Viaje completado"
   REJECTED_BY_DRIVER, //Internal state, used to mark trip when rejected by prospective driver
+  TRIP_CANCELLED, //Used to notify client that trip was cancelled because no drivers are available
 }
 
 export default TripStatus;
