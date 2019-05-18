@@ -102,7 +102,7 @@ async function getUserRating(id: string) {
       return { sum: 0, count: 0 };
     }
 
-    return rating;
+    return rating[0];
   } catch (e) {
     return undefined;
   }

@@ -105,6 +105,7 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
       await userService.updateUserState(driverId, UserState.IDLE);
     }
 
+    console.log(`TRIP CANCELLED '${trip.id}'`);
     //driver was not found so trip state changes to TRIP_CANCELLED.
     return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
   } catch (e) {
