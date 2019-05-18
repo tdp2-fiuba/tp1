@@ -1,6 +1,6 @@
 import Express from 'express';
-import { ICreateTripData, ILocation, ITrip, TripStatus, IUser } from '../models';
-import { tripsService, userService } from '../services';
+import {ICreateTripData, ILocation, ITrip, IUser, TripStatus} from '../models';
+import {tripsService, userService} from '../services';
 import usersController from './usersController';
 import UserState from '../models/UserState';
 
@@ -13,6 +13,10 @@ async function getAll(req: Express.Request, res: Express.Response) {
 async function getById(req: Express.Request, res: Express.Response) {
   const tripId = req.params.id;
   const trip = await tripsService.getTripById(tripId);
+  if(trip.status === TripStatus.COMPLETED){
+    trip.clientDetail = await userService.getUserById(trip.clientId);
+    trip.driverDetail = await userService.getUserById(trip.driverId);
+  }
   res.json(trip);
 }
 

@@ -1,17 +1,17 @@
 package com.tdp2.eukanuber.model;
 
 public class RefuseDriverTripRequest {
-    private Integer seconds;
+    private Integer time;
 
-    public RefuseDriverTripRequest(Integer seconds) {
-        this.seconds = seconds;
+    public RefuseDriverTripRequest(Integer time) {
+        this.time = time;
     }
 
-    public Integer getSeconds() {
-        return seconds;
+    public Integer getTime() {
+        return time;
     }
 
-    public void setSeconds(Integer seconds) {
-        this.seconds = seconds;
+    public void setTime(Integer time) {
+        this.time = time;
     }
 }

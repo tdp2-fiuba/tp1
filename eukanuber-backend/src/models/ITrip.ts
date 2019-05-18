@@ -1,4 +1,5 @@
 import TripStatus from "./TripStatus";
+import IUser from "./IUser";
 
 export default interface ITrip {
   id: string;
@@ -16,4 +17,6 @@ export default interface ITrip {
   escort: boolean;
   status: TripStatus;
   payment: string;
+  clientDetail: any;
+  driverDetail: any;
 }
