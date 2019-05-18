@@ -42,7 +42,12 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private List<LatLng> driverPath;
     private Context mContext;
     private Boolean initializeDriver;
-
+    private Handler updateDriverPositionHandler;
+    private Runnable updateDriverPositionRunnable;
+    private Handler checkDriverPositionHandler;
+    private Runnable checkDriverPositionRunnable;
+    private Handler checkTripStatusHandler;
+    private Runnable checkTripStatusRunnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,16 +60,22 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         currentStatus = currentTrip.getStatus();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        this.driverPath = new ArrayList<>();
-        checkTripStatus();
-        checkDriverPosition();
+
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        this.driverPath = new ArrayList<>();
+        checkTripStatus();
+        checkDriverPosition();
+    }
+
     private void checkDriverPosition() {
-        Handler handler = new Handler();
+        checkDriverPositionHandler = new Handler();
         Integer delay = 2500;
-        Runnable runnable = new Runnable() {
+        checkDriverPositionRunnable = new Runnable() {
             @Override
             public void run() {
                 UserService userService = new UserService(mContext);
@@ -90,17 +101,17 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                 });
                 if (currentTrip.getStatus() != TripStatus.COMPLETED.ordinal()) {
-                    handler.postDelayed(this, delay);
+                    checkDriverPositionHandler.postDelayed(this, delay);
                 }
             }
         };
-        handler.postDelayed(runnable, delay);
+        checkDriverPositionHandler.postDelayed(checkDriverPositionRunnable, delay);
     }
 
     private void updateDriverPosition() {
-        Handler handler = new Handler();
+        updateDriverPositionHandler = new Handler();
         Integer delay = 2000;
-        Runnable runnable = new Runnable() {
+        updateDriverPositionRunnable = new Runnable() {
             Integer index = 0;
             Integer next = 0;
             LatLng startPosition;
@@ -123,17 +134,14 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
                     valueAnimator.setDuration(delay);
                     valueAnimator.setInterpolator(new LinearInterpolator());
-                    valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                            float v = valueAnimator.getAnimatedFraction();
-                            double lng = v * endPosition.longitude + (1 - v)
-                                    * startPosition.longitude;
-                            double lat = v * endPosition.latitude + (1 - v)
-                                    * startPosition.latitude;
-                            LatLng newPos = new LatLng(lat, lng);
-                            mapManager.moveMarker(markerCar, newPos);
-                        }
+                    valueAnimator.addUpdateListener(valueAnimator1 -> {
+                        float v = valueAnimator1.getAnimatedFraction();
+                        double lng = v * endPosition.longitude + (1 - v)
+                                * startPosition.longitude;
+                        double lat = v * endPosition.latitude + (1 - v)
+                                * startPosition.latitude;
+                        LatLng newPos = new LatLng(lat, lng);
+                        mapManager.moveMarker(markerCar, newPos);
                     });
                     valueAnimator.start();
                     if (index != driverPath.size() - 1) {
@@ -141,18 +149,18 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     }
                 }
                 if (currentStatus != TripStatus.COMPLETED.ordinal()) {
-                    handler.postDelayed(this, delay);
+                    updateDriverPositionHandler.postDelayed(this, delay);
                 }
 
             }
         };
-        handler.postDelayed(runnable, delay);
+        updateDriverPositionHandler.postDelayed(updateDriverPositionRunnable, delay);
     }
 
     private void checkTripStatus() {
-        Handler handler = new Handler();
+        checkTripStatusHandler = new Handler();
         Integer delay = 2500;
-        Runnable runnable = new Runnable() {
+        checkTripStatusRunnable = new Runnable() {
             @Override
             public void run() {
                 TripService tripService = new TripService(mContext);
@@ -172,6 +180,9 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                             if (currentStatus == TripStatus.COMPLETED.ordinal()) {
                                 initTripCompleted();
                             }
+                            if (currentStatus == TripStatus.TRIP_CANCELLED.ordinal()) {
+                                initTripCancelled();
+                            }
                         }
                     }
 
@@ -183,13 +194,13 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     }
                 });
                 if (currentStatus != TripStatus.COMPLETED.ordinal()) {
-                    handler.postDelayed(this, delay);
+                    checkTripStatusHandler.postDelayed(this, delay);
                 }
 
 
             }
         };
-        handler.postDelayed(runnable, delay);
+        checkTripStatusHandler.postDelayed(checkTripStatusRunnable, delay);
     }
 
     private void initTripDriverGoingOrigin() {
@@ -222,6 +233,12 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("currentTrip", currentTrip);
         showMessage("Viaje finalizado con exito!");
+        startActivity(intent);
+    }
+    private void initTripCancelled() {
+        Intent intent = new Intent(this, HomeClientActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        showMessage("No se encontraron conductores para su viaje.");
         startActivity(intent);
     }
 
@@ -265,5 +282,17 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         ).show();
     }
 
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(checkTripStatusHandler != null && checkTripStatusRunnable != null){
+            checkTripStatusHandler.removeCallbacks(checkTripStatusRunnable);
+        }
+        if(checkDriverPositionHandler!= null && checkDriverPositionRunnable != null){
+            checkDriverPositionHandler.removeCallbacks(checkDriverPositionRunnable);
+        }
+        if(updateDriverPositionHandler != null && updateDriverPositionRunnable != null){
+            updateDriverPositionHandler.removeCallbacks(updateDriverPositionRunnable);
+        }
+    }
 }

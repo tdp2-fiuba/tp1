@@ -103,13 +103,8 @@ async function changeDriverTripStatus(tripId: string, driverId: string, tripStat
             .where('id', driverId);
 
         await transaction.commit();
-        if (trip === undefined) {
-            return {};
-        }
-        return {
-            ...trip,
-            pets: trip.pets.split(','),
-        }
+
+        return getTripById(tripId);
     } catch (err) {
         transaction.rollback();
         console.error(`Assign driver to trip aborted! "${err}"`);

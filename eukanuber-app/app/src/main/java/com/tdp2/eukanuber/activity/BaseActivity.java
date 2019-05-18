@@ -120,6 +120,7 @@ abstract class BaseActivity extends AppCompatActivity
                     AppSecurityManager.logout(settings);
                     LoginManager.getInstance().logOut();
                     Intent intent = new Intent(baseActivity, LoginActivity.class);
+
                     startActivity(intent);
                     return;
                 }

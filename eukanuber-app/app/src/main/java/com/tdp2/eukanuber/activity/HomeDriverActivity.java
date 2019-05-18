@@ -61,10 +61,15 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         this.createMenu(userLogged);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         popupOpen = false;
         initDriverHome();
     }
-
 
     private void initDriverHome() {
         handlerRequestTrips = new Handler();
@@ -305,12 +310,13 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         if(handlerRequestTrips != null && runnableRequestTrips != null){
             handlerRequestTrips.removeCallbacks(runnableRequestTrips);
         }
 
     }
+
 
 }
