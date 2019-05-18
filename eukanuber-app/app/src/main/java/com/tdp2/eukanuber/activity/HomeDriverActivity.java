@@ -3,7 +3,6 @@ package com.tdp2.eukanuber.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -27,11 +26,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
-import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
-import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
+import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.Trip;
-import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
@@ -131,18 +128,13 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         buttonCancel.setOnClickListener(view -> {
             TripService tripService = new TripService(mActivity);
             Integer seconds = 12;
-            Call<Trip> call = tripService.refuseDriverTrip(trip.getId());
+            Call<Trip> call = tripService.refuseDriverTrip(trip.getId(), new RefuseDriverTripRequest(seconds));
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
                     popupWindow.dismiss();
-                    Trip trip = response.body();
-                    Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
-                    intentActiveTripDriver.putExtra("currentTrip", trip);
-                    intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     popupOpen = false;
-                    showMessage("El viaje ha sido confirmado.");
-                    startActivity(intentActiveTripDriver);
+                    showMessage("El viaje ha sido rechazado.");
                 }
 
                 @Override
@@ -158,7 +150,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         });
         buttonConfirm.setOnClickListener(view -> {
             TripService tripService = new TripService(mActivity);
-            Call<Trip> call = tripService.acceptDriverTrip(trip.getId());
+            Call<Trip> call = tripService.confirmDriverTrip(trip.getId());
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
