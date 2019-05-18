@@ -300,11 +300,11 @@ public class RegisterDriverCarActivity extends BaseActivity {
         int dstWidth = 0;
         int dstHeight = 0;
         if (srcWidth > srcHeight) {
-            dstWidth = 200;
+            dstWidth = 500;
             dstHeight = (dstWidth * srcHeight) / srcWidth;
         }
         if (srcWidth <= srcHeight) {
-            dstHeight = 200;
+            dstHeight = 500;
             dstWidth = (dstHeight * srcWidth) / srcHeight;
         }
         return Bitmap.createScaledBitmap(source, dstWidth, dstHeight, false);
