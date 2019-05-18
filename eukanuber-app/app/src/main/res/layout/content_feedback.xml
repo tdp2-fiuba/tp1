@@ -29,7 +29,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:baselineAligned="false"
-                    android:text="Conductor"
                     android:textAlignment="center"
                     android:textColor="#FFFFFF"
                     android:textSize="20dp" />
@@ -47,10 +46,9 @@
                     app:civ_shadow_radius="10" />
 
                 <TextView
-                    android:id="@+id/name"
+                    android:id="@+id/nameUser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Juan Perez"
                     android:textAlignment="center"
                     android:textColor="#FFFFFF"
                     android:textSize="20dp" />
@@ -168,10 +166,10 @@
                         android:src="@drawable/ic_time_white" />
 
                     <TextView
+                        android:id="@+id/tripTime"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:text="10 min"
                         android:textColor="#FFFFFF"
                         android:textSize="18dp" />
                 </LinearLayout>
@@ -181,7 +179,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:paddingLeft="15dp"
+                    android:paddingLeft="35dp"
 
                     >
 
@@ -195,10 +193,10 @@
                         />
 
                     <TextView
+                        android:id="@+id/tripDistance"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:text="2.64km"
                         android:textColor="#FFFFFF"
                         android:textSize="18dp" />
                 </LinearLayout>
@@ -218,14 +216,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Comentarios"
-                    android:textSize="20dp" />
+                    android:textSize="20dp"
+               />
 
                 <EditText
                     android:id="@+id/feedbackComment"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="Escriba comentarios sobre su experiencia con el conductor"
-                    android:inputType="textMultiLine" />
+                    android:layout_height="100dp"
+                    android:inputType="textMultiLine"
+                    android:maxLength="760"
+                    android:gravity="top"
+                    android:lines="4"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"

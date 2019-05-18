@@ -30,6 +30,7 @@ app.get('/users/drivers/pendingTrips', usersController.getDriverPendingTrips);
 // Trips endpoints
 app.get('/trips', tripsController.getAll);
 app.get('/trips/:id', tripsController.getById);
+app.get('/trips/:id/full', tripsController.getFullById);
 app.post('/trips', tripsController.createTrip);
 app.put('/trips/:id', tripsController.updateTrip);
 app.post('/trips/:id/accept', tripsController.acceptTrip);
