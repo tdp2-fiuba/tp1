@@ -41,7 +41,7 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
     const originCoordinates = await googleMapsService.getGeocode(trip.origin);
     const destinationCoordinates = await googleMapsService.getGeocode(trip.destination);
     const routes = await googleMapsService.getDirections(originCoordinates, destinationCoordinates);
-    const routeData = await calculateTripData(routes, trip.pets);
+    const routeData = await calculateTripData(routes, trip.pets, trip.escort);
 
     const newTrip = {
         ...trip,
@@ -157,11 +157,11 @@ async function assignDriverToTrip(tripId: string, driverId: string) {
     }
 }
 
-async function calculateTripData(routes: string, pets: string[]) {
+async function calculateTripData(routes: string, pets: string[], escort: boolean) {
     const driversAvailability = await getDriversAvailability();
 
     const route = JSON.parse(routes)[0];
-    const price = await calculateTripCost(route.legs[0].distance.value, pets, driversAvailability);
+    const price = await calculateTripCost(route.legs[0].distance.value, pets, route.legs[0].duration.value, escort);
 
     return {
         distance: route.legs[0].distance.text,
@@ -185,23 +185,47 @@ async function getDriversAvailability(): Promise<number> {
     return activeDrivers / driversWithTrips;
 }
 
-async function calculateTripCost(distance: number, pets: string[], activeDrivers: number) {
-    const getPetSizeExtraCost = (petSize: string) => (petSize === 'S' ? 0 : petSize === 'M' ? 20 : 40);
-    const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
+async function calculateTripCost(distance: number, pets: string[], duration: number, escort: boolean) {
+    //const getPetSizeExtraCost = (petSize: string) => (petSize === 'S' ? 0 : petSize === 'M' ? 20 : 40);
+    
+    //Costo por mascota: 50 pesos por cada una, sin importar tamaño
+    const petSizeCost = pets.length * 50;
+
+    //si hay acompañante son 100 pe mas
+    var escortCost = 0;
+    if(escort){
+        escortCost = 100;
+    }else{
+        escortCost = 0;
+    }
+
+    // Hay un costo por distancia: 25 pesos por km
+    const distanceCost = distance * 25;
+
+    //const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
+
+    //Si es horario nocturno 50% + sobre el total. Horario nocturno es de 6pm a 6 am.
+    const utcHour = new Date().getUTCHours();
+    var isNocturneTime = false;
+    const getUtcTimeExtraCost = (utcHour: number) => (((utcHour >= 18 && utcHour <= 23) || (utcHour >= 0 && utcHour < 6)) ? isNocturneTime = true : isNocturneTime = false);
 
     // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M y L tienen recargo)
-    const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
+    //const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
 
-    // Dependiendo la hora, obtenemos un recargo (desde las 0 horas hasta las 6 hay un recargo)
-    const timeExtraCost = getUtcTimeExtraCost(new Date().getUTCHours());
+    //5 pesos por minuto
+    const durationCost = duration * 5;
 
+    //Deprecado por Alejandro
     // Si hay menos del 50% de los conductores disponibles, se agrega un recargo
-    const driversExtraCost = activeDrivers > 0.5 ? 0 : 50;
+    //const driversExtraCost = activeDrivers > 0.5 ? 0 : 50;
 
-    // Hay un costo por distancia (a mayor distancia, más caro)
-    const distanceCost = distance * 0.1;
+    var totalCost = petSizeCost + escortCost + distanceCost + durationCost;
 
-    return petsExtraCost + timeExtraCost + driversExtraCost + distanceCost;
+    if(isNocturneTime){
+        totalCost = totalCost + totalCost * 0.50;
+    }
+
+    return totalCost;
 }
 
 async function getRoute(origin: string, destination: string) {
