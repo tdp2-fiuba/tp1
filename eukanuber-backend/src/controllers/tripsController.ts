@@ -112,8 +112,8 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
       await userService.updateUserState(driverId, UserState.IDLE);
     }
 
-    //driver was not found so trip goes back to state CLIENT_ACCEPTED.
-    return await tripsService.updateTripStatus(trip.id, TripStatus.CLIENT_ACCEPTED);
+    //driver was not found so trip state changes to TRIP_CANCELLED.
+    return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
   } catch (e) {
     console.log('Error assigning driver to trip: ' + e);
     return {};
