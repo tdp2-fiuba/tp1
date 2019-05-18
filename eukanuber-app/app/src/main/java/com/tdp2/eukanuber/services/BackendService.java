@@ -73,4 +73,7 @@ public interface BackendService {
     @GET("users/lastTrip")
     Call<Trip> getLastTrip();
 
+    @GET("users/drivers/pendingTrips")
+    Call<Trip> getPendingTrips();
+
 }

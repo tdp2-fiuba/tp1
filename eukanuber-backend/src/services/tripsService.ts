@@ -225,12 +225,15 @@ async function getUserLastTrip(userId: string) {
 
 async function getDriverPendingTrips(driverId: string) {
   try {
-    const pendingTrips = await db
+    const pendingTrip = await db
       .table('trips')
       .where('driverId', driverId)
       .andWhere('status', TripStatus.DRIVER_CONFIRM_PENDING)
       .first();
-    return pendingTrips;
+    return {
+        ...pendingTrip,
+        pets: pendingTrip.pets.split(','),
+    }
   } catch (e) {
     console.log(e);
     return [];

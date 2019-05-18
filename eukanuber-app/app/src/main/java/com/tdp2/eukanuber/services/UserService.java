@@ -99,4 +99,16 @@ public class UserService extends ClientService{
         BackendService getService = retrofit.create(BackendService.class);
         return getService.getLastTrip();
     }
+
+    public Call<Trip> getPendingTrips() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService getService = retrofit.create(BackendService.class);
+        return getService.getPendingTrips();
+    }
+
 }
