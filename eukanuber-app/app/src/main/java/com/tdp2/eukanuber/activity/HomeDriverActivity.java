@@ -76,14 +76,13 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void run() {
                 if (!popupOpen) {
-                    TripService tripService = new TripService(mActivity);
-                    Call<List<Trip>> call = tripService.getAll(String.valueOf(TripStatus.CLIENT_ACCEPTED.ordinal()));
-                    call.enqueue(new Callback<List<Trip>>() {
+                    UserService userService = new UserService(mActivity);
+                    Call<Trip> call = userService.getPendingTrips();
+                    call.enqueue(new Callback<Trip>() {
                         @Override
-                        public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
-                            List<Trip> trips = response.body();
-                            if (trips.size() > 0) {
-                                Trip trip = trips.get(0);
+                        public void onResponse(Call<Trip> call, Response<Trip> response) {
+                            Trip trip = response.body();
+                            if (trip.getId() != null) {
                                 Log.v("CLIENT ACCEPTED TRIP", trip.getId());
                                 if (!tripsOpened.contains(trip.getId())) {
                                     tripsOpened.add(trip.getId());
@@ -95,7 +94,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                         }
 
                         @Override
-                        public void onFailure(Call<List<Trip>> call, Throwable t) {
+                        public void onFailure(Call<Trip> call, Throwable t) {
                             Log.v("TRIP", t.getMessage());
                         }
                     });
@@ -130,14 +129,36 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
+            TripService tripService = new TripService(mActivity);
+            Integer seconds = 12;
+            Call<Trip> call = tripService.refuseDriverTrip(trip.getId());
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    popupWindow.dismiss();
+                    Trip trip = response.body();
+                    Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
+                    intentActiveTripDriver.putExtra("currentTrip", trip);
+                    intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    popupOpen = false;
+                    showMessage("El viaje ha sido confirmado.");
+                    startActivity(intentActiveTripDriver);
+                }
+
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    popupWindow.dismiss();
+                    popupOpen = false;
+                    showMessage("Ha ocurrido un error al confirmar el viaje.");
+                }
+            });
             popupWindow.dismiss();
             popupOpen = false;
             showMessage("No ha aceptado el viaje.");
         });
         buttonConfirm.setOnClickListener(view -> {
-            AssignDriverToTripRequest assignDriverToTripRequest = new AssignDriverToTripRequest(userLogged.getId());
             TripService tripService = new TripService(mActivity);
-            Call<Trip> call = tripService.assignDriverToTrip(trip.getId(), assignDriverToTripRequest);
+            Call<Trip> call = tripService.acceptDriverTrip(trip.getId());
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
