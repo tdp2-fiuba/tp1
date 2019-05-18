@@ -266,7 +266,11 @@ async function getUserLastTrip(req: Express.Request, res: Express.Response) {
 async function getDriverPendingTrips(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-    return await tripsService.getDriverPendingTrips(userId);
+    const trips = await tripsService.getDriverPendingTrips(userId);
+    res
+      .status(200)
+      .json(trips)
+      .send();
   } catch (e) {
     console.log(e.message);
     res

@@ -83,9 +83,11 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
       }, 60000);
 
       let accepted = false;
-      while (!accepted && !timeoutReached) {
+      let rejected = false;
+      while (!accepted && !rejected && !timeoutReached) {
         console.log('Wating on driver...');
-        accepted = await tripsService.driverAcceptedTrip(trip.id);
+        accepted = await tripsService.driverHasTripWithStatus(trip.id, TripStatus.DRIVER_GOING_ORIGIN);
+        rejected = await tripsService.driverHasTripWithStatus(trip.id, TripStatus.REJECTED_BY_DRIVER);
       }
 
       clearTimeout(timeout);
@@ -98,6 +100,12 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
       if (timeoutReached) {
         //penalize driver for timeout.
         await userService.penalizeDriverIgnoredTrip(driverId, trip.id);
+      }
+
+      if (rejected) {
+        //penalize driver for rejecting.
+        //TODO: change the stars depending on how long it took to reject and number of existing reviews.
+        await userService.penalizeDriverRejectTrip(driverId, trip.id);
       }
 
       //remove driver from prospective driver's list and continue with algorithm:

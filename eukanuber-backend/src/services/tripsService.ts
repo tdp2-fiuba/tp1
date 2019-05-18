@@ -66,13 +66,13 @@ async function createTrip(trip: ICreateTripData): Promise<ITrip> {
   };
 }
 
-async function driverAcceptedTrip(tripId: string) {
+async function driverHasTripWithStatus(tripId: string, tripStatus: TripStatus) {
   try {
     const status = await db
       .table('trips')
       .where('id', tripId)
       .select('status');
-    return status[0].status === 4; // TripStatus.DRIVER_GOING_ORIGIN; //TODO: el TripStatus le da undefined... revisar esto...
+    return status[0].status === tripStatus;
   } catch (e) {
     return false;
   }
@@ -85,9 +85,7 @@ async function driverAcceptTrip(tripId: string, driverId: string) {
 }
 
 async function driverRejectTrip(tripId: string, driverId: string) {
-  await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
-  //TODO: change the stars depending on how long it took to reject and number of existing reviews.
-  return await userService.penalizeDriverRejectTrip(driverId, tripId);
+  return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
 }
 
 async function changeDriverTripStatus(tripId: string, driverId: string, tripState: TripStatus, driverState: UserState) {
@@ -247,7 +245,7 @@ export default {
   assignDriverToTrip,
   getRoute,
   getUserLastTrip,
-  driverAcceptedTrip,
+  driverHasTripWithStatus,
   driverAcceptTrip,
   driverRejectTrip,
   getDriverPendingTrips,
