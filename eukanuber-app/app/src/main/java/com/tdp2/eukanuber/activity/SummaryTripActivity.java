@@ -51,7 +51,7 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
         ImageButton buttonCancel = this.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = this.findViewById(R.id.buttonConfirmTrip);
         buttonCancel.setOnClickListener(view -> {
-            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.CLIENT_CANCELLED.ordinal());
+            UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.CANCELLED.ordinal());
             TripService tripService = new TripService(mContext);
             Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
             ProgressDialog dialog = new ProgressDialog(SummaryTripActivity.this);

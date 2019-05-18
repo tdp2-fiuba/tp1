@@ -103,6 +103,9 @@ async function changeDriverTripStatus(tripId: string, driverId: string, tripStat
             .where('id', driverId);
 
         await transaction.commit();
+        if (trip === undefined) {
+            return {};
+        }
         return {
             ...trip,
             pets: trip.pets.split(','),
@@ -233,6 +236,9 @@ async function getDriverPendingTrips(driverId: string) {
             .where('driverId', driverId)
             .andWhere('status', TripStatus.DRIVER_CONFIRM_PENDING)
             .first();
+        if (pendingTrip === undefined) {
+            return {};
+        }
         return {
             ...pendingTrip,
             pets: pendingTrip.pets.split(','),

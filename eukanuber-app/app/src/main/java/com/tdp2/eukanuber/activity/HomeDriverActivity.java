@@ -144,9 +144,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
             });
-            popupWindow.dismiss();
-            popupOpen = false;
-            showMessage("No ha aceptado el viaje.");
         });
         buttonConfirm.setOnClickListener(view -> {
             TripService tripService = new TripService(mActivity);
