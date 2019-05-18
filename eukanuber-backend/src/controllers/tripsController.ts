@@ -26,7 +26,6 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
   try {
     const tripId = req.params.id;
     const trip: Partial<ITrip> = req.body;
-
     if (trip.status) {
       let updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
       if (trip.status == TripStatus.CLIENT_ACCEPTED) {
@@ -52,6 +51,15 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
 
         //trigger async algorithm to assign driver.
         return await assignDriverToTrip(trip, drivers);
+      } else {
+        /* Lo agrego para el cambio de estado del viaje por el chofer
+                (En viaje, Terminado)*/
+        updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
+        res
+          .status(200)
+          .json(updatedTrip)
+          .send();
+        return;
       }
     }
 
@@ -126,8 +134,8 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
   try {
     const tripId = req.params.id;
     const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-    await tripsService.driverAcceptTrip(tripId, driverId);
-    res.status(200).send();
+    const trip = await tripsService.driverAcceptTrip(tripId, driverId);
+    return res.json(trip);
   } catch (e) {
     res.status(500).send();
   }

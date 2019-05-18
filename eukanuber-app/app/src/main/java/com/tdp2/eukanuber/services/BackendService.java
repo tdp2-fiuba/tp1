@@ -1,6 +1,6 @@
 package com.tdp2.eukanuber.services;
 
-import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
+import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.MapRoute;
@@ -42,9 +42,6 @@ public interface BackendService {
     Call<Trip> createTrip(@Body NewTripRequest request);
 
     @PUT("trips/{tripId}")
-    Call<Trip> assignDriverToTrip(@Path("tripId") String tripId, @Body AssignDriverToTripRequest assignDriverToTripRequest);
-
-    @PUT("trips/{tripId}")
     Call<Trip> updateStatusTrip(@Path("tripId") String tripId, @Body UpdateStatusTripRequest updateStatusTripRequest);
 
     @POST("trips/routes")
@@ -75,5 +72,11 @@ public interface BackendService {
 
     @GET("users/drivers/pendingTrips")
     Call<Trip> getPendingTrips();
+
+    @POST("trips/{tripId}/reject")
+    Call<Trip> refuseDriverTrip(@Path("tripId") String tripId, @Body RefuseDriverTripRequest refuseDriverTripRequest);
+
+    @POST("trips/{tripId}/accept")
+    Call<Trip> confirmDriverTrip(@Path("tripId") String tripId);
 
 }

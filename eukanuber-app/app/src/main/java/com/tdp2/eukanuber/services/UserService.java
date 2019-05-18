@@ -2,19 +2,12 @@ package com.tdp2.eukanuber.services;
 
 import android.content.Context;
 
-import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
-import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
-import com.tdp2.eukanuber.model.MapRoute;
-import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
-import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;

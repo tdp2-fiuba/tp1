@@ -2,7 +2,6 @@ package com.tdp2.eukanuber.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -15,13 +14,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
-import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.manager.MapManager;
-import com.tdp2.eukanuber.model.AssignDriverToTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
-import com.tdp2.eukanuber.model.User;
-import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
 import retrofit2.Call;

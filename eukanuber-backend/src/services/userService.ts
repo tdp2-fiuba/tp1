@@ -4,6 +4,7 @@ import db from '../db/db';
 import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import facebookService from './facebookService';
+
 var moment = require('moment');
 const { raw } = require('objection');
 
@@ -32,7 +33,10 @@ async function getUserById(id: string) {
   }
 
   const userData = users[0];
-  const userImages = users.map((u: any) => ({ fileName: u.fileName, fileContent: Buffer.from(u.fileContent).toString('base64') }));
+  const userImages = users.map((u: any) => ({
+    fileName: u.fileName,
+    fileContent: Buffer.from(u.fileContent).toString('base64'),
+  }));
 
   const user = {
     id,
@@ -53,6 +57,23 @@ async function getUserById(id: string) {
   return user;
 }
 
+async function getUserReviews(id: string) {
+  try {
+    const reviews = await db
+      .table('userReview')
+      .where('reviewee', id)
+      .andWhereNot('reviewer', id) //If reviewer is user, then those correspond to penalizations, should not be returned.
+      .select('*');
+
+    if (!reviews) {
+      return undefined;
+    }
+    return reviews;
+  } catch (e) {
+    return undefined;
+  }
+}
+
 async function getUserByFbId(fbId: string) {
   try {
     const user = await db
@@ -66,24 +87,6 @@ async function getUserByFbId(fbId: string) {
     }
 
     return user.id;
-  } catch (e) {
-    return undefined;
-  }
-}
-
-async function getUserReviews(id: string) {
-  try {
-    const reviews = await db
-      .table('userReview')
-      .where('reviewee', id)
-      .andWhereNot('reviewer', id) //If reviewer is user, then those correspond to penalizations, should not be returned.
-      .select('*');
-
-    if (!reviews) {
-      return undefined;
-    }
-
-    return reviews;
   } catch (e) {
     return undefined;
   }
@@ -245,8 +248,10 @@ async function getUserPosition(id: string) {
     .where('id', id)
     .select('longitude', 'latitude')
     .first();
-
-  return currentLoc.latitude + ',' + currentLoc.longitude;
+  const position = {
+    position: currentLoc.latitude + ',' + currentLoc.longitude,
+  };
+  return position;
 }
 
 async function updateUserPosition(id: string, pos: IPosition) {
@@ -296,12 +301,12 @@ async function userLogout(id: string) {
 
 async function isUserLogged(id: string) {
   try {
-    console.log(`CHECK USER "${id}" LOGGED IN`);
     return await getUserById(id).then(result => result.loggedIn);
   } catch (e) {
     return false;
   }
 }
+
 async function deleteUser(fbId: string) {
   return await db
     .table('users')
@@ -313,7 +318,10 @@ async function validateFacebookAccount(fbId: string, fbAccessToken: string) {
   const accountData = await facebookService.getFacebookFriendCount(fbAccessToken);
   const isValid = fbId === accountData.id && accountData.friends.summary.total_count >= MIN_FRIEND_COUNT;
 
-  return { isValid, errorMessage: !isValid && `Cuenta de facebook invalida. Debe tener más de ${MIN_FRIEND_COUNT} amigos en la cuenta` };
+  return {
+    isValid,
+    errorMessage: !isValid && `Cuenta de facebook invalida. Debe tener más de ${MIN_FRIEND_COUNT} amigos en la cuenta`,
+  };
 }
 
 async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> {
