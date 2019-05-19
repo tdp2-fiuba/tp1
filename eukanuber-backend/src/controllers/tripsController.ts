@@ -9,12 +9,18 @@ async function getAll(req: Express.Request, res: Express.Response) {
     const trips = await tripsService.getTrips(status);
     res.json(trips);
 }
+
 async function getFullById(req: Express.Request, res: Express.Response) {
     const tripId = req.params.id;
     const trip = await tripsService.getTripById(tripId);
     if (trip.status === TripStatus.COMPLETED) {
         trip.clientDetail = await userService.getUserById(trip.clientId);
         trip.driverDetail = await userService.getUserById(trip.driverId);
+        // Borro imagenes que no son del perfil para que
+        // cargue mas rapido pantalla de feedback
+        trip.driverDetail.images = [
+            trip.driverDetail.images[0]
+        ];
     }
     res.json(trip);
 }
@@ -64,6 +70,11 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
                 updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
                 if (updatedTrip.status === TripStatus.COMPLETED) {
                     await userService.updateUserState(updatedTrip.driverId, UserState.IDLE);
+                    updatedTrip.clientDetail = await userService.getUserById(updatedTrip.clientId);
+                    updatedTrip.driverDetail = await userService.getUserById(updatedTrip.driverId);
+                    updatedTrip.driverDetail.images = [
+                        updatedTrip.driverDetail.images[0]
+                    ];
                 }
                 res
                     .status(200)

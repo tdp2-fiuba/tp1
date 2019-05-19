@@ -60,22 +60,7 @@ public class FeedbackActivity extends SecureActivity {
         Intent intent = getIntent();
         this.score = 0;
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-        TripService tripService = new TripService(mActivity);
-        Call<Trip> call = tripService.getFull(currentTrip.getId());
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                currentTrip = response.body();
-                initTripData();
-            }
-
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.v("TRIP", t.getMessage());
-                // showMessage("Ha ocurrido un error al solicitar el viaje.");
-
-            }
-        });
+        initTripData();
     }
 
     private void initTripData() {

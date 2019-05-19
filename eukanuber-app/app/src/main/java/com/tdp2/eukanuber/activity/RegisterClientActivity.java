@@ -58,7 +58,7 @@ public class RegisterClientActivity extends BaseActivity {
                         EditText lastname = mActivity.findViewById(R.id.inputRegisterLastname);
                         name.setText(object.getString("first_name"));
                         lastname.setText(object.getString("last_name"));
-                        URL imageURL = new URL("https://graph.facebook.com/" + object.getString("id") + "/picture?type=small");
+                        URL imageURL = new URL("https://graph.facebook.com/" + object.getString("id") + "/picture?type=large");
                         AsyncTask asyncTask = new AsyncTask() {
                             @Override
                             protected Object doInBackground(Object[] objects) {
