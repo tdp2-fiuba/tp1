@@ -4,6 +4,8 @@ import {tripsService, userService} from '../services';
 import usersController from './usersController';
 import UserState from '../models/UserState';
 
+const MIN_REVIEW_COUNT = 10;
+
 async function getAll(req: Express.Request, res: Express.Response) {
     const status: TripStatus = req.query.status;
     const trips = await tripsService.getTrips(status);
@@ -45,27 +47,34 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
             let updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
             if (trip.status == TripStatus.CLIENT_ACCEPTED) {
                 let trip = await tripsService.getTripById(tripId);
-                let drivers: Array<IUser> = await userService.getProspectiveDrivers(trip.originCoordinates);
+                let drivers: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates);
 
-                //TODO: separar en subgrupos y ordenarlos por nota
-                if (!(drivers.length > 0)) {
-                    //trip remains in state CLIENT_ACCEPTED if
-                    //no drivers are found in the area.
-                    return res
-                        .status(200)
-                        .json(updatedTrip)
-                        .send();
+                if (drivers.length <= 0) {
+                    updatedTrip = await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
                 }
 
-                //change trip status to DRIVER_CONFIRM_PENDING so client knows driver is being assigned...
-                updatedTrip = await tripsService.updateTripStatus(tripId, TripStatus.DRIVER_CONFIRM_PENDING);
                 res
                     .status(200)
                     .json(updatedTrip)
                     .send();
 
-                //trigger async algorithm to assign driver.
-                return await assignDriverToTrip(trip, drivers);
+                let groupA = drivers.filter(driver => driver.count < MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
+                let groupB = drivers.filter(driver => driver.count >= MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
+
+                //trigger algorithm to assign driver.
+                let assigned = await assignDriverToTrip(trip, groupA);
+                if (assigned) {
+                    return;
+                }
+
+                //If driver not assigned in group A, continue with group B...
+                assigned = await assignDriverToTrip(trip, groupB);
+                if (assigned) {
+                    return;
+                }
+                console.log(`TRIP CANCELLED '${trip.id}'`);
+                //driver was not found so trip state changes to TRIP_CANCELLED.
+                return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
             } else {
                 updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
                 if (updatedTrip.status === TripStatus.COMPLETED) {
@@ -81,11 +90,14 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
                     .json(updatedTrip)
                     .send();
                 return;
+
             }
         }
-
-        // Send a Bad request
-        return res.sendStatus(400);
+        console.log('No trip status received');
+        return res
+            .status(400)
+            .json({message: 'No se recibió status de viaje!'})
+            .send();
     } catch (e) {
         res
             .status(500)
@@ -94,21 +106,23 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
     }
 }
 
-async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
+async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
     try {
         while (drivers.length > 0) {
             const driver = drivers.shift();
             const driverId: string = driver.id;
             console.log(`New candidate driver: '${driverId}'`);
-
-            //assign driver to a trip:
-            await tripsService.assignDriverToTrip(trip.id, driverId);
-
+            try {
+                //assign driver to a trip:
+                await tripsService.assignDriverToTrip(trip.id, driverId);
+            } catch (e) {
+                continue;
+            }
             let timeoutReached = false;
             let timeout = setTimeout(function () {
                 timeoutReached = true;
                 console.log('Driver timeout reached!');
-            }, 60000);
+            }, 20000);
 
             let accepted = false;
             let rejected = false;
@@ -122,7 +136,7 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
 
             if (accepted) {
                 console.log('Driver accepted trip!');
-                return;
+                return true;
             }
 
             if (timeoutReached) {
@@ -134,12 +148,10 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<IUser>) {
             await userService.updateUserState(driverId, UserState.IDLE);
         }
 
-        console.log(`TRIP CANCELLED '${trip.id}'`);
-        //driver was not found so trip state changes to TRIP_CANCELLED.
-        return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
+        return false;
     } catch (e) {
         console.log('Error assigning driver to trip: ' + e);
-        return {};
+        return false;
     }
 }
 
@@ -165,12 +177,31 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
 async function rejectTrip(req: Express.Request, res: Express.Response) {
     try {
         const tripId = req.params.id;
-        const responseTime: number = req.body.time;
         const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-        await tripsService.driverRejectTrip(tripId, driverId, responseTime);
+        await tripsService.driverRejectTrip(tripId, driverId);
         res.status(200).send();
     } catch (e) {
         res.status(500).send();
+    }
+}
+
+async function getFinishedTripsByUserId(req: Express.Request, res: Express.Response) {
+    try {
+        const userId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
+        const userIsDriver = await usersController.userIsDriver(userId);
+        var tripList = [];
+        if (userIsDriver) {
+            tripList = await tripsService.getDriverFinishedTrips(userId);
+        } else {
+            tripList = await tripsService.getPassengerFinishedTrips(userId);
+        }
+
+        res.status(200).json(tripList);
+    } catch (e) {
+        res
+            .status(500)
+            .json({message: e.message})
+            .send();
     }
 }
 
@@ -183,4 +214,5 @@ export default {
     getRoute,
     acceptTrip,
     rejectTrip,
+    getFinishedTripsByUserId,
 };
