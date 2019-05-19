@@ -242,6 +242,16 @@ async function updateUserWithData(id: string, updateData: any) {
     .select()) as string[])[0];
 }
 
+async function getUserRole(id: string) {
+  const role = await db
+    .table('users')
+    .where('id', id)
+    .select('userType')
+    .first();
+
+  return role;
+}
+
 async function getUserPosition(id: string) {
   const currentLoc = await db
     .table('users')
@@ -373,4 +383,5 @@ export default {
   updateUserState,
   penalizeDriverIgnoredTrip,
   penalizeDriverRejectTrip,
+  getUserRole,
 };
