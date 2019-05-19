@@ -116,3 +116,13 @@ trip1 = {
     "price": "100 USD",
     "routes": ""
   }
+
+
+review = {
+    "userId":"32652240-bd54-42d4-8ab3-00c5173a8e99", 
+    "tripId":"5ba33b8a-dfd6-4e43-90c7-317e79fd95c9",
+    "review": {
+        "stars": 5,
+        "comment": "this was an awesome trip!"
+    }
+}

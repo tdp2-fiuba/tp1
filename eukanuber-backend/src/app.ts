@@ -17,7 +17,7 @@ app.get('/users/all', usersController.getUsers);
 app.post('/users/register', usersController.createUser);
 app.get('/users', usersController.getUserById);
 app.put('/users', usersController.updateUser);
-app.put('/users/review', usersController.submitUserReview);
+app.put('/users/review', usersController.submitUserReview); //TODO:should be post...
 app.get('/users/:userId/rating', usersController.getUserRating);
 app.get('/users/:userId/reviews', usersController.getUserReviews);
 app.get('/users/lastTrip', usersController.getUserLastTrip);

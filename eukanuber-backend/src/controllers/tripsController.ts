@@ -43,19 +43,19 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
         let trip = await tripsService.getTripById(tripId);
         let drivers: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates);
 
-        //TODO: separar en subgrupos y ordenarlos por nota
-        if (!(drivers.length > 0)) {
-          //trip remains in state CLIENT_ACCEPTED if
-          //no drivers are found in the area.
-          return res
-            .status(200)
-            .json(updatedTrip)
-            .send();
+        if (drivers.length <= 0) {
+          updatedTrip = await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
         }
-        let groupA = drivers.filter(driver => driver.count <= MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
-        let groupB = drivers.filter(driver => driver.count > MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
 
-        //trigger async algorithm to assign driver.
+        res
+          .status(200)
+          .json(updatedTrip)
+          .send();
+
+        let groupA = drivers.filter(driver => driver.count < MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
+        let groupB = drivers.filter(driver => driver.count >= MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
+
+        //trigger algorithm to assign driver.
         let assigned = await assignDriverToTrip(trip, groupA);
         if (assigned) {
           return;
@@ -76,11 +76,10 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
         if (updatedTrip.status === TripStatus.COMPLETED) {
           await userService.updateUserState(updatedTrip.driverId, UserState.IDLE);
         }
-        res
+        return res
           .status(200)
           .json(updatedTrip)
           .send();
-        return;
       }
     }
     console.log('No trip status received');
@@ -106,14 +105,13 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
         //assign driver to a trip:
         await tripsService.assignDriverToTrip(trip.id, driverId);
       } catch (e) {
-        drivers.shift();
         continue;
       }
       let timeoutReached = false;
       let timeout = setTimeout(function() {
         timeoutReached = true;
         console.log('Driver timeout reached!');
-      }, 60000);
+      }, 20000);
 
       let accepted = false;
       let rejected = false;

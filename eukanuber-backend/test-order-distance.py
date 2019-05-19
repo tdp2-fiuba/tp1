@@ -6,17 +6,6 @@ from subprocess import check_call
 
 base_url = 'http://localhost:3000'
 
-
-def getTrips():
-	r = requests.get(base_url + '/trips')
-	assert(r.status_code == 200)
-	print("GET TRIPS: " + json.dumps(r.json()));
-
-def getUsers():
-	r = requests.get(base_url + '/users/all')
-	assert(r.status_code == 200)
-	print("GET USERS: " + json.dumps(r.json()));
-
 def createUsers():
 	create_trip = base_url + '/trips'
 	user_registration = base_url + '/users/register'
@@ -60,7 +49,7 @@ def createUsers():
 
 	printSeparator()
 
-	time.sleep(2)
+	#time.sleep(2)
 
 	trips_driver3 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver3['token']})
 
@@ -118,7 +107,7 @@ def resetServer():
 	#check_call('npm run build', shell=True)
 	#check_call('npm start', shell=True)
 
-resetServer()
+#resetServer()
 runTestCases()
 
 

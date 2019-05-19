@@ -342,7 +342,7 @@ async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> 
         db.raw(
           `users.id, 
           avg(stars) as rating,
-          sum(stars) as count,
+          count(*) as count,
           ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
     * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 as distance`,
           args
