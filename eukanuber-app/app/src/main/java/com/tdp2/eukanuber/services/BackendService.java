@@ -83,6 +83,6 @@ public interface BackendService {
     @POST("trips/{tripId}/accept")
     Call<Trip> confirmDriverTrip(@Path("tripId") String tripId);
 
-    @PUT("users/review")
+    @POST("users/review")
     Call<Void> sendFeedback(@Body FeedbackRequest feedbackRequest);
 }
