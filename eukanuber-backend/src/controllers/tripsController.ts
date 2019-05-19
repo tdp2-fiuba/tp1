@@ -23,6 +23,8 @@ async function getFullById(req: Express.Request, res: Express.Response) {
         trip.driverDetail.images = [
             trip.driverDetail.images[0]
         ];
+        trip.reviewToDriver= await tripsService.getUserTripReview(trip.id, trip.clientId);
+        trip.reviewToClient  = await tripsService.getUserTripReview(trip.id, trip.driverId);
     }
     res.json(trip);
 }

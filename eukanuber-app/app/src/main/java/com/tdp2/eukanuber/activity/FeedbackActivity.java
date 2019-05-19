@@ -49,6 +49,7 @@ public class FeedbackActivity extends SecureActivity {
     Integer score;
     Trip currentTrip;
     User userToScore;
+    Boolean fromDetailTrip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class FeedbackActivity extends SecureActivity {
         Intent intent = getIntent();
         this.score = 0;
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
+        fromDetailTrip = intent.getBooleanExtra("fromDetailTrip", false);
         initTripData();
     }
 
@@ -184,17 +186,43 @@ public class FeedbackActivity extends SecureActivity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                dialog.dismiss();
-                if (userLogged.getUserType().equals(User.USER_TYPE_DRIVER)) {
-                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(mActivity, HomeClientActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                if(fromDetailTrip){
+                    TripService tripService = new TripService(mActivity);
+                    Call<Trip> callFullTrip = tripService.getFull(currentTrip.getId());
+                    callFullTrip.enqueue(new Callback<Trip>() {
+                        @Override
+                        public void onResponse(Call<Trip> call, Response<Trip> response) {
+                            dialog.dismiss();
+                            currentTrip = response.body();
+                            Intent intentTripDetail = new Intent(mActivity, TripDetailActivity.class);
+                            intentTripDetail.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intentTripDetail.putExtra("currentTrip", currentTrip);
+                            startActivity(intentTripDetail);
+                            return;
+                        }
+                        @Override
+                        public void onFailure(Call<Trip> call, Throwable t) {
+                            dialog.dismiss();
+                            Log.v("TRIP", t.getMessage());
+                        }
+                    });
+
+                }else{
+                    dialog.dismiss();
+                    if (userLogged.getUserType().equals(User.USER_TYPE_DRIVER)) {
+                        Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        return;
+
+                    } else {
+                        Intent intent = new Intent(mActivity, HomeClientActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        return;
+                    }
                 }
-                return;
+
             }
 
             @Override

@@ -91,10 +91,8 @@ public class ListTripsAdapter extends ArrayAdapter<Trip> {
         }
         viewHolder.pets.setText(String.valueOf(trip.getPets().size()));
         convertView.setOnClickListener(v -> {
-            Trip tripSelected = trip;
-            tripSelected.getId();
             Intent intentTripDetail = new Intent(mContext, TripDetailActivity.class);
-            intentTripDetail.putExtra("currentTrip", tripSelected);
+            intentTripDetail.putExtra("currentTrip", trip);
             mContext.startActivity(intentTripDetail);
         });
         return convertView;
