@@ -288,6 +288,26 @@ async function getDriverPendingTrips(req: Express.Request, res: Express.Response
   }
 }
 
+async function getFinishedTrips(req: Express.Request, res: Express.Response) {
+    try {
+        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+        const isDriver = await userIsDriver(userId);
+        let tripList = [];
+        if (isDriver) {
+            tripList = await tripsService.getDriverFinishedTrips(userId);
+        } else {
+            tripList = await tripsService.getPassengerFinishedTrips(userId);
+        }
+
+        res.status(200).json(tripList);
+    } catch (e) {
+        res
+            .status(500)
+            .json({message: e.message})
+            .send();
+    }
+}
+
 export default {
   getUsers,
   getUserById,
@@ -305,4 +325,5 @@ export default {
   getUserIdIfLoggedWithValidCredentials,
   getDriverPendingTrips,
   userIsDriver,
+  getFinishedTrips
 };

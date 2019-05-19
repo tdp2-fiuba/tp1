@@ -27,6 +27,7 @@ app.post('/users/login/:fbId', usersController.userLogin);
 app.delete('/users/:fbId', usersController.deleteUser);
 app.post('/users/logout', usersController.userLogout);
 app.get('/users/drivers/pendingTrips', usersController.getDriverPendingTrips);
+app.get('/users/finishedTrips', usersController.getFinishedTrips);
 
 // Trips endpoints
 app.get('/trips', tripsController.getAll);

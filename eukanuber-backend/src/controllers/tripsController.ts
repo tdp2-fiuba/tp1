@@ -185,26 +185,6 @@ async function rejectTrip(req: Express.Request, res: Express.Response) {
     }
 }
 
-async function getFinishedTripsByUserId(req: Express.Request, res: Express.Response) {
-    try {
-        const userId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-        const userIsDriver = await usersController.userIsDriver(userId);
-        var tripList = [];
-        if (userIsDriver) {
-            tripList = await tripsService.getDriverFinishedTrips(userId);
-        } else {
-            tripList = await tripsService.getPassengerFinishedTrips(userId);
-        }
-
-        res.status(200).json(tripList);
-    } catch (e) {
-        res
-            .status(500)
-            .json({message: e.message})
-            .send();
-    }
-}
-
 export default {
     getAll,
     getById,
@@ -213,6 +193,5 @@ export default {
     updateTrip,
     getRoute,
     acceptTrip,
-    rejectTrip,
-    getFinishedTripsByUserId,
+    rejectTrip
 };
