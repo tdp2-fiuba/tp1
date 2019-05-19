@@ -85,4 +85,8 @@ public interface BackendService {
 
     @POST("users/review")
     Call<Void> sendFeedback(@Body FeedbackRequest feedbackRequest);
+
+    @GET("users/finishedTrips")
+    Call<List<Trip>> getFinishedTrips();
+
 }

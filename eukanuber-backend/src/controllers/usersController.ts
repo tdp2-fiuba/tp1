@@ -292,13 +292,7 @@ async function getFinishedTrips(req: Express.Request, res: Express.Response) {
     try {
         const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
         const isDriver = await userIsDriver(userId);
-        let tripList = [];
-        if (isDriver) {
-            tripList = await tripsService.getDriverFinishedTrips(userId);
-        } else {
-            tripList = await tripsService.getPassengerFinishedTrips(userId);
-        }
-
+        const tripList = await tripsService.getFinishedTrips(userId, isDriver);
         res.status(200).json(tripList);
     } catch (e) {
         res

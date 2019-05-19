@@ -4,6 +4,7 @@ import {ICreateTripData, ITrip, TripStatus, UserValidationStatus, UserTypes} fro
 import googleMapsService from './googleMapsService';
 import UserState from '../models/UserState';
 import userService from './userService';
+import Express from "express";
 
 require('dotenv').config();
 
@@ -272,36 +273,60 @@ async function getDriverPendingTrips(driverId: string) {
     }
 }
 
-async function getDriverFinishedTrips(driverId: string) {
+async function getUserTripReview(tripId: string, userId: string) {
     try {
-        const finishedTrips = await db
-            .table('trips')
-            .where('driverId', driverId)
-            .andWhere('status', TripStatus.COMPLETED)
-            .orderBy('createdDate', 'desc')
-            .select();
-        if (finishedTrips === undefined) {
-            return [];
+
+        const review = await db
+                .table('userReview')
+                .where('tripId', tripId)
+                .where('reviewee', userId)
+                .select()
+                .first();
+        if (!review) {
+            return undefined;
         }
-        return finishedTrips.map((trip: any) => ({...trip, pets: trip.pets.split(',')}));
+        return review;
+
     } catch (e) {
         console.log(e);
-        return [];
+        return undefined;
     }
+
 }
 
-async function getPassengerFinishedTrips(passengerId: string) {
+async function getFinishedTrips(userId: string, isDriver: boolean) {
     try {
-        const finishedTrips = await db
-            .table('trips')
-            .where('clientId', passengerId)
-            .andWhere('status', TripStatus.COMPLETED)
-            .orderBy('createdDate', 'desc')
-            .select();
+        let finishedTrips = [];
+        if (isDriver) {
+            finishedTrips = await db
+                .table('trips')
+                .where('driverId', userId)
+                .andWhere('status', TripStatus.COMPLETED)
+                .orderBy('createdDate', 'desc')
+                .select();
+        } else {
+            finishedTrips = await db
+                .table('trips')
+                .where('clientId', userId)
+                .andWhere('status', TripStatus.COMPLETED)
+                .orderBy('createdDate', 'desc')
+                .select();
+        }
+
         if (finishedTrips === undefined) {
             return [];
         }
-        return finishedTrips.map((trip: any) => ({...trip, pets: trip.pets.split(',')}));
+        for (const trip of finishedTrips) {
+            trip.clientDetail = await userService.getUserById(trip.clientId);
+            trip.driverDetail = await userService.getUserById(trip.driverId);
+            trip.reviewToClient = await getUserTripReview(trip.id, trip.clientId);
+            trip.reviewToDriver = await getUserTripReview(trip.id, trip.driverId);
+            trip.driverDetail.images = [
+                trip.driverDetail.images[0]
+            ];
+            trip.pets = trip.pets.split(',');
+        }
+        return finishedTrips;
     } catch (e) {
         console.log(e);
         return [];
@@ -320,6 +345,5 @@ export default {
     driverAcceptTrip,
     driverRejectTrip,
     getDriverPendingTrips,
-    getDriverFinishedTrips,
-    getPassengerFinishedTrips,
+    getFinishedTrips,
 };

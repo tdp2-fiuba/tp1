@@ -23,6 +23,7 @@ import com.tdp2.eukanuber.adapter.ListTripsAdapter;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.services.TripService;
+import com.tdp2.eukanuber.services.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,21 +40,14 @@ public class TripHistoryActivity extends SecureActivity {
         setContentView(R.layout.activity_trip_history);
         mActivity = this;
         this.createMenu(userLogged);
-        TripService tripService = new TripService(mActivity);
-        Call<List<Trip>> call = tripService.getAll();
+        UserService userService = new UserService(mActivity);
+        Call<List<Trip>> call = userService.getFinishedTrips();
 
         call.enqueue(new Callback<List<Trip>>() {
             @Override
             public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
                 List<Trip> trips = response.body();
-                Trip trip = new Trip();
-                trip.setId("1");
-                Trip trip2 = new Trip();
-                trip2.setId("2");
-                trips.add(trip);
-                trips.add(trip2);
                 ListView list = findViewById(R.id.listTrips);
-
                 ListTripsAdapter adapter= new ListTripsAdapter(mActivity, (ArrayList<Trip>) trips);
                 list.setAdapter(adapter);
             }
