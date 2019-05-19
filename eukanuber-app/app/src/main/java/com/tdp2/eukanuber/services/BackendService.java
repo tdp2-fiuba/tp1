@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.FeedbackRequest;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
@@ -89,4 +90,6 @@ public interface BackendService {
     @GET("users/finishedTrips")
     Call<List<Trip>> getFinishedTrips();
 
+    @GET("users/{userId}/rating")
+    Call<Rating> getUserRating(@Path("userId") String userId);
 }

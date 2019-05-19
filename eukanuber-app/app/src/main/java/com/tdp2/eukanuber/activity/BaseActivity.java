@@ -25,10 +25,12 @@ import com.facebook.login.LoginManager;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.UserService;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +74,24 @@ abstract class BaseActivity extends AppCompatActivity
             if(nameUserView != null){
                 nameUserView.setText(userLogged.getFullName());
             }
+            UserService tripService = new UserService(baseActivity);
+            Call<Rating> call = tripService.getUserRating(userLogged.getId());
+            call.enqueue(new Callback<Rating>() {
+                @Override
+                public void onResponse(Call<Rating> call, Response<Rating> response) {
+                    Rating rating = response.body();
+                    TextView ratingView = headerView.findViewById(R.id.userRating);
+                    Float sum = Float.parseFloat(rating.getSum());
+                    Float count = Float.parseFloat(rating.getCount());
+                    Float average = sum/count;
+                    ratingView.setText(String.format ("%.2f", average));
+                }
+
+                @Override
+                public void onFailure(Call<Rating> call, Throwable t) {
+                    Log.v("Rating", t.getMessage());
+                }
+            });
         }
 
     }

@@ -12,13 +12,20 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.services.UserService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 abstract class SecureActivity extends BaseActivity {
     protected User userLogged;
@@ -34,6 +41,5 @@ abstract class SecureActivity extends BaseActivity {
             return;
         }
     }
-
 
 }
