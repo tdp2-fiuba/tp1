@@ -292,7 +292,7 @@ async function getPassengerFinishedTrips(passengerId: string) {
     try {
         const finishedTrips = await db
             .table('trips')
-            .where('passengerId', passengerId)
+            .where('clientId', passengerId)
             .andWhere('status', TripStatus.COMPLETED)
             .orderBy('createdDate', 'desc')
             .select();
