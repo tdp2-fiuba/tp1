@@ -219,6 +219,14 @@ async function userLogin(req: Express.Request, res: Express.Response) {
   }
 }
 
+async function userIsDriver(userId: string) {
+  const userRole = await userService.getUserRole(userId);
+  if(userRole == "driver"){
+    return true;
+  }
+  return false;
+}
+
 async function loginUserWithFbId(fbId: string) {
   const userId = await userService.getUserByFbId(fbId);
 
@@ -296,4 +304,5 @@ export default {
   getUserReviews,
   getUserIdIfLoggedWithValidCredentials,
   getDriverPendingTrips,
+  userIsDriver,
 };

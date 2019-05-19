@@ -1,5 +1,6 @@
 package com.tdp2.eukanuber.services;
 
+import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
@@ -36,6 +37,9 @@ public interface BackendService {
 
     @GET("trips/{tripId}")
     Call<Trip> get(@Path("tripId") String tripId);
+
+    @GET("trips/{tripId}/full")
+    Call<Trip> getFull(@Path("tripId") String tripId);
 
     // Trips
     @POST("trips")
@@ -79,4 +83,6 @@ public interface BackendService {
     @POST("trips/{tripId}/accept")
     Call<Trip> confirmDriverTrip(@Path("tripId") String tripId);
 
+    @PUT("users/review")
+    Call<Void> sendFeedback(@Body FeedbackRequest feedbackRequest);
 }

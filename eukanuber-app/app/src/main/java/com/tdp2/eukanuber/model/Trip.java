@@ -21,6 +21,8 @@ public class Trip implements Serializable {
     private String driverId;
     private Integer status;
     private List<MapRoute> routes;
+    private User clientDetail;
+    private User driverDetail;
 
     public String getId() {
         return id;
@@ -147,5 +149,21 @@ public class Trip implements Serializable {
 
     public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public User getClientDetail() {
+        return clientDetail;
+    }
+
+    public void setClientDetail(User clientDetail) {
+        this.clientDetail = clientDetail;
+    }
+
+    public User getDriverDetail() {
+        return driverDetail;
+    }
+
+    public void setDriverDetail(User driverDetail) {
+        this.driverDetail = driverDetail;
     }
 }

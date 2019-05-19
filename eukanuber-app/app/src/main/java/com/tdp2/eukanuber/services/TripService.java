@@ -42,6 +42,17 @@ public class TripService extends ClientService {
         BackendService postService = retrofit.create(BackendService.class);
         return postService.get(tripId);
     }
+
+    public Call<Trip> getFull(String tripId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.getFull(tripId);
+    }
     public Call<List<Trip>> getAll() {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)

@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.services;
 
 import android.content.Context;
 
+import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
@@ -103,5 +104,14 @@ public class UserService extends ClientService{
         BackendService getService = retrofit.create(BackendService.class);
         return getService.getPendingTrips();
     }
+    public Call<Void> sendFeedback(FeedbackRequest feedbackRequest) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
+        BackendService getService = retrofit.create(BackendService.class);
+        return getService.sendFeedback(feedbackRequest);
+    }
 }

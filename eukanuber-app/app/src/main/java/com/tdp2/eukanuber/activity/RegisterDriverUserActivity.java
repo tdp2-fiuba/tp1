@@ -147,11 +147,11 @@ public class RegisterDriverUserActivity extends BaseActivity {
         int dstWidth = 0;
         int dstHeight = 0;
         if (srcWidth > srcHeight) {
-            dstWidth = 500;
+            dstWidth = 200;
             dstHeight = (dstWidth * srcHeight) / srcWidth;
         }
         if (srcWidth <= srcHeight) {
-            dstHeight = 500;
+            dstHeight = 200;
             dstWidth = (dstHeight * srcWidth) / srcHeight;
         }
         return Bitmap.createScaledBitmap(source, dstWidth, dstHeight, false);

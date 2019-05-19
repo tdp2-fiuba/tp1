@@ -1,5 +1,5 @@
 import Express from 'express';
-import { ICreateTripData, ILocation, ITrip, TripStatus, IUser } from '../models';
+import { ICreateTripData, ILocation, ITrip, IUser, TripStatus } from '../models';
 import { tripsService, userService } from '../services';
 import usersController from './usersController';
 import UserState from '../models/UserState';
@@ -10,6 +10,15 @@ async function getAll(req: Express.Request, res: Express.Response) {
   const status: TripStatus = req.query.status;
   const trips = await tripsService.getTrips(status);
   res.json(trips);
+}
+async function getFullById(req: Express.Request, res: Express.Response) {
+  const tripId = req.params.id;
+  const trip = await tripsService.getTripById(tripId);
+  if (trip.status === TripStatus.COMPLETED) {
+    trip.clientDetail = await userService.getUserById(trip.clientId);
+    trip.driverDetail = await userService.getUserById(trip.driverId);
+  }
+  res.json(trip);
 }
 
 async function getById(req: Express.Request, res: Express.Response) {
@@ -43,14 +52,6 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
             .json(updatedTrip)
             .send();
         }
-
-        //change trip status to DRIVER_CONFIRM_PENDING so client knows driver is being assigned...
-        updatedTrip = await tripsService.updateTripStatus(tripId, TripStatus.DRIVER_CONFIRM_PENDING);
-        res
-          .status(200)
-          .json(updatedTrip)
-          .send();
-
         let groupA = drivers.filter(driver => driver.count <= MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
         let groupB = drivers.filter(driver => driver.count > MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
 
@@ -72,6 +73,9 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
         /* Lo agrego para el cambio de estado del viaje por el chofer
                 (En viaje, Terminado)*/
         updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
+        if (updatedTrip.status === TripStatus.COMPLETED) {
+          await userService.updateUserState(updatedTrip.driverId, UserState.IDLE);
+        }
         res
           .status(200)
           .json(updatedTrip)
@@ -172,12 +176,34 @@ async function rejectTrip(req: Express.Request, res: Express.Response) {
   }
 }
 
+async function getFinishedTripsByUserId(req: Express.Request, res: Express.Response) {
+  try {
+    const userId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
+    const userIsDriver = await usersController.userIsDriver(userId);
+    var tripList = [];
+    if (userIsDriver) {
+      tripList = await tripsService.getDriverFinishedTrips(userId);
+    } else {
+      tripList = await tripsService.getPassengerFinishedTrips(userId);
+    }
+
+    res.status(200).json(tripList);
+  } catch (e) {
+    res
+      .status(500)
+      .json({ message: e.message })
+      .send();
+  }
+}
+
 export default {
   getAll,
   getById,
+  getFullById,
   createTrip,
   updateTrip,
   getRoute,
   acceptTrip,
   rejectTrip,
+  getFinishedTripsByUserId,
 };

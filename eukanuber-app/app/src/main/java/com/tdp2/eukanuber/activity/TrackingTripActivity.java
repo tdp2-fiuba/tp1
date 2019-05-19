@@ -84,7 +84,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     @Override
                     public void onResponse(Call<UserPositionResponse> call, Response<UserPositionResponse> response) {
                         UserPositionResponse userPositionResponse = response.body();
-                        if (userPositionResponse != null) {
+                        if (userPositionResponse != null && userPositionResponse.getPosition() != null) {
                             String[] positionSplit = userPositionResponse.getPosition().split(",");
                             LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
                             if (!driverPath.contains(position)) {

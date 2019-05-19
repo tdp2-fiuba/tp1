@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -23,11 +24,15 @@ import com.facebook.GraphRequest;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.Review;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserImage;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
+import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
 import java.io.ByteArrayOutputStream;
@@ -40,9 +45,10 @@ import retrofit2.Response;
 
 public class FeedbackActivity extends SecureActivity {
     Activity mActivity;
-    Bitmap bitmapImageProfile;
     Integer score;
     Trip currentTrip;
+    User userToScore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,17 +58,59 @@ public class FeedbackActivity extends SecureActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Feedback");
         Intent intent = getIntent();
-        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-
-        bitmapImageProfile = BitmapFactory.decodeResource(getResources(),
-                R.drawable.empty_profile);
-
-        CircularImageView profilePicture = mActivity.findViewById(R.id.profilePicture);
-        profilePicture.setImageBitmap(bitmapImageProfile);
         this.score = 0;
-        EditText editText = findViewById(R.id.feedbackComment);
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
+        TripService tripService = new TripService(mActivity);
+        Call<Trip> call = tripService.getFull(currentTrip.getId());
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                currentTrip = response.body();
+                initTripData();
+            }
+
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                Log.v("TRIP", t.getMessage());
+                // showMessage("Ha ocurrido un error al solicitar el viaje.");
+
+            }
+        });
+    }
+
+    private void initTripData() {
+        String userType;
+        String commentHint;
+        if (userLogged.getUserType().equals(User.USER_TYPE_CLIENT)) {
+            userToScore = currentTrip.getDriverDetail();
+            userType = "Conductor";
+            commentHint = "Escriba comentarios sobre su experiencia con el conductor";
+        } else {
+            userToScore = currentTrip.getClientDetail();
+            userType = "Cliente";
+            commentHint = "Escriba comentarios sobre su experiencia con el cliente y sus mascotas";
+        }
+        String imageProfileB64 = userToScore.getImageByType(User.PROFILE_IMAGE_NAME);
+        byte[] decodedString = Base64.decode(imageProfileB64, Base64.DEFAULT);
+        Bitmap imageProfile = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        String fullName = userToScore.getFullName();
+
+        TextView userTypeView = findViewById(R.id.userType);
+        userTypeView.setText(userType);
+        CircularImageView profilePicture = mActivity.findViewById(R.id.profilePicture);
+        profilePicture.setImageBitmap(imageProfile);
+        TextView nameView = findViewById(R.id.nameUser);
+        nameView.setText(fullName);
+
+        TextView tripTimeView = findViewById(R.id.tripTime);
+        tripTimeView.setText(currentTrip.getDuration());
+        TextView tripDistanceView = findViewById(R.id.tripDistance);
+        tripDistanceView.setText(currentTrip.getDistance());
+
+        EditText feedbackComment = findViewById(R.id.feedbackComment);
+        feedbackComment.setHint(commentHint);
+        feedbackComment.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        feedbackComment.setRawInputType(InputType.TYPE_CLASS_TEXT);
     }
 
     @Override
@@ -73,7 +121,7 @@ public class FeedbackActivity extends SecureActivity {
 
     public void showMessage(String message) {
         Toast.makeText(
-                this,
+                mActivity,
                 message,
                 Toast.LENGTH_LONG
         ).show();
@@ -132,6 +180,44 @@ public class FeedbackActivity extends SecureActivity {
     }
 
     public void submitFeedback(View view) {
+        EditText feedbackComment = findViewById(R.id.feedbackComment);
+        String comment = feedbackComment.getText().toString();
+        if (this.score == 0) {
+            showMessage("Debe realizar una calificación");
+            return;
+        }
+        UserService userService = new UserService(mActivity);
+        FeedbackRequest feedbackRequest = new FeedbackRequest(
+                userToScore.getId(),
+                currentTrip.getId(),
+                new Review(this.score, comment));
+        Call<Void> call = userService.sendFeedback(feedbackRequest);
+        ProgressDialog dialog = new ProgressDialog(FeedbackActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                dialog.dismiss();
+                if (userLogged.getUserType().equals(User.USER_TYPE_DRIVER)) {
+                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(mActivity, HomeClientActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                return;
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                dialog.dismiss();
+                Log.v("Feedback Error", t.getMessage());
+                showMessage("Ha ocurrido un error. Intente luego.");
+            }
+        });
 
     }
 }
