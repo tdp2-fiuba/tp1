@@ -213,7 +213,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
     //const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
 
     //5 pesos por minuto
-    const durationCost = duration * 5;
+    const durationCost = (duration / 60) * 5;
 
     //Deprecado por Alejandro
     // Si hay menos del 50% de los conductores disponibles, se agrega un recargo
@@ -270,6 +270,42 @@ async function getDriverPendingTrips(driverId: string) {
     }
 }
 
+async function getDriverFinishedTrips(driverId: string) {
+    try {
+        const finishedTrips = await db
+            .table('trips')
+            .where('driverId', driverId)
+            .andWhere('status', TripStatus.COMPLETED)
+            .orderBy('createdDate', 'desc')
+            .select();
+        if (finishedTrips === undefined) {
+            return [];
+        }
+        return finishedTrips;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+
+async function getPassengerFinishedTrips(passengerId: string) {
+    try {
+        const finishedTrips = await db
+            .table('trips')
+            .where('passengerId', passengerId)
+            .andWhere('status', TripStatus.COMPLETED)
+            .orderBy('createdDate', 'desc')
+            .select();
+        if (finishedTrips === undefined) {
+            return [];
+        }
+        return finishedTrips;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+
 export default {
     getTrips,
     getTripById,
@@ -282,4 +318,6 @@ export default {
     driverAcceptTrip,
     driverRejectTrip,
     getDriverPendingTrips,
+    getDriverFinishedTrips,
+    getPassengerFinishedTrips,
 };
