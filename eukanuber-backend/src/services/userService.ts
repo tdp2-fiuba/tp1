@@ -4,6 +4,7 @@ import db from '../db/db';
 import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
 import facebookService from './facebookService';
+require('dotenv').config();
 
 var moment = require('moment');
 const { raw } = require('objection');
@@ -201,13 +202,9 @@ async function penalizeDriverIgnoredTrip(driverId: string, tripId: string) {
   return await submitUserReview(driverId, driverId, tripId, { stars: 1, comment: `IGNORED TRIP '${tripId}'` });
 }
 
-async function penalizeDriverRejectTrip(driverId: string, tripId: string, responseTime: number) {
+async function penalizeDriverRejectTrip(driverId: string, tripId: string) {
   //penalize driver by submitting a review with driverId as reviewer id.
-  if (responseTime > REJECTION_TIME_LIMIT) {
-    console.log('MAX REJECTION TIME REACHED: Applying penalization to driver.');
-    return await submitUserReview(driverId, driverId, tripId, { stars: 2, comment: `REJECTED TRIP '${tripId}'.` });
-  }
-  console.log('REJECTED WITHIN ACCEPTED TIME: Applying penalization to driver.');
+  console.log('REJECTED TRIP: Applying penalization to driver.');
   return await submitUserReview(driverId, driverId, tripId, { stars: 3, comment: `REJECTED TRIP '${tripId}'.` });
 }
 
@@ -334,11 +331,14 @@ async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> 
       .select(
         db.raw(
           `users.id, 
+          avg(stars) as rating,
+          sum(stars) as count,
           ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
     * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 as distance`,
           args
         )
       )
+      .leftJoin('userReview', 'users.id', '=', 'userReview.reviewee')
       .where(
         db.raw(
           `ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
@@ -346,7 +346,9 @@ async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> 
           args
         )
       )
-      .andWhere('users.userType', 'driver');
+      .andWhere('users.userType', 'driver')
+      .groupBy('users.id')
+      .orderBy(['distance', { column: 'rating', order: 'desc' }]); //order by distance then by rating
     return users;
   } catch (e) {
     console.log(e);

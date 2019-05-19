@@ -5,6 +5,8 @@ import googleMapsService from './googleMapsService';
 import UserState from '../models/UserState';
 import userService from './userService';
 
+require('dotenv').config();
+
 async function getTrips(status: TripStatus) {
   const trips = await db
     .table('trips')
@@ -84,8 +86,8 @@ async function driverAcceptTrip(tripId: string, driverId: string) {
   return await changeDriverTripStatus(tripId, driverId, TripStatus.DRIVER_GOING_ORIGIN, UserState.TRAVELLING);
 }
 
-async function driverRejectTrip(tripId: string, driverId: string, responseTime: number) {
-  await userService.penalizeDriverRejectTrip(driverId, tripId, responseTime);
+async function driverRejectTrip(tripId: string, driverId: string) {
+  await userService.penalizeDriverRejectTrip(driverId, tripId);
 
   return await changeDriverTripStatus(tripId, driverId, TripStatus.REJECTED_BY_DRIVER, UserState.IDLE);
 }

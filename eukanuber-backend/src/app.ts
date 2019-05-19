@@ -1,3 +1,4 @@
+require('dotenv').config();
 import bodyParser from 'body-parser';
 import Express from 'express';
 import { statusController, tripsController, usersController } from './controllers';
