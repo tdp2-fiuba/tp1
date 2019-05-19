@@ -122,6 +122,7 @@ public class UserService extends ClientService{
                 .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
+
                 .build();
 
         BackendService getService = retrofit.create(BackendService.class);

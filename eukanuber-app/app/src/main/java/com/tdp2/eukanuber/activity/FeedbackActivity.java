@@ -27,6 +27,7 @@ import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.Review;
+import com.tdp2.eukanuber.model.ReviewRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.User;
@@ -175,7 +176,7 @@ public class FeedbackActivity extends SecureActivity {
         FeedbackRequest feedbackRequest = new FeedbackRequest(
                 userToScore.getId(),
                 currentTrip.getId(),
-                new Review(this.score, comment));
+                new ReviewRequest(this.score, comment));
         Call<Void> call = userService.sendFeedback(feedbackRequest);
         ProgressDialog dialog = new ProgressDialog(FeedbackActivity.this);
         dialog.setMessage("Espere un momento por favor");

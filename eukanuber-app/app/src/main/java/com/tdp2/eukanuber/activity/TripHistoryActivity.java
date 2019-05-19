@@ -1,6 +1,7 @@
 package com.tdp2.eukanuber.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,18 +43,23 @@ public class TripHistoryActivity extends SecureActivity {
         this.createMenu(userLogged);
         UserService userService = new UserService(mActivity);
         Call<List<Trip>> call = userService.getFinishedTrips();
+        ProgressDialog dialog = new ProgressDialog(TripHistoryActivity.this);
+        dialog.setMessage("Cargando los viajes. Espere un momento por favor.");
+        dialog.show();
 
         call.enqueue(new Callback<List<Trip>>() {
             @Override
             public void onResponse(Call<List<Trip>> call, Response<List<Trip>> response) {
+                dialog.dismiss();
                 List<Trip> trips = response.body();
                 ListView list = findViewById(R.id.listTrips);
-                ListTripsAdapter adapter= new ListTripsAdapter(mActivity, (ArrayList<Trip>) trips);
+                ListTripsAdapter adapter= new ListTripsAdapter(mActivity, (ArrayList<Trip>) trips, userLogged);
                 list.setAdapter(adapter);
             }
 
             @Override
             public void onFailure(Call<List<Trip>> call, Throwable t) {
+                dialog.dismiss();
                 Log.v("TRIP", t.getMessage());
             }
         });

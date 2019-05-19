@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -27,7 +28,10 @@ public class ClientService {
                         .addHeader("Authorization", "Bearer " + appToken)
                         .build();
                 return chain.proceed(newRequest);
-            }).build();
+            })
+            .readTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .build();
         }
 
     }

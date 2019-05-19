@@ -297,6 +297,7 @@ async function getUserTripReview(tripId: string, userId: string) {
 async function getFinishedTrips(userId: string, isDriver: boolean) {
     try {
         let finishedTrips = [];
+        console.log('isDriver: ', isDriver);
         if (isDriver) {
             finishedTrips = await db
                 .table('trips')
@@ -312,7 +313,6 @@ async function getFinishedTrips(userId: string, isDriver: boolean) {
                 .orderBy('createdDate', 'desc')
                 .select();
         }
-
         if (finishedTrips === undefined) {
             return [];
         }
