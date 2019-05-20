@@ -210,7 +210,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
     const utcHour = new Date().getUTCHours();
     var isNocturneTime = false;
     const getUtcTimeExtraCost = (utcHour: number) =>
-        (utcHour >= 18 && utcHour <= 23) || (utcHour >= 0 && utcHour < 6) ? (isNocturneTime = true) : (isNocturneTime = false);
+        ((utcHour >= 18 && utcHour <= 23) || (utcHour >= 0 && utcHour < 6)) ? (isNocturneTime = true) : (isNocturneTime = false);
 
     // Por cada mascota, obtenemos un recargo (si es S no hay recargo, M y L tienen recargo)
     //const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
