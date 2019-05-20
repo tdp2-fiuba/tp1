@@ -207,7 +207,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
     //const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
     //Si es horario nocturno 50% + sobre el total. Horario nocturno es de 6pm a 6 am.
-    const utcHour = new Date().getUTCHours();
+    const utcHour = new Date().getUTCHours() - 3;
     var isNocturneTime = false;
     const getUtcTimeExtraCost = (utcHour: number) =>
         ((utcHour >= 18 && utcHour <= 23) || (utcHour >= 0 && utcHour < 6)) ? (isNocturneTime = true) : (isNocturneTime = false);
