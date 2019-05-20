@@ -16,19 +16,41 @@
         android:id="@+id/imageUserView"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_marginTop="10dp"
         android:src="@mipmap/ic_launcher_round"
         app:civ_border_color="@color/colorPrimary"
         app:civ_border_width="1dp"
         app:civ_shadow="true"
         app:civ_shadow_radius="10"
         app:civ_shadow_color="@color/colorPrimaryDark"/>
-    <TextView
-        android:id="@+id/nameUserView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:textSize="16dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/nameUserView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:textSize="16dp"
+            android:text="Rolando Rivas"
+
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        <ImageView
+            android:id="@+id/userRatingIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="@dimen/nav_header_vertical_spacing"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_star_gold" />
+        <TextView
+            android:id="@+id/userRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:textSize="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+    </LinearLayout>
 
 
 </LinearLayout>

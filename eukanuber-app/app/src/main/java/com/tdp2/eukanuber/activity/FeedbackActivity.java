@@ -27,6 +27,7 @@ import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.Review;
+import com.tdp2.eukanuber.model.ReviewRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.User;
@@ -48,6 +49,7 @@ public class FeedbackActivity extends SecureActivity {
     Integer score;
     Trip currentTrip;
     User userToScore;
+    Boolean fromDetailTrip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,22 +62,8 @@ public class FeedbackActivity extends SecureActivity {
         Intent intent = getIntent();
         this.score = 0;
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-        TripService tripService = new TripService(mActivity);
-        Call<Trip> call = tripService.getFull(currentTrip.getId());
-        call.enqueue(new Callback<Trip>() {
-            @Override
-            public void onResponse(Call<Trip> call, Response<Trip> response) {
-                currentTrip = response.body();
-                initTripData();
-            }
-
-            @Override
-            public void onFailure(Call<Trip> call, Throwable t) {
-                Log.v("TRIP", t.getMessage());
-                // showMessage("Ha ocurrido un error al solicitar el viaje.");
-
-            }
-        });
+        fromDetailTrip = intent.getBooleanExtra("fromDetailTrip", false);
+        initTripData();
     }
 
     private void initTripData() {
@@ -190,7 +178,7 @@ public class FeedbackActivity extends SecureActivity {
         FeedbackRequest feedbackRequest = new FeedbackRequest(
                 userToScore.getId(),
                 currentTrip.getId(),
-                new Review(this.score, comment));
+                new ReviewRequest(this.score, comment));
         Call<Void> call = userService.sendFeedback(feedbackRequest);
         ProgressDialog dialog = new ProgressDialog(FeedbackActivity.this);
         dialog.setMessage("Espere un momento por favor");
@@ -198,17 +186,43 @@ public class FeedbackActivity extends SecureActivity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                dialog.dismiss();
-                if (userLogged.getUserType().equals(User.USER_TYPE_DRIVER)) {
-                    Intent intent = new Intent(mActivity, HomeDriverActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(mActivity, HomeClientActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                if(fromDetailTrip){
+                    TripService tripService = new TripService(mActivity);
+                    Call<Trip> callFullTrip = tripService.getFull(currentTrip.getId());
+                    callFullTrip.enqueue(new Callback<Trip>() {
+                        @Override
+                        public void onResponse(Call<Trip> call, Response<Trip> response) {
+                            dialog.dismiss();
+                            currentTrip = response.body();
+                            Intent intentTripDetail = new Intent(mActivity, TripDetailActivity.class);
+                            intentTripDetail.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intentTripDetail.putExtra("currentTrip", currentTrip);
+                            startActivity(intentTripDetail);
+                            return;
+                        }
+                        @Override
+                        public void onFailure(Call<Trip> call, Throwable t) {
+                            dialog.dismiss();
+                            Log.v("TRIP", t.getMessage());
+                        }
+                    });
+
+                }else{
+                    dialog.dismiss();
+                    if (userLogged.getUserType().equals(User.USER_TYPE_DRIVER)) {
+                        Intent intent = new Intent(mActivity, HomeDriverActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        return;
+
+                    } else {
+                        Intent intent = new Intent(mActivity, HomeClientActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        return;
+                    }
                 }
-                return;
+
             }
 
             @Override

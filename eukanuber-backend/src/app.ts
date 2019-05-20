@@ -17,7 +17,7 @@ app.get('/users/all', usersController.getUsers);
 app.post('/users/register', usersController.createUser);
 app.get('/users', usersController.getUserById);
 app.put('/users', usersController.updateUser);
-app.put('/users/review', usersController.submitUserReview); //TODO:should be post...
+app.post('/users/review', usersController.submitUserReview);
 app.get('/users/:userId/rating', usersController.getUserRating);
 app.get('/users/:userId/reviews', usersController.getUserReviews);
 app.get('/users/lastTrip', usersController.getUserLastTrip);
@@ -27,6 +27,7 @@ app.post('/users/login/:fbId', usersController.userLogin);
 app.delete('/users/:fbId', usersController.deleteUser);
 app.post('/users/logout', usersController.userLogout);
 app.get('/users/drivers/pendingTrips', usersController.getDriverPendingTrips);
+app.get('/users/finishedTrips', usersController.getFinishedTrips);
 
 // Trips endpoints
 app.get('/trips', tripsController.getAll);

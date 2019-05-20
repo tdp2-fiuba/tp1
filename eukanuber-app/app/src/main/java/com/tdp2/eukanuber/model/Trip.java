@@ -23,6 +23,8 @@ public class Trip implements Serializable {
     private List<MapRoute> routes;
     private User clientDetail;
     private User driverDetail;
+    private Review reviewToClient;
+    private Review reviewToDriver;
 
     public String getId() {
         return id;
@@ -165,5 +167,21 @@ public class Trip implements Serializable {
 
     public void setDriverDetail(User driverDetail) {
         this.driverDetail = driverDetail;
+    }
+
+    public Review getReviewToClient() {
+        return reviewToClient;
+    }
+
+    public void setReviewToClient(Review reviewToClient) {
+        this.reviewToClient = reviewToClient;
+    }
+
+    public Review getReviewToDriver() {
+        return reviewToDriver;
+    }
+
+    public void setReviewToDriver(Review reviewToDriver) {
+        this.reviewToDriver = reviewToDriver;
     }
 }

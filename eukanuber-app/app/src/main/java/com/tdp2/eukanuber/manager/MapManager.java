@@ -124,8 +124,8 @@ public class MapManager {
         try {
             List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
             if (pointsPolyline.size() > 0) {
-                LatLng firstPoint = pointsPolyline.get(0);
-                LatLng lastPoint = pointsPolyline.get(pointsPolyline.size()-1);
+                /*LatLng firstPoint = pointsPolyline.get(0);
+                LatLng lastPoint = pointsPolyline.get(pointsPolyline.size()-1);*/
                 PolylineOptions polyOptions = new PolylineOptions();
                 polyOptions.color(Color.rgb(100, 149, 237));
                 polyOptions.width(20);
@@ -134,7 +134,7 @@ public class MapManager {
                 polyOptionsInside.color(Color.rgb(30, 144, 255));
                 polyOptionsInside.width(16);
                 polyOptionsInside.addAll(pointsPolyline);
-                mMap.addMarker(new MarkerOptions()
+               /* mMap.addMarker(new MarkerOptions()
                         .position(firstPoint)
                         .draggable(false)
                         .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_begin_path))
@@ -143,7 +143,7 @@ public class MapManager {
                         .position(lastPoint)
                         .draggable(false)
                         .icon(bitmapDescriptorFromVector(mActivity, R.drawable.ic_finish_path))
-                );
+                );*/
                 mMap.addPolyline(polyOptions);
                 mMap.addPolyline(polyOptionsInside);
 
@@ -187,7 +187,34 @@ public class MapManager {
 
 
     }
+    public void zoomInstantPath(MapRoutePolyline mapRoutePolyline) {
+        int padding = 100;
+        List<LatLng> pointsPolyline = PolyUtil.decode(mapRoutePolyline.getPoints());
 
+        if (pointsPolyline.size() > 0) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (LatLng latLng : pointsPolyline) {
+                builder.include(latLng);
+            }
+
+            final LatLngBounds bounds = builder.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+            mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    try {
+                        mMap.moveCamera(cu);
+                    } catch (Exception ex) {
+                        Log.d("ZOOM PATH", ex.getMessage());
+                    }
+
+                }
+            });
+        }
+
+
+    }
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());

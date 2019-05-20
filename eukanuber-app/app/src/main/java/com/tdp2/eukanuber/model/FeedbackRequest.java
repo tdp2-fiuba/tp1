@@ -7,9 +7,9 @@ import java.util.List;
 public class FeedbackRequest implements Serializable {
     private String userId;
     private String tripId;
-    private Review review;
+    private ReviewRequest review;
 
-    public FeedbackRequest(String userId, String tripId, Review review) {
+    public FeedbackRequest(String userId, String tripId, ReviewRequest review) {
         this.userId = userId;
         this.tripId = tripId;
         this.review = review;
@@ -31,11 +31,11 @@ public class FeedbackRequest implements Serializable {
         this.tripId = tripId;
     }
 
-    public Review getReview() {
+    public ReviewRequest getReview() {
         return review;
     }
 
-    public void setReview(Review review) {
+    public void setReview(ReviewRequest review) {
         this.review = review;
     }
 }

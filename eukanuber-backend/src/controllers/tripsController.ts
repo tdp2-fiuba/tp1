@@ -11,12 +11,18 @@ async function getAll(req: Express.Request, res: Express.Response) {
   const trips = await tripsService.getTrips(status);
   res.json(trips);
 }
+
 async function getFullById(req: Express.Request, res: Express.Response) {
   const tripId = req.params.id;
   const trip = await tripsService.getTripById(tripId);
   if (trip.status === TripStatus.COMPLETED) {
     trip.clientDetail = await userService.getUserById(trip.clientId);
     trip.driverDetail = await userService.getUserById(trip.driverId);
+    // Borro imagenes que no son del perfil para que
+    // cargue mas rapido pantalla de feedback
+    trip.driverDetail.images = [trip.driverDetail.images[0]];
+    trip.reviewToDriver = await tripsService.getUserTripReview(trip.id, trip.clientId);
+    trip.reviewToClient = await tripsService.getUserTripReview(trip.id, trip.driverId);
   }
   res.json(trip);
 }
@@ -77,16 +83,18 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
         //driver was not found so trip state changes to TRIP_CANCELLED.
         return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
       } else {
-        /* Lo agrego para el cambio de estado del viaje por el chofer
-                (En viaje, Terminado)*/
         updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
         if (updatedTrip.status === TripStatus.COMPLETED) {
           await userService.updateUserState(updatedTrip.driverId, UserState.IDLE);
+          updatedTrip.clientDetail = await userService.getUserById(updatedTrip.clientId);
+          updatedTrip.driverDetail = await userService.getUserById(updatedTrip.driverId);
+          updatedTrip.driverDetail.images = [updatedTrip.driverDetail.images[0]];
         }
-        return res
+        res
           .status(200)
           .json(updatedTrip)
           .send();
+        return;
       }
     }
     console.log('No trip status received');
@@ -181,26 +189,6 @@ async function rejectTrip(req: Express.Request, res: Express.Response) {
   }
 }
 
-async function getFinishedTripsByUserId(req: Express.Request, res: Express.Response) {
-  try {
-    const userId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-    const userIsDriver = await usersController.userIsDriver(userId);
-    var tripList = [];
-    if (userIsDriver) {
-      tripList = await tripsService.getDriverFinishedTrips(userId);
-    } else {
-      tripList = await tripsService.getPassengerFinishedTrips(userId);
-    }
-
-    res.status(200).json(tripList);
-  } catch (e) {
-    res
-      .status(500)
-      .json({ message: e.message })
-      .send();
-  }
-}
-
 export default {
   getAll,
   getById,
@@ -210,5 +198,4 @@ export default {
   getRoute,
   acceptTrip,
   rejectTrip,
-  getFinishedTripsByUserId,
 };

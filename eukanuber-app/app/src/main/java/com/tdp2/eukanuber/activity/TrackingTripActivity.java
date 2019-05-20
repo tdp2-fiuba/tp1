@@ -229,11 +229,26 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
             updateDriverPosition();
         }
         initializeDriver = false;
-        Intent intent = new Intent(this, FeedbackActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("currentTrip", currentTrip);
-        showMessage("Viaje finalizado con exito!");
-        startActivity(intent);
+        TripService tripService = new TripService(mContext);
+        Call<Trip> call = tripService.getFull(currentTrip.getId());
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                currentTrip = response.body();
+                Intent intent = new Intent(mContext, FeedbackActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("currentTrip", currentTrip);
+                showMessage("Viaje finalizado con exito!");
+                startActivity(intent);
+            }
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                Log.v("TRIP", t.getMessage());
+                // showMessage("Ha ocurrido un error al solicitar el viaje.");
+
+            }
+        });
+
     }
     private void initTripCancelled() {
         Intent intent = new Intent(this, HomeClientActivity.class);

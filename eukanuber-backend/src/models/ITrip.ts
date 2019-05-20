@@ -19,4 +19,6 @@ export default interface ITrip {
   payment: string;
   clientDetail: any;
   driverDetail: any;
+  reviewToClient: any;
+  reviewToDriver: any;
 }

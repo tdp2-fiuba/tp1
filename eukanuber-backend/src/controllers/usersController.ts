@@ -1,9 +1,9 @@
 import Express from 'express';
 import jwt from 'jsonwebtoken';
-import { IUser } from '../models';
+import {IUser} from '../models';
 import ICreateUserData from '../models/ICreateUserData';
-import { userService } from '../services';
-import { tripsService } from '../services';
+import {tripsService, userService} from '../services';
+import UserTypes from "../models/UserTypes";
 
 const secret = 'ALOHOMORA';
 
@@ -221,10 +221,7 @@ async function userLogin(req: Express.Request, res: Express.Response) {
 
 async function userIsDriver(userId: string) {
   const userRole = await userService.getUserRole(userId);
-  if(userRole == "driver"){
-    return true;
-  }
-  return false;
+  return userRole.userType === UserTypes.Driver;
 }
 
 async function loginUserWithFbId(fbId: string) {
@@ -288,6 +285,20 @@ async function getDriverPendingTrips(req: Express.Request, res: Express.Response
   }
 }
 
+async function getFinishedTrips(req: Express.Request, res: Express.Response) {
+    try {
+        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+        const isDriver = await userIsDriver(userId);
+        const tripList = await tripsService.getFinishedTrips(userId, isDriver);
+        res.status(200).json(tripList);
+    } catch (e) {
+        res
+            .status(500)
+            .json({message: e.message})
+            .send();
+    }
+}
+
 export default {
   getUsers,
   getUserById,
@@ -305,4 +316,5 @@ export default {
   getUserIdIfLoggedWithValidCredentials,
   getDriverPendingTrips,
   userIsDriver,
+  getFinishedTrips
 };

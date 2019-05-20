@@ -51,6 +51,9 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     private Runnable runnableRequestTrips;
     private Integer delayRequestTrips;
     private Boolean popupOpen;
+    private Integer secondsPopup;
+    private Handler secondsCounterHandler;
+    private Runnable secondsCounterRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +76,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
     private void initDriverHome() {
         handlerRequestTrips = new Handler();
-        delayRequestTrips = 5000;
+        delayRequestTrips = 500;
         runnableRequestTrips = new Runnable() {
             @Override
             public void run() {
@@ -84,8 +87,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                         @Override
                         public void onResponse(Call<Trip> call, Response<Trip> response) {
                             Trip trip = response.body();
-                            if (trip.getId() != null) {
-                                Log.v("CLIENT ACCEPTED TRIP", trip.getId());
+                            if (trip != null && trip.getId() != null) {
                                 if (!tripsOpened.contains(trip.getId())) {
                                     tripsOpened.add(trip.getId());
                                     View view = mActivity.findViewById(R.id.layoutMap);
@@ -116,7 +118,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-
+        secondsPopup = 20;
         String escortText = trip.getEscort() ? "Si" : "No";
         trip.setDuration(trip.getDuration());
         trip.setPrice(trip.getPrice());
@@ -128,12 +130,40 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         String pets = this.getPetsString(trip.getPets());
         ((TextView) popupView.findViewById(R.id.petsText)).setText(pets);
         ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
+
+        TextView secondsCounterView = popupView.findViewById(R.id.secondsCounter);
+        secondsPopup = 20;
+        secondsCounterView.setText(String.valueOf(secondsPopup));
+        secondsCounterHandler = new Handler();
+        secondsCounterRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (secondsPopup > 0) {
+                    secondsPopup--;
+                    secondsCounterHandler.postDelayed(this, 1000);
+                    secondsCounterView.setText(String.valueOf(secondsPopup));
+                } else {
+                    secondsCounterView.setText(String.valueOf(secondsPopup));
+                    if(popupOpen){
+                        popupWindow.dismiss();
+                        popupOpen = false;
+                        showMessage("El viaje ha sido rechazado.");
+                    }
+
+                }
+
+            }
+        };
+        secondsCounterHandler.postDelayed(secondsCounterRunnable, 1000);
         ImageButton buttonCancel = popupView.findViewById(R.id.buttonCancelTrip);
         ImageButton buttonConfirm = popupView.findViewById(R.id.buttonConfirmTrip);
-        buttonCancel.setOnClickListener(view -> {
+
+        buttonCancel.setOnClickListener(view ->
+
+        {
             TripService tripService = new TripService(mActivity);
-            Integer seconds = 12;
-            Call<Trip> call = tripService.refuseDriverTrip(trip.getId(), new RefuseDriverTripRequest(seconds));
+            Call<Trip> call = tripService.refuseDriverTrip(trip.getId(), new RefuseDriverTripRequest(secondsPopup));
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
@@ -150,7 +180,9 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 }
             });
         });
-        buttonConfirm.setOnClickListener(view -> {
+        buttonConfirm.setOnClickListener(view ->
+
+        {
             TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.confirmDriverTrip(trip.getId());
             call.enqueue(new Callback<Trip>() {
@@ -247,7 +279,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 User userUpdated = response.body();
-                if(userUpdated != null){
+                if (userUpdated != null) {
                     Log.d("USER UPDATED", userUpdated.getId());
                 }
 
@@ -312,10 +344,9 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     @Override
     protected void onStop() {
         super.onStop();
-        if(handlerRequestTrips != null && runnableRequestTrips != null){
+        if (handlerRequestTrips != null && runnableRequestTrips != null) {
             handlerRequestTrips.removeCallbacks(runnableRequestTrips);
         }
-
     }
 
 
