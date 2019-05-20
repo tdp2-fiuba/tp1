@@ -107,7 +107,7 @@ def resetServer():
 	#check_call('npm run build', shell=True)
 	#check_call('npm start', shell=True)
 
-#resetServer()
-runTestCases()
+resetServer()
+#runTestCases()
 
 
