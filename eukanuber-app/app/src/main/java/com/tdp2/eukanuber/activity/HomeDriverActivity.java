@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -163,31 +164,35 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
         {
             TripService tripService = new TripService(mActivity);
-            Call<Trip> call = tripService.refuseDriverTrip(trip.getId(), new RefuseDriverTripRequest(secondsPopup));
-            call.enqueue(new Callback<Trip>() {
+            Call<Void> call = tripService.refuseDriverTrip(trip.getId());
+            call.enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Trip> call, Response<Trip> response) {
-                    popupWindow.dismiss();
-                    popupOpen = false;
-                    showMessage("El viaje ha sido rechazado.");
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    System.out.print(response.body());
                 }
 
                 @Override
-                public void onFailure(Call<Trip> call, Throwable t) {
-                    popupWindow.dismiss();
-                    popupOpen = false;
-                    showMessage("Ha ocurrido un error al rechazar el viaje.");
+                public void onFailure(Call<Void> call, Throwable t) {
+                    System.out.print(t.getMessage());
+
                 }
             });
+            popupWindow.dismiss();
+            popupOpen = false;
+            showMessage("El viaje ha sido rechazado.");
         });
         buttonConfirm.setOnClickListener(view ->
 
         {
             TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.confirmDriverTrip(trip.getId());
+            ProgressDialog dialog = new ProgressDialog(HomeDriverActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
                     popupWindow.dismiss();
                     Trip trip = response.body();
                     Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
@@ -200,6 +205,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
+                    dialog.dismiss();
                     popupWindow.dismiss();
                     popupOpen = false;
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
