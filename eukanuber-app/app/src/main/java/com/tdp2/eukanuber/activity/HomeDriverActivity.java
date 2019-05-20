@@ -176,7 +176,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 public void onFailure(Call<Trip> call, Throwable t) {
                     popupWindow.dismiss();
                     popupOpen = false;
-                    showMessage("Ha ocurrido un error al confirmar el viaje.");
+                    showMessage("Ha ocurrido un error al rechazar el viaje.");
                 }
             });
         });
