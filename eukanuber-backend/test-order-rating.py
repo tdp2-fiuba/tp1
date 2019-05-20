@@ -117,7 +117,7 @@ def selectDriver():
 			time.sleep(3)
 			trips_driver = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver['token']})
 
-		print("CONDUCTOR {} RECHAZA EL VIAJE".format(driver['user']['id']))
+		print("CONDUCTOR {} {} RECHAZA EL VIAJE".format(driver['user']['firstName'], driver['user']['lastName']))
 		reject_status = requests.post(create_trip + '/' + trip['id'] + '/reject', headers={'Authorization': 'Bearer ' + driver['token']})
 
 def printDriverInfo(n, created, user):

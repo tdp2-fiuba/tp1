@@ -102,13 +102,13 @@ async function getUserRating(id: string) {
       .count({ count: 'stars' })
       .groupBy('reviewee');
 
-    if (!rating) {
+    if (!rating || rating === undefined) {
       return { sum: 0, count: 0 };
     }
 
     return rating[0];
   } catch (e) {
-    return undefined;
+    return { sum: 0, count: 0 };
   }
 }
 
@@ -331,10 +331,17 @@ async function validateFacebookAccount(fbId: string, fbAccessToken: string) {
   };
 }
 
-async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> {
+async function getProspectiveDrivers(tripOrigin: string, startDistance: string, stopDistance: string): Promise<Array<IUser>> {
   const origin = tripOrigin.split(',');
-  //const limitDrivers = 20;
-  const args = [origin[0], origin[0], origin[1]]; //[lat, lat, lng]
+  let distance = `ACOS(SIN(RADIANS(CAST('${origin[0]}' as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST('${
+    origin[0]
+  }' as float))) * COS(RADIANS(CAST(users.latitude as float)))
+   * COS(RADIANS(CAST(users.longitude as float) - CAST('${origin[1]}' as float)))) * 3959 `;
+
+  let distanceCond =
+    distance + ' <' + (startDistance == '' ? '0' : startDistance) + (stopDistance == '' ? '' : ' and ' + distance + ' <=' + stopDistance);
+
+  const args = [distance]; //[lat, lat, lng]
   try {
     const users = await db
       .table('users')
@@ -343,19 +350,13 @@ async function getProspectiveDrivers(tripOrigin: string): Promise<Array<IUser>> 
           `users.id, 
           avg(stars) as rating,
           count(*) as count,
-          ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
-    * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 as distance`,
+          ? as distance`,
           args
         )
       )
       .leftJoin('userReview', 'users.id', '=', 'userReview.reviewee')
-      .where(
-        db.raw(
-          `ACOS(SIN(RADIANS(CAST(? as float))) * SIN(RADIANS(CAST(users.latitude as float))) + COS(RADIANS(CAST(? as float))) * COS(RADIANS(CAST(users.latitude as float)))
-      * COS(RADIANS(CAST(users.longitude as float) - CAST(? as float)))) * 3959 <= 2.48548 and users.state=0`,
-          args
-        )
-      )
+      .where(db.raw(distanceCond))
+      .andWhere('users.state', '0')
       .andWhere('users.userType', 'driver')
       .groupBy('users.id')
       .orderBy(['distance', { column: 'rating', order: 'desc' }]); //order by distance then by rating

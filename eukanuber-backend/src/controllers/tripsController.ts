@@ -41,31 +41,36 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
       let updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
       if (trip.status == TripStatus.CLIENT_ACCEPTED) {
         let trip = await tripsService.getTripById(tripId);
-        let drivers: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates);
+        let driversD1: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '0', '1.24274');
+        let driversD2: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '1.24274', '2.48548');
+        let driversD3: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '2.48548', '');
+        let allDrivers = [driversD1, driversD2, driversD3];
+        allDrivers.forEach(async function(drivers) {
+          if (drivers.length <= 0) {
+            updatedTrip = await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
+          }
 
-        if (drivers.length <= 0) {
-          updatedTrip = await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
-        }
+          res
+            .status(200)
+            .json(updatedTrip)
+            .send();
 
-        res
-          .status(200)
-          .json(updatedTrip)
-          .send();
+          let groupA = drivers.filter(driver => driver.count < MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
+          let groupB = drivers.filter(driver => driver.count >= MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
 
-        let groupA = drivers.filter(driver => driver.count < MIN_REVIEW_COUNT); //group A consists of drivers with lesser amount of reviews.
-        let groupB = drivers.filter(driver => driver.count >= MIN_REVIEW_COUNT); //group B consists of drivers with more reviews.
+          //trigger algorithm to assign driver.
+          let assigned = await assignDriverToTrip(trip, groupA);
+          if (assigned) {
+            return;
+          }
 
-        //trigger algorithm to assign driver.
-        let assigned = await assignDriverToTrip(trip, groupA);
-        if (assigned) {
-          return;
-        }
+          //If driver not assigned in group A, continue with group B...
+          assigned = await assignDriverToTrip(trip, groupB);
+          if (assigned) {
+            return;
+          }
+        });
 
-        //If driver not assigned in group A, continue with group B...
-        assigned = await assignDriverToTrip(trip, groupB);
-        if (assigned) {
-          return;
-        }
         console.log(`TRIP CANCELLED '${trip.id}'`);
         //driver was not found so trip state changes to TRIP_CANCELLED.
         return await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
