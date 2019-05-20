@@ -37,19 +37,18 @@
 
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
         <ImageView
-            android:id="@+id/tripDriverScoreIcon"
+            android:id="@+id/userRatingIcon"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginTop="@dimen/nav_header_vertical_spacing"
             android:layout_marginLeft="10dp"
-            android:src="@drawable/ic_star_black" />
+            android:src="@drawable/ic_star_gold" />
         <TextView
             android:id="@+id/userRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/nav_header_vertical_spacing"
             android:textSize="16dp"
-            android:text="5"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
     </LinearLayout>
 

@@ -241,7 +241,7 @@
                                     android:id="@+id/tripClientScoreIcon"
                                     android:layout_width="20dp"
                                     android:layout_height="20dp"
-                                    android:src="@drawable/ic_star_black" />
+                                    android:src="@drawable/ic_star_gold" />
                                 <TextView
                                     android:id="@+id/tripClientScoreComment"
                                     android:layout_width="match_parent"
@@ -267,7 +267,7 @@
                                     android:id="@+id/tripDriverScoreIcon"
                                     android:layout_width="20dp"
                                     android:layout_height="20dp"
-                                    android:src="@drawable/ic_star_black" />
+                                    android:src="@drawable/ic_star_gold" />
 
                                 <TextView
                                     android:id="@+id/tripDriverScoreComment"

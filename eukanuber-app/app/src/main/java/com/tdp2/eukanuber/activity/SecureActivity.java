@@ -42,4 +42,9 @@ abstract class SecureActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        refreshRating(userLogged);
+    }
 }

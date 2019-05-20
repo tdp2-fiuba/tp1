@@ -87,7 +87,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                         @Override
                         public void onResponse(Call<Trip> call, Response<Trip> response) {
                             Trip trip = response.body();
-                            if (trip.getId() != null) {
+                            if (trip != null && trip.getId() != null) {
                                 if (!tripsOpened.contains(trip.getId())) {
                                     tripsOpened.add(trip.getId());
                                     View view = mActivity.findViewById(R.id.layoutMap);
