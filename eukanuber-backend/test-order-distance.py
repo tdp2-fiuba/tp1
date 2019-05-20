@@ -59,7 +59,7 @@ def createUsers():
 		time.sleep(3)
 		trips_driver3 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver3['token']})
 
-	print("CONDUCTOR {} RECHAZA EL VIAJE".format(driver3['user']['id']))
+	print("CONDUCTOR {} {} RECHAZA EL VIAJE".format(driver3['user']['firstName'],driver3['user']['lastName']))
 	reject_status = requests.post(create_trip + '/' + trip1['id'] + '/reject', headers={'Authorization': 'Bearer ' + driver3['token']})
 
 	time.sleep(2)
@@ -72,13 +72,25 @@ def createUsers():
 		time.sleep(3)
 		trips_driver2 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver2['token']})
 
-	print("CONDUCTOR {} ACEPTA EL VIAJE".format(driver2['user']['id']))
-	reject_status = requests.post(create_trip + '/' + trip1['id'] + '/accept', headers={'Authorization': 'Bearer ' + driver2['token']})
+	print("CONDUCTOR {} {} RECHAZA EL VIAJE".format(driver2['user']['firstName'], driver2['user']['lastName']))
+	reject_status = requests.post(create_trip + '/' + trip1['id'] + '/reject', headers={'Authorization': 'Bearer ' + driver2['token']})
+
+
+	trips_driver1 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver1['token']})
+
+	while(not trips_driver1):
+		print(trips_driver1)
+		print("ESPERANDO A QUE SE ASIGNE EL VIAJE AL CONDUCTOR")
+		time.sleep(3)
+		trips_driver1 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver1['token']})
+
+	print("CONDUCTOR {} {} RECHAZA EL VIAJE".format(driver1['user']['firstName'], driver1['user']['lastName']))
+	reject_status = requests.post(create_trip + '/' + trip1['id'] + '/reject', headers={'Authorization': 'Bearer ' + driver1['token']})
 
 	printSeparator()
-	reject_status = requests.get(base_url + '/users/' + driver3['user']['id'] + '/rating', headers={'Authorization': 'Bearer ' + driver3['token']})
-	score = reject_status.json()
-	print("CALIFICACION DEL CONDUCTOR QUE RECHAZA {}".format(float(score['sum']) / float(score['count'])))
+	#reject_status = requests.get(base_url + '/users/' + driver3['user']['id'] + '/rating', headers={'Authorization': 'Bearer ' + driver3['token']})
+	#score = reject_status.json()
+	#print("CALIFICACION DEL CONDUCTOR QUE RECHAZA {}".format(float(score['sum']) / float(score['count'])))
 
 
 def runTestCases():

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,10 +26,12 @@ import com.facebook.login.LoginManager;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.UserService;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,6 +45,11 @@ abstract class BaseActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         baseActivity = this;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     protected void createMenu(User userLogged) {
@@ -72,9 +80,49 @@ abstract class BaseActivity extends AppCompatActivity
             if(nameUserView != null){
                 nameUserView.setText(userLogged.getFullName());
             }
+            refreshRating(userLogged);
         }
 
     }
+
+    public void refreshRating(User userLogged){
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        if(userLogged != null && navigationView != null && navigationView.getHeaderCount() > 0){
+            View headerView = navigationView.getHeaderView(0);
+            UserService tripService = new UserService(baseActivity);
+            Call<Rating> call = tripService.getUserRating(userLogged.getId());
+            call.enqueue(new Callback<Rating>() {
+                @Override
+                public void onResponse(Call<Rating> call, Response<Rating> response) {
+                    Rating rating = response.body();
+                    if(rating != null && rating.getCount() != null && Integer.parseInt(rating.getCount()) > 0){
+                        TextView ratingView = headerView.findViewById(R.id.userRating);
+                        Float sum = Float.parseFloat(rating.getSum());
+                        Float count = Float.parseFloat(rating.getCount());
+                        Float average = sum/count;
+                        ratingView.setText(String.format ("%.2f", average));
+                    }else{
+                        TextView ratingView = headerView.findViewById(R.id.userRating);
+                        ImageView ratingViewIcon = headerView.findViewById(R.id.userRatingIcon);
+                        ratingView.setVisibility(View.GONE);
+                        ratingViewIcon.setVisibility(View.GONE);
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<Rating> call, Throwable t) {
+                    Log.v("Rating", t.getMessage());
+                    TextView ratingView = headerView.findViewById(R.id.userRating);
+                    ImageView ratingViewIcon = headerView.findViewById(R.id.userRatingIcon);
+                    ratingView.setVisibility(View.GONE);
+                    ratingViewIcon.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
+
 
     @Override
     public void onBackPressed() {

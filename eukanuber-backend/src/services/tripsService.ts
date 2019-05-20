@@ -277,11 +277,12 @@ async function getUserTripReview(tripId: string, userId: string) {
     try {
 
         const review = await db
-                .table('userReview')
-                .where('tripId', tripId)
-                .where('reviewee', userId)
-                .select()
-                .first();
+            .table('userReview')
+            .where('tripId', tripId)
+            .andWhere('reviewer', userId)
+            .orderBy('dateTime', 'desc')
+            .select()
+            .first();
         if (!review) {
             return undefined;
         }
@@ -297,6 +298,7 @@ async function getUserTripReview(tripId: string, userId: string) {
 async function getFinishedTrips(userId: string, isDriver: boolean) {
     try {
         let finishedTrips = [];
+        console.log('isDriver: ', isDriver);
         if (isDriver) {
             finishedTrips = await db
                 .table('trips')
@@ -312,15 +314,14 @@ async function getFinishedTrips(userId: string, isDriver: boolean) {
                 .orderBy('createdDate', 'desc')
                 .select();
         }
-
         if (finishedTrips === undefined) {
             return [];
         }
         for (const trip of finishedTrips) {
             trip.clientDetail = await userService.getUserById(trip.clientId);
             trip.driverDetail = await userService.getUserById(trip.driverId);
-            trip.reviewToClient = await getUserTripReview(trip.id, trip.clientId);
-            trip.reviewToDriver = await getUserTripReview(trip.id, trip.driverId);
+            trip.reviewToDriver = await getUserTripReview(trip.id, trip.clientId);
+            trip.reviewToClient = await getUserTripReview(trip.id, trip.driverId);
             trip.driverDetail.images = [
                 trip.driverDetail.images[0]
             ];
@@ -346,4 +347,5 @@ export default {
     driverRejectTrip,
     getDriverPendingTrips,
     getFinishedTrips,
+    getUserTripReview
 };

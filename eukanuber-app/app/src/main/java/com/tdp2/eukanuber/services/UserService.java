@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
@@ -122,9 +123,22 @@ public class UserService extends ClientService{
                 .client(client)
                 .baseUrl(BackendService.API_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
+
                 .build();
 
         BackendService getService = retrofit.create(BackendService.class);
         return getService.getFinishedTrips();
+    }
+
+    public Call<Rating> getUserRating(String userId){
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+
+                .build();
+
+        BackendService getService = retrofit.create(BackendService.class);
+        return getService.getUserRating(userId);
     }
 }

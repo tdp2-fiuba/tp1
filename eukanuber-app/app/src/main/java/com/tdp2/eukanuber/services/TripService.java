@@ -96,7 +96,7 @@ public class TripService extends ClientService {
     }
 
 
-    public Call<Trip> refuseDriverTrip(String tripId, RefuseDriverTripRequest refuseDriverTripRequest) {
+    public Call<Void> refuseDriverTrip(String tripId) {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(BackendService.API_PATH)
@@ -104,7 +104,7 @@ public class TripService extends ClientService {
                 .build();
 
         BackendService postService = retrofit.create(BackendService.class);
-        return postService.refuseDriverTrip(tripId, refuseDriverTripRequest);
+        return postService.refuseDriverTrip(tripId);
     }
 
     public Call<Trip> confirmDriverTrip(String tripId) {
