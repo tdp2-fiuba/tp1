@@ -1,13 +1,11 @@
 package com.tdp2.eukanuber.activity;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,9 +24,6 @@ import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,24 +34,23 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private Trip currentTrip;
     private Integer currentStatus;
     private Marker markerCar;
-    private List<LatLng> driverPath;
     private Context mContext;
-    private Boolean initializeDriver;
-    private Handler updateDriverPositionHandler;
-    private Runnable updateDriverPositionRunnable;
     private Handler checkDriverPositionHandler;
     private Runnable checkDriverPositionRunnable;
     private Handler checkTripStatusHandler;
     private Runnable checkTripStatusRunnable;
+    private Integer timeSimulationStep;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
         this.createMenu(userLogged);
+        timeSimulationStep = 10000;
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-        initializeDriver = intent.getBooleanExtra("fromHome", false);
         currentStatus = currentTrip.getStatus();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -67,14 +61,12 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     @Override
     protected void onStart() {
         super.onStart();
-        this.driverPath = new ArrayList<>();
         checkTripStatus();
         checkDriverPosition();
     }
 
     private void checkDriverPosition() {
         checkDriverPositionHandler = new Handler();
-        Integer delay = 2500;
         checkDriverPositionRunnable = new Runnable() {
             @Override
             public void run() {
@@ -87,9 +79,12 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                         if (userPositionResponse != null && userPositionResponse.getPosition() != null) {
                             String[] positionSplit = userPositionResponse.getPosition().split(",");
                             LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
-                            if (!driverPath.contains(position)) {
-                                driverPath.add(position);
+                            if (markerCar == null) {
+                                markerCar = mapManager.addMarkerCar(position);
+                                mapManager.moveCamera(position);
                             }
+                            mapManager.moveMarker(markerCar, position);
+                            mapManager.moveCamera(position);
                         }
                     }
 
@@ -101,65 +96,15 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                 });
                 if (currentTrip.getStatus() != TripStatus.COMPLETED.ordinal()) {
-                    checkDriverPositionHandler.postDelayed(this, delay);
+                    checkDriverPositionHandler.postDelayed(this, timeSimulationStep);
                 }
             }
         };
-        checkDriverPositionHandler.postDelayed(checkDriverPositionRunnable, delay);
-    }
-
-    private void updateDriverPosition() {
-        updateDriverPositionHandler = new Handler();
-        Integer delay = 2000;
-        updateDriverPositionRunnable = new Runnable() {
-            Integer index = 0;
-            Integer next = 0;
-            LatLng startPosition;
-            LatLng endPosition;
-
-            @Override
-            public void run() {
-                if (index < driverPath.size()) {
-                    if (index == driverPath.size() - 1) {
-                        next = index;
-                    } else {
-                        next = index + 1;
-                    }
-
-                    startPosition = driverPath.get(index);
-                    endPosition = driverPath.get(next);
-                    if (markerCar == null) {
-                        markerCar = mapManager.addMarkerCar(startPosition);
-                    }
-                    ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-                    valueAnimator.setDuration(delay);
-                    valueAnimator.setInterpolator(new LinearInterpolator());
-                    valueAnimator.addUpdateListener(valueAnimator1 -> {
-                        float v = valueAnimator1.getAnimatedFraction();
-                        double lng = v * endPosition.longitude + (1 - v)
-                                * startPosition.longitude;
-                        double lat = v * endPosition.latitude + (1 - v)
-                                * startPosition.latitude;
-                        LatLng newPos = new LatLng(lat, lng);
-                        mapManager.moveMarker(markerCar, newPos);
-                    });
-                    valueAnimator.start();
-                    if (index != driverPath.size() - 1) {
-                        index++;
-                    }
-                }
-                if (currentStatus != TripStatus.COMPLETED.ordinal()) {
-                    updateDriverPositionHandler.postDelayed(this, delay);
-                }
-
-            }
-        };
-        updateDriverPositionHandler.postDelayed(updateDriverPositionRunnable, delay);
+        checkDriverPositionHandler.postDelayed(checkDriverPositionRunnable, 0);
     }
 
     private void checkTripStatus() {
         checkTripStatusHandler = new Handler();
-        Integer delay = 2500;
         checkTripStatusRunnable = new Runnable() {
             @Override
             public void run() {
@@ -194,41 +139,27 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     }
                 });
                 if (currentStatus != TripStatus.COMPLETED.ordinal()) {
-                    checkTripStatusHandler.postDelayed(this, delay);
+                    checkTripStatusHandler.postDelayed(this, timeSimulationStep);
                 }
 
 
             }
         };
-        checkTripStatusHandler.postDelayed(checkTripStatusRunnable, delay);
+        checkTripStatusHandler.postDelayed(checkTripStatusRunnable, 0);
     }
 
     private void initTripDriverGoingOrigin() {
         TextView textStatus = findViewById(R.id.tripStatus);
         textStatus.setText("En Camino");
-        checkDriverPosition();
-        updateDriverPosition();
-        initializeDriver = false;
     }
 
 
     private void initTripInTravel() {
-        if (initializeDriver) {
-            checkDriverPosition();
-            updateDriverPosition();
-        }
-        initializeDriver = false;
-
         TextView textStatus = findViewById(R.id.tripStatus);
         textStatus.setText("En Viaje");
     }
 
     private void initTripCompleted() {
-        if (initializeDriver) {
-            checkDriverPosition();
-            updateDriverPosition();
-        }
-        initializeDriver = false;
         TripService tripService = new TripService(mContext);
         Call<Trip> call = tripService.getFull(currentTrip.getId());
         call.enqueue(new Callback<Trip>() {
@@ -305,9 +236,6 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         }
         if(checkDriverPositionHandler!= null && checkDriverPositionRunnable != null){
             checkDriverPositionHandler.removeCallbacks(checkDriverPositionRunnable);
-        }
-        if(updateDriverPositionHandler != null && updateDriverPositionRunnable != null){
-            updateDriverPositionHandler.removeCallbacks(updateDriverPositionRunnable);
         }
     }
 }
