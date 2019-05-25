@@ -79,12 +79,16 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                         if (userPositionResponse != null && userPositionResponse.getPosition() != null) {
                             String[] positionSplit = userPositionResponse.getPosition().split(",");
                             LatLng position = new LatLng(Double.valueOf(positionSplit[0]), Double.valueOf(positionSplit[1]));
-                            if (markerCar == null) {
-                                markerCar = mapManager.addMarkerCar(position);
+                            if (currentStatus == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
+                                    currentStatus == TripStatus.IN_TRAVEL.ordinal() ||
+                                    currentStatus == TripStatus.ARRIVED_DESTINATION.ordinal()) {
+                                if (markerCar == null) {
+                                    markerCar = mapManager.addMarkerCar(position);
+                                    mapManager.moveCamera(position);
+                                }
+                                mapManager.moveMarker(markerCar, position);
                                 mapManager.moveCamera(position);
                             }
-                            mapManager.moveMarker(markerCar, position);
-                            mapManager.moveCamera(position);
                         }
                     }
 
@@ -96,7 +100,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                 });
                 if (currentTrip.getStatus() != TripStatus.COMPLETED.ordinal()) {
-                    checkDriverPositionHandler.postDelayed(this, timeSimulationStep);
+                    checkDriverPositionHandler.postDelayed(this, timeSimulationStep/2);
                 }
             }
         };
@@ -134,7 +138,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                     @Override
                     public void onFailure(Call<Trip> call, Throwable t) {
                         Log.v("TRIP", t.getMessage());
-                       // showMessage("Ha ocurrido un error al solicitar el viaje.");
+                        // showMessage("Ha ocurrido un error al solicitar el viaje.");
 
                     }
                 });
@@ -172,6 +176,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                 showMessage("Viaje finalizado con exito!");
                 startActivity(intent);
             }
+
             @Override
             public void onFailure(Call<Trip> call, Throwable t) {
                 Log.v("TRIP", t.getMessage());
@@ -181,6 +186,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         });
 
     }
+
     private void initTripCancelled() {
         Intent intent = new Intent(this, HomeClientActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -231,10 +237,10 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     @Override
     protected void onStop() {
         super.onStop();
-        if(checkTripStatusHandler != null && checkTripStatusRunnable != null){
+        if (checkTripStatusHandler != null && checkTripStatusRunnable != null) {
             checkTripStatusHandler.removeCallbacks(checkTripStatusRunnable);
         }
-        if(checkDriverPositionHandler!= null && checkDriverPositionRunnable != null){
+        if (checkDriverPositionHandler != null && checkDriverPositionRunnable != null) {
             checkDriverPositionHandler.removeCallbacks(checkDriverPositionRunnable);
         }
     }

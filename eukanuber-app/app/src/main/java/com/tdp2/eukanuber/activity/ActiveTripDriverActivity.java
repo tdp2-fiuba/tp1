@@ -63,7 +63,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         Intent intent = getIntent();
 
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-        timeSimulationStep = 20000;
+        timeSimulationStep = 10000;
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
