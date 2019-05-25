@@ -30,6 +30,7 @@ import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
@@ -72,7 +73,26 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     protected void onStart() {
         super.onStart();
         popupOpen = false;
-        initDriverHome();
+        UserService userService = new UserService(this);
+        Call<Trip> call = userService.getLastTrip();
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                Trip trip = response.body();
+                if (trip != null && trip.getId() != null &&
+                        (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
+                                trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
+                                trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
+                    beginTrip(trip);
+                }else {
+                    initDriverHome();
+                }
+            }
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                System.out.print("Ha ocurrido un error al recuperar el viaje.");
+            }
+        });
     }
 
     private void initDriverHome() {
@@ -146,7 +166,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     secondsCounterView.setText(String.valueOf(secondsPopup));
                 } else {
                     secondsCounterView.setText(String.valueOf(secondsPopup));
-                    if(popupOpen){
+                    if (popupOpen) {
                         popupWindow.dismiss();
                         popupOpen = false;
                         showMessage("El viaje ha sido rechazado.");
@@ -195,12 +215,8 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     dialog.dismiss();
                     popupWindow.dismiss();
                     Trip trip = response.body();
-                    Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
-                    intentActiveTripDriver.putExtra("currentTrip", trip);
-                    intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    popupOpen = false;
                     showMessage("El viaje ha sido confirmado.");
-                    startActivity(intentActiveTripDriver);
+                    beginTrip(trip);
                 }
 
                 @Override
@@ -212,6 +228,14 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 }
             });
         });
+    }
+
+    private void beginTrip(Trip trip){
+        Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
+        intentActiveTripDriver.putExtra("currentTrip", trip);
+        intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        popupOpen = false;
+        startActivity(intentActiveTripDriver);
     }
 
     private String getPetsString(List<String> pets) {

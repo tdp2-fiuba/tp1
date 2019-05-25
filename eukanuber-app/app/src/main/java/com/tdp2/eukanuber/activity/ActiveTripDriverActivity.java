@@ -63,7 +63,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         Intent intent = getIntent();
 
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
-        timeSimulationStep = 10000;
+        timeSimulationStep = 20000;
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -77,7 +77,10 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
             return;
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        String driverLocationStr = location.getLatitude() + ", " + location.getLongitude();
+        String driverLocationStr = currentTrip.getOriginCoordinates();
+        if(location != null){
+            driverLocationStr = location.getLatitude() + ", " + location.getLongitude();
+        }
         GetRouteRequest getRouteRequest = new GetRouteRequest(driverLocationStr, currentTrip.getOriginCoordinates());
         Call<MapRoute> call = tripService.getRoutes(getRouteRequest);
         call.enqueue(new Callback<MapRoute>() {
@@ -86,7 +89,12 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                 MapRoute route = response.body();
                 if (route != null) {
                     mapManager.drawPath(route.getOverviewPolyline());
-                    stepGoToOrigin(route);
+                    if(currentTrip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal()){
+                        stepGoToOrigin(route);
+                    }
+                    if(currentTrip.getStatus() == TripStatus.IN_TRAVEL.ordinal()){
+                        stepGoToDestination(currentTrip.getRoutes().get(0));
+                    }
                 }
             }
 
@@ -115,7 +123,13 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         mapManager.moveCamera(position);
 
     }
-    private void stepGoToDestination(){
+    private void stepGoToDestination(MapRoute route){
+        mapManager.clearMap();
+        markerCar = null;
+        List<LatLng> pointsRouteTripPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
+        LatLng positionOrigin = pointsRouteTripPolyline.get(0);
+        moveCar(positionOrigin);
+        mapManager.drawPath(route.getOverviewPolyline());
         Handler handler = new Handler();
         Runnable runnable = () -> driverOnDestination();
         handler.postDelayed(runnable, timeSimulationStep);
@@ -168,11 +182,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                     Log.d("UPDATE STATUS TRIP", t.getMessage());
                 }
             });
-            mapManager.clearMap();
-            markerCar = null;
-            moveCar(positionOrigin);
-            mapManager.drawPath(tripRoute.getOverviewPolyline());
-            stepGoToDestination();
+            stepGoToDestination(tripRoute);
         });
 
     }

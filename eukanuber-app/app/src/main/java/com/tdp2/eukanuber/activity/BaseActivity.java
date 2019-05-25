@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,13 +24,9 @@ import android.widget.Toast;
 import com.facebook.login.LoginManager;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
-import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.UserService;
-
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
