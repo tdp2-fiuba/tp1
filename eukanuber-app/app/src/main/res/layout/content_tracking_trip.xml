@@ -28,6 +28,7 @@
             android:layout_height="1dp"
             android:background="@color/colorPrimary" />
         <LinearLayout
+            android:id="@+id/layoutStatusTrip"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
@@ -48,18 +49,43 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center">
-                <TextView
-                    android:id="@+id/tripStatus"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorTertiary"
-                    android:text="Buscando conductor..."
-                    android:padding="10dp"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="20dp"
-                    android:textAlignment="center" />
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tripStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/colorTertiary"
+                        android:text="Buscando conductor..."
+                        android:padding="10dp"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="20dp"
+                        android:textAlignment="center" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/layoutCancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingTop="10dp">
+                    <TextView
+                        android:id="@+id/tripCancel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/quantum_error_light"
+                        android:text="Cancelar viaje"
+                        android:padding="10dp"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="20dp"
+                        android:onClick="cancelTrip"
+                        android:textAlignment="center" />
+                </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

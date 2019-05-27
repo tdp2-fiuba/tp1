@@ -1,11 +1,15 @@
 package com.tdp2.eukanuber.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,9 +21,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
+import com.tdp2.eukanuber.model.FeedbackRequest;
 import com.tdp2.eukanuber.model.MapRoute;
+import com.tdp2.eukanuber.model.ReviewRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
+import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
@@ -61,6 +68,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     @Override
     protected void onStart() {
         super.onStart();
+        showCancelButton();
         checkTripStatus();
         checkDriverPosition();
     }
@@ -155,15 +163,18 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private void initTripDriverGoingOrigin() {
         TextView textStatus = findViewById(R.id.tripStatus);
         textStatus.setText("En Camino");
+        showCancelButton();
     }
 
 
     private void initTripInTravel() {
         TextView textStatus = findViewById(R.id.tripStatus);
         textStatus.setText("En Viaje");
+        hideCancelButton();
     }
 
     private void initTripCompleted() {
+        hideCancelButton();
         TripService tripService = new TripService(mContext);
         Call<Trip> call = tripService.getFull(currentTrip.getId());
         call.enqueue(new Callback<Trip>() {
@@ -232,6 +243,41 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                 message,
                 Toast.LENGTH_LONG
         ).show();
+    }
+
+
+
+    private void showCancelButton() {
+        LinearLayout layoutMap = findViewById(R.id.layoutMap);
+        LinearLayout layoutStatus = findViewById(R.id.layoutStatusTrip);
+        LinearLayout layoutCancel = findViewById(R.id.layoutCancel);
+        LinearLayout.LayoutParams lParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
+        lParams.weight = 7;
+        layoutMap.setLayoutParams(lParams);
+        LinearLayout.LayoutParams lParamsStatus = (LinearLayout.LayoutParams) layoutStatus.getLayoutParams();
+        lParamsStatus.weight = 3;
+        layoutStatus.setLayoutParams(lParamsStatus);
+        layoutCancel.setVisibility(View.VISIBLE);
+    }
+
+    private void hideCancelButton() {
+        LinearLayout layoutMap = findViewById(R.id.layoutMap);
+        LinearLayout layoutStatus = findViewById(R.id.layoutStatusTrip);
+        LinearLayout layoutCancel = findViewById(R.id.layoutCancel);
+
+        LinearLayout.LayoutParams lParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
+        lParams.weight = 8;
+        layoutMap.setLayoutParams(lParams);
+        LinearLayout.LayoutParams lParamsStatus = (LinearLayout.LayoutParams) layoutStatus.getLayoutParams();
+        lParamsStatus.weight = 2;
+        layoutStatus.setLayoutParams(lParamsStatus);
+        layoutCancel.setVisibility(View.GONE);
+    }
+
+    public void cancelTrip(View view) {
+        
+
+
     }
 
     @Override
