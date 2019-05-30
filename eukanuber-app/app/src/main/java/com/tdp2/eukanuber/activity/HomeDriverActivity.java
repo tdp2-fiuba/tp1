@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -56,6 +57,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     private Integer secondsPopup;
     private Handler secondsCounterHandler;
     private Runnable secondsCounterRunnable;
+    private Boolean userActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +69,14 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        this.userActive = true;
+        updateUserStatus();
         popupOpen = false;
         UserService userService = new UserService(this);
         Call<Trip> call = userService.getLastTrip();
@@ -379,5 +384,31 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         }
     }
 
+    private void updateUserStatus(){
+        TextView status = findViewById(R.id.status);
+        TextView labelStatus = findViewById(R.id.labelStatus);
+        TextView labelButtonStatus = findViewById(R.id.labelButtonStatus);
+        ImageView buttonStatus = findViewById(R.id.buttonStatus);
+        if(userActive){
+            status.setText("Activo");
+            status.setTextColor(getResources().getColor(R.color.colorSuccess));
+            labelStatus.setText("En este estado puede recibir viajes");
+            buttonStatus.setImageResource(R.drawable.icon_power_off);
+            labelButtonStatus.setText("Ponerse como inactivo");
+        }else{
+            status.setText("Inactivo");
+            status.setTextColor(getResources().getColor(R.color.colorAccent));
+            labelStatus.setText("En este estado no puede recibir viajes");
+            buttonStatus.setImageResource(R.drawable.icon_power_on);
+            labelButtonStatus.setText("Ponerse como activo");
+        }
+    }
+
+    public void toggleStatus(View view) {
+        userActive = !userActive;
+        updateUserStatus();
+
+
+    }
 
 }

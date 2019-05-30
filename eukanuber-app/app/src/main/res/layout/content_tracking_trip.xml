@@ -16,7 +16,7 @@
             android:id="@+id/layoutMap"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8">
+            android:layout_weight="7">
             <fragment
                 android:id="@+id/map"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -31,7 +31,7 @@
             android:id="@+id/layoutStatusTrip"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:padding="10dp"
             android:orientation="vertical">
             <LinearLayout
@@ -39,33 +39,34 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_marginBottom="5dp">
-                <TextView
-                    android:layout_width="wrap_content"
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="18dp"
-                    android:textColor="#000000"
-                    android:text="Estado del viaje"/>
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18dp"
+                        android:textColor="#000000"
+                        android:text="Estado del viaje"/>
+                    <TextView
+                        android:id="@+id/tripStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Buscando conductor"
+                        android:textColor="@color/colorSuccess"
+                        android:textSize="26dp" />
+                </LinearLayout>
+
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center_vertical">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/tripStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/colorTertiary"
-                        android:text="Buscando conductor..."
-                        android:padding="10dp"
-                        android:textColor="@color/colorWhite"
-                        android:textSize="20dp"
-                        android:textAlignment="center" />
-                </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/layoutCancel"
                     android:layout_width="match_parent"
@@ -76,7 +77,7 @@
                         android:id="@+id/tripCancel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/quantum_error_light"
+                        android:background="@color/colorAccent"
                         android:text="Cancelar viaje"
                         android:padding="10dp"
                         android:textColor="@color/colorWhite"

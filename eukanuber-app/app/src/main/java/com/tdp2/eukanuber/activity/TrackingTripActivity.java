@@ -264,7 +264,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         LinearLayout layoutMap = findViewById(R.id.layoutMap);
         LinearLayout layoutStatus = findViewById(R.id.layoutStatusTrip);
         LinearLayout layoutCancel = findViewById(R.id.layoutCancel);
-
+        TextView tripStatus = findViewById(R.id.tripStatus);
         LinearLayout.LayoutParams lParams = (LinearLayout.LayoutParams) layoutMap.getLayoutParams();
         lParams.weight = 8;
         layoutMap.setLayoutParams(lParams);
@@ -272,6 +272,8 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         lParamsStatus.weight = 2;
         layoutStatus.setLayoutParams(lParamsStatus);
         layoutCancel.setVisibility(View.GONE);
+        tripStatus.setTextSize(30);
+        tripStatus.setPadding(0, 20, 0, 0);
     }
 
     public void cancelTrip(View view) {
