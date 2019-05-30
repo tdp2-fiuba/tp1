@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "185546552182",
+    "firebase_url": "https://northern-hope-236009.firebaseio.com",
+    "project_id": "northern-hope-236009",
+    "storage_bucket": "northern-hope-236009.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185546552182:android:829a8ea3bed47bd6",
+        "android_client_info": {
+          "package_name": "com.tdp2.eukanuber"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "185546552182-k95g0lnavviubecvtgc91t078b51s8a8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqISx9toH5iyh6lvy3-drCMWhX3i7hy9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "185546552182-k95g0lnavviubecvtgc91t078b51s8a8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
