@@ -2,6 +2,7 @@ package com.tdp2.eukanuber.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -29,6 +31,7 @@ import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.Trip;
+import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
@@ -54,6 +57,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     private Integer secondsPopup;
     private Handler secondsCounterHandler;
     private Runnable secondsCounterRunnable;
+    private Boolean userActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +69,35 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        this.userActive = true;
+        updateUserStatus();
         popupOpen = false;
-        initDriverHome();
+        UserService userService = new UserService(this);
+        Call<Trip> call = userService.getLastTrip();
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                Trip trip = response.body();
+                if (trip != null && trip.getId() != null &&
+                        (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
+                                trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
+                                trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
+                    beginTrip(trip);
+                }else {
+                    initDriverHome();
+                }
+            }
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                System.out.print("Ha ocurrido un error al recuperar el viaje.");
+            }
+        });
     }
 
     private void initDriverHome() {
@@ -145,7 +171,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     secondsCounterView.setText(String.valueOf(secondsPopup));
                 } else {
                     secondsCounterView.setText(String.valueOf(secondsPopup));
-                    if(popupOpen){
+                    if (popupOpen) {
                         popupWindow.dismiss();
                         popupOpen = false;
                         showMessage("El viaje ha sido rechazado.");
@@ -163,49 +189,58 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
         {
             TripService tripService = new TripService(mActivity);
-            Call<Trip> call = tripService.refuseDriverTrip(trip.getId(), new RefuseDriverTripRequest(secondsPopup));
-            call.enqueue(new Callback<Trip>() {
+            Call<Void> call = tripService.refuseDriverTrip(trip.getId());
+            call.enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Trip> call, Response<Trip> response) {
-                    popupWindow.dismiss();
-                    popupOpen = false;
-                    showMessage("El viaje ha sido rechazado.");
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    System.out.print(response.body());
                 }
 
                 @Override
-                public void onFailure(Call<Trip> call, Throwable t) {
-                    popupWindow.dismiss();
-                    popupOpen = false;
-                    showMessage("Ha ocurrido un error al confirmar el viaje.");
+                public void onFailure(Call<Void> call, Throwable t) {
+                    System.out.print(t.getMessage());
+
                 }
             });
+            popupWindow.dismiss();
+            popupOpen = false;
+            showMessage("El viaje ha sido rechazado.");
         });
         buttonConfirm.setOnClickListener(view ->
 
         {
             TripService tripService = new TripService(mActivity);
             Call<Trip> call = tripService.confirmDriverTrip(trip.getId());
+            ProgressDialog dialog = new ProgressDialog(HomeDriverActivity.this);
+            dialog.setMessage("Espere un momento por favor");
+            dialog.show();
             call.enqueue(new Callback<Trip>() {
                 @Override
                 public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    dialog.dismiss();
                     popupWindow.dismiss();
                     Trip trip = response.body();
-                    Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
-                    intentActiveTripDriver.putExtra("currentTrip", trip);
-                    intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    popupOpen = false;
                     showMessage("El viaje ha sido confirmado.");
-                    startActivity(intentActiveTripDriver);
+                    beginTrip(trip);
                 }
 
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
+                    dialog.dismiss();
                     popupWindow.dismiss();
                     popupOpen = false;
                     showMessage("Ha ocurrido un error al confirmar el viaje.");
                 }
             });
         });
+    }
+
+    private void beginTrip(Trip trip){
+        Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
+        intentActiveTripDriver.putExtra("currentTrip", trip);
+        intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        popupOpen = false;
+        startActivity(intentActiveTripDriver);
     }
 
     private String getPetsString(List<String> pets) {
@@ -349,5 +384,31 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         }
     }
 
+    private void updateUserStatus(){
+        TextView status = findViewById(R.id.status);
+        TextView labelStatus = findViewById(R.id.labelStatus);
+        TextView labelButtonStatus = findViewById(R.id.labelButtonStatus);
+        ImageView buttonStatus = findViewById(R.id.buttonStatus);
+        if(userActive){
+            status.setText("Activo");
+            status.setTextColor(getResources().getColor(R.color.colorSuccess));
+            labelStatus.setText("En este estado puede recibir viajes");
+            buttonStatus.setImageResource(R.drawable.icon_power_off);
+            labelButtonStatus.setText("Ponerse como inactivo");
+        }else{
+            status.setText("Inactivo");
+            status.setTextColor(getResources().getColor(R.color.colorAccent));
+            labelStatus.setText("En este estado no puede recibir viajes");
+            buttonStatus.setImageResource(R.drawable.icon_power_on);
+            labelButtonStatus.setText("Ponerse como activo");
+        }
+    }
+
+    public void toggleStatus(View view) {
+        userActive = !userActive;
+        updateUserStatus();
+
+
+    }
 
 }

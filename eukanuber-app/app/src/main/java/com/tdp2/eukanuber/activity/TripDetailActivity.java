@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -91,6 +92,7 @@ public class TripDetailActivity extends SecureActivity implements OnMapReadyCall
             Date date = null;
 
             date = df1.parse(currentTrip.getCreatedDate());
+            date = new Date(date.getTime() - TimeUnit.HOURS.toMillis(3));
 
             DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             dateView.setText(df2.format(date));

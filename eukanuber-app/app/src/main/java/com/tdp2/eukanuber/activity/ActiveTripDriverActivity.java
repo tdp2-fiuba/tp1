@@ -52,6 +52,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     private LocationManager locationManager;
     private Marker markerCar;
     private Activity mActivity;
+    private Integer timeSimulationStep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         Intent intent = getIntent();
 
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
+        timeSimulationStep = 10000;
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -75,7 +77,10 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
             return;
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        String driverLocationStr = location.getLatitude() + ", " + location.getLongitude();
+        String driverLocationStr = currentTrip.getOriginCoordinates();
+        if(location != null){
+            driverLocationStr = location.getLatitude() + ", " + location.getLongitude();
+        }
         GetRouteRequest getRouteRequest = new GetRouteRequest(driverLocationStr, currentTrip.getOriginCoordinates());
         Call<MapRoute> call = tripService.getRoutes(getRouteRequest);
         call.enqueue(new Callback<MapRoute>() {
@@ -84,7 +89,12 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                 MapRoute route = response.body();
                 if (route != null) {
                     mapManager.drawPath(route.getOverviewPolyline());
-                    initSimulateDriver(route);
+                    if(currentTrip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal()){
+                        stepGoToOrigin(route);
+                    }
+                    if(currentTrip.getStatus() == TripStatus.IN_TRAVEL.ordinal()){
+                        stepGoToDestination(currentTrip.getRoutes().get(0));
+                    }
                 }
             }
 
@@ -95,63 +105,37 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         });
     }
 
-    private void initSimulateDriver(MapRoute route) {
+    private void stepGoToOrigin(MapRoute route){
         List<LatLng> pointsPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
         Handler handler = new Handler();
-        Integer delay = 4000;
-        Runnable runnable = new Runnable() {
-            Integer index = 0;
-            Integer next = 0;
-            LatLng startPosition;
-            LatLng endPosition;
+        LatLng initialPositionDriver = pointsPolyline.get(0);
+        moveCar(initialPositionDriver);
+        refreshDriverPosition(initialPositionDriver);
+        Runnable runnable = () -> driverOnOrigin();
+        handler.postDelayed(runnable, timeSimulationStep);
+    }
 
-            @Override
-            public void run() {
-                if (index < pointsPolyline.size()) {
-                    if (index == pointsPolyline.size() - 1) {
-                        next = index;
-                    } else {
-                        next = index + 1;
-                    }
-                    startPosition = pointsPolyline.get(index);
-                    endPosition = pointsPolyline.get(next);
-                    refreshDriverPosition(startPosition);
+    private void moveCar(LatLng position){
+        if (markerCar == null) {
+            markerCar = mapManager.addMarkerCar(position);
+        }
+        mapManager.moveMarker(markerCar, position);
+        mapManager.moveCamera(position);
 
-                    ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-                    valueAnimator.setDuration(delay);
-                    valueAnimator.setInterpolator(new LinearInterpolator());
-                    valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                        @Override
-                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                            float v = valueAnimator.getAnimatedFraction();
-                            double lng = v * endPosition.longitude + (1 - v)
-                                    * startPosition.longitude;
-                            double lat = v * endPosition.latitude + (1 - v)
-                                    * startPosition.latitude;
-                            LatLng newPos = new LatLng(lat, lng);
-                            mapManager.moveMarker(markerCar, newPos);
-                        }
-                    });
-                    valueAnimator.start();
-                    index++;
-                    handler.postDelayed(this, delay);
-                } else {
-                    if (TripStatus.IN_TRAVEL.ordinal() == currentTrip.getStatus()) {
-                        driverOnDestination();
-                    }
-                    if (TripStatus.DRIVER_GOING_ORIGIN.ordinal() == currentTrip.getStatus()) {
-                        driverOnOrigin(startPosition);
-                    }
-
-
-                }
-            }
-        };
-        handler.postDelayed(runnable, delay);
+    }
+    private void stepGoToDestination(MapRoute route){
+        mapManager.clearMap();
+        markerCar = null;
+        List<LatLng> pointsRouteTripPolyline = PolyUtil.decode(route.getOverviewPolyline().getPoints());
+        LatLng positionOrigin = pointsRouteTripPolyline.get(0);
+        moveCar(positionOrigin);
+        mapManager.drawPath(route.getOverviewPolyline());
+        Handler handler = new Handler();
+        Runnable runnable = () -> driverOnDestination();
+        handler.postDelayed(runnable, timeSimulationStep);
     }
 
     private void refreshDriverPosition(LatLng position) {
-
         UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
         UserService userService = new UserService(this);
         Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
@@ -162,10 +146,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                 if(userUpdated != null){
                     Log.d("USER UPDATED", userUpdated.getId());
                 }
-
-
             }
-
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 Log.d("UPDATE USER POSITION", t.getMessage());
@@ -174,13 +155,17 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     }
 
 
-    private void driverOnOrigin(LatLng position) {
+    private void driverOnOrigin() {
         Button buttonStatusStart = findViewById(R.id.button_status_start);
         buttonStatusStart.setVisibility(View.VISIBLE);
         Button buttonStatusFinish = findViewById(R.id.button_status_finish);
         buttonStatusFinish.setVisibility(View.GONE);
         showStatus();
-
+        MapRoute tripRoute = currentTrip.getRoutes().get(0);
+        List<LatLng> pointsRouteTripPolyline = PolyUtil.decode(tripRoute.getOverviewPolyline().getPoints());
+        LatLng positionOrigin = pointsRouteTripPolyline.get(0);
+        moveCar(positionOrigin);
+        refreshDriverPosition(positionOrigin);
         buttonStatusStart.setOnClickListener(v -> {
             hideStatus();
             UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.IN_TRAVEL.ordinal());
@@ -197,11 +182,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                     Log.d("UPDATE STATUS TRIP", t.getMessage());
                 }
             });
-            MapRoute tripRoute = currentTrip.getRoutes().get(0);
-            mapManager.clearMap();
-            initMarkerMap(position);
-            mapManager.drawPath(tripRoute.getOverviewPolyline());
-            initSimulateDriver(tripRoute);
+            stepGoToDestination(tripRoute);
         });
 
     }
@@ -211,6 +192,11 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         buttonStatusStart.setVisibility(View.GONE);
         Button buttonStatusFinish = findViewById(R.id.button_status_finish);
         buttonStatusFinish.setVisibility(View.VISIBLE);
+        MapRoute tripRoute = currentTrip.getRoutes().get(0);
+        List<LatLng> pointsRouteTripPolyline = PolyUtil.decode(tripRoute.getOverviewPolyline().getPoints());
+        LatLng positionDestination = pointsRouteTripPolyline.get(pointsRouteTripPolyline.size()-1);
+        moveCar(positionDestination);
+        refreshDriverPosition(positionDestination);
         showStatus();
         buttonStatusFinish.setOnClickListener(v -> {
             UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.COMPLETED.ordinal());
@@ -286,14 +272,9 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         }
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        initMarkerMap(position);
+        moveCar(position);
         mapManager.moveCamera(position);
     }
-
-    private void initMarkerMap(LatLng position) {
-        markerCar = mapManager.addMarkerCar(position);
-    }
-
 
     public void showMessage(String message) {
         Toast.makeText(

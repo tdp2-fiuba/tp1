@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class ListTripsAdapter extends ArrayAdapter<Trip> {
 
@@ -84,6 +85,7 @@ public class ListTripsAdapter extends ArrayAdapter<Trip> {
         try {
             DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             Date date = df1.parse(trip.getCreatedDate());
+            date = new Date(date.getTime() - TimeUnit.HOURS.toMillis(3));
             DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             viewHolder.date.setText(df2.format(date));
         } catch (ParseException e) {

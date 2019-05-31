@@ -18,7 +18,7 @@ describe("tripsController", () => {
   });
 
   after(() => sandbox.restore());
-
+/*
   describe("updateTripStatus", () => {
     let tripId: any;
     let status: any;
@@ -77,7 +77,7 @@ describe("tripsController", () => {
       expect(responseJsonSpy).calledOnceWith(updatedTrip);
     });
   });
-
+*/
   describe("getById", () => {
     let trip: any;
     let tripId: any;

@@ -110,7 +110,7 @@ describe("tripsService", () => {
       expect(result).to.deep.equal(expectedResult);
     });
   });
-
+/*
   describe("#assignDriverToTrip", () => {
     let tripId: string;
     let driverId: string;
@@ -155,7 +155,7 @@ describe("tripsService", () => {
       });
     });
   });
-
+*/
   describe("#getRoute", () => {
     let origin: string;
     let destination: string;

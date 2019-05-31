@@ -122,7 +122,7 @@
                             android:layout_height="match_parent"
                             android:layout_marginRight="5dp"
                             android:padding="10dp"
-                            android:background="@color/colorSecondary"
+                            android:background="@color/colorAccent"
                             android:src="@drawable/ic_cancel_white" />
 
                 </LinearLayout>
