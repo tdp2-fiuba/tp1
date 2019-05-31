@@ -341,19 +341,12 @@ async function getProspectiveDrivers(tripOrigin: string, startDistance: string, 
   let distanceCond =
     distance + ' <' + (startDistance == '' ? '0' : startDistance) + (stopDistance == '' ? '' : ' and ' + distance + ' <=' + stopDistance);
 
-  const args = [distance]; //[lat, lat, lng]
+  let query = `users.id, avg(stars) as rating, count(*) as count,` + distance + `as distance`;
+  const args = [distance];
   try {
     const users = await db
       .table('users')
-      .select(
-        db.raw(
-          `users.id, 
-          avg(stars) as rating,
-          count(*) as count,
-          ? as distance`,
-          args
-        )
-      )
+      .select(db.raw(query))
       .leftJoin('userReview', 'users.id', '=', 'userReview.reviewee')
       .where(db.raw(distanceCond))
       .andWhere('users.state', '0')
