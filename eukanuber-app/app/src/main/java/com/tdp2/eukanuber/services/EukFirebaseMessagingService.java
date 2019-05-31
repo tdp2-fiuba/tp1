@@ -44,7 +44,7 @@ public class EukFirebaseMessagingService extends FirebaseMessagingService {
 
         Intent notificationIntent = new Intent(this, HomeDriverActivity.class);
         int notificationId = new Random().nextInt(60000);
-        notificationIntent.putExtra(NOTIFICATION_ID_EXTRA, notificationId);
+        notificationIntent.putExtra("notificationTripId", remoteMessage.getData().get("tripId"));
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         final PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0 /* Request code */, notificationIntent,
@@ -59,19 +59,17 @@ public class EukFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification_layout);
-
         contentView.setImageViewResource(R.id.image, R.mipmap.ic_launcher);
-        /*contentView.setTextViewText(R.id.title, remoteMessage.getNotification().getTitle());
-        contentView.setTextViewText(R.id.text, "This is a custom layout");
-*/
+        contentView.setTextViewText(R.id.title, remoteMessage.getData().get("title"));
+        contentView.setTextViewText(R.id.description, remoteMessage.getData().get("driverName"));
+        contentView.setTextViewText(R.id.score, remoteMessage.getData().get("driverScore"));
+        contentView.setTextViewText(R.id.quantPets, remoteMessage.getData().get("pets"));
+        contentView.setTextViewText(R.id.textInfo, remoteMessage.getData().get("distance") + " - " + remoteMessage.getData().get("duration") );
+        contentView.setTextViewText(R.id.price, remoteMessage.getData().get("price"));
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, ADMIN_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_pets_black)
-                        /*.setContentTitle(remoteMessage.getNotification().getTitle())
-                        .setStyle(new NotificationCompat.BigPictureStyle()
-                                .setSummaryText(remoteMessage.getNotification().getBody())
-                                .bigPicture(bitmap))
-                        .setContentText(remoteMessage.getNotification().getBody())*/
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent)

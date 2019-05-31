@@ -80,6 +80,12 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         popupOpen = false;
         UserService userService = new UserService(this);
         Call<Trip> call = userService.getLastTrip();
+        String tripId = getIntent().getStringExtra("notificationTripId");
+        if(tripId != null){
+            Log.d("SARASSAAAAAAAAAAAAa", "notificationTripId: "+tripId);
+        }else{
+            Log.d("SARASSAAAAAAAAAAAAa", "SIN notificationTripId");
+        }
         call.enqueue(new Callback<Trip>() {
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
