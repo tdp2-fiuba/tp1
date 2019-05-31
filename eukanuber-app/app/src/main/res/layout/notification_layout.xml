@@ -1,0 +1,94 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="fill_parent"
+    android:layout_height="100dp"
+    android:padding="15dp" >
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="10dp" />
+    <TextView
+        android:textSize="14dp"
+        android:textColor="#000"
+        android:text="¡Tiene un nuevo viaje disponible!"
+        android:id="@+id/title"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/image"
+        />
+    <TextView
+        android:textSize="13dp"
+        android:textColor="#000"
+        android:text="Alfredo Perez"
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/image"
+        android:layout_below="@id/title"
+        />
+    <TextView
+        android:textSize="13dp"
+        android:textColor="#000"
+        android:text="5.0"
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/description"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="10dp"
+        />
+    <ImageView
+        android:src="@drawable/ic_star_gold"
+        android:id="@+id/imageStar"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_toRightOf="@id/score"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="5dp" />
+    <TextView
+        android:textSize="20dp"
+        android:textColor="#000"
+        android:textStyle="bold"
+        android:text="256$"
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/imageStar"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="30dp"
+        />
+    <TextView
+        android:textSize="13dp"
+        android:textColor="#000"
+        android:text="3"
+        android:id="@+id/quantPets"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/image"
+        android:layout_below="@id/description"
+        />
+    <ImageView
+        android:src="@drawable/ic_pets_black"
+        android:id="@+id/imagePet"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_toRightOf="@id/quantPets"
+        android:layout_below="@id/description"
+        android:layout_marginLeft="5dp" />
+    <TextView
+        android:textSize="13dp"
+        android:textColor="#000"
+        android:text="2.4km - 23 min"
+        android:id="@+id/textInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/imagePet"
+        android:layout_below="@id/description"
+        android:layout_marginLeft="10dp"
+        />
+
+</RelativeLayout>
