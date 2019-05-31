@@ -77,6 +77,7 @@ def createUsers():
 
 
 	trips_driver1 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver1['token']})
+	print("CONDUCTOR {} {} VIAJE PENDIENTE {}".format(driver1['user']['firstName'], driver1['user']['lastName'], trips_driver1))
 
 	while(not trips_driver1):
 		print(trips_driver1)
@@ -84,8 +85,8 @@ def createUsers():
 		time.sleep(3)
 		trips_driver1 = requests.get(base_url + '/users/drivers/pendingTrips', headers={'Authorization': 'Bearer ' + driver1['token']})
 
-	print("CONDUCTOR {} {} RECHAZA EL VIAJE".format(driver1['user']['firstName'], driver1['user']['lastName']))
 	reject_status = requests.post(create_trip + '/' + trip1['id'] + '/reject', headers={'Authorization': 'Bearer ' + driver1['token']})
+	print("CONDUCTOR {} {} RECHAZA EL VIAJE {}".format(driver1['user']['firstName'], driver1['user']['lastName'], reject_status))
 
 	printSeparator()
 	#reject_status = requests.get(base_url + '/users/' + driver3['user']['id'] + '/rating', headers={'Authorization': 'Bearer ' + driver3['token']})

@@ -60,7 +60,7 @@ def createTrips():
 	review['review']['stars'] = 5
 
 	for i in range(total_trips):
-		requests.put(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
+		requests.post(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
 
 	print("CREANDO REVIEWS PARA CONDUCTOR 2...")
 	total_trips = 2
@@ -70,7 +70,7 @@ def createTrips():
 	review['review']['stars'] = 3
 
 	for i in range(total_trips):
-		r = requests.put(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
+		r = requests.post(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
 		assert(r.status_code == 200)
 
 	print("CREANDO REVIEWS PARA CONDUCTOR 3...")
@@ -81,7 +81,7 @@ def createTrips():
 	review['review']['stars'] = 4
 
 	for i in range(total_trips):
-		r = requests.put(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
+		r = requests.post(base_url + '/users/review', headers={'Authorization': 'Bearer ' + passengers[0]['token']}, json=review)
 		assert(r.status_code == 200)
 
 	printSeparator()

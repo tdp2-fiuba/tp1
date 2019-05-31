@@ -37,6 +37,7 @@ app.post('/trips', tripsController.createTrip);
 app.put('/trips/:id', tripsController.updateTrip);
 app.post('/trips/:id/accept', tripsController.acceptTrip);
 app.post('/trips/:id/reject', tripsController.rejectTrip);
+app.post('/trips/:id/cancel', tripsController.rejectTrip);
 app.post('/trips/routes', tripsController.getRoute);
 
 // Status endpoints

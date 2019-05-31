@@ -4,7 +4,8 @@ import { tripsService, userService } from '../services';
 import usersController from './usersController';
 import UserState from '../models/UserState';
 
-const MIN_REVIEW_COUNT = 10;
+const MIN_REVIEW_COUNT = 0;
+const DISTANCES = ['0', '1.24274', '2.48548'];
 
 async function getAll(req: Express.Request, res: Express.Response) {
   const status: TripStatus = req.query.status;
@@ -47,12 +48,17 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
       let updatedTrip = await tripsService.updateTripStatus(tripId, trip.status);
       if (trip.status == TripStatus.CLIENT_ACCEPTED) {
         let trip = await tripsService.getTripById(tripId);
-        let driversD1: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '0', '1.24274');
-        let driversD2: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '1.24274', '2.48548');
-        let driversD3: Array<any> = await userService.getProspectiveDrivers(trip.originCoordinates, '2.48548', '');
-        let allDrivers = [driversD1, driversD2, driversD3];
+        let candidates = 0;
+        let allDrivers: Array<Array<any>> = [];
+        for (let j = 0; j < DISTANCES.length; j++) {
+          let d1 = DISTANCES[j];
+          let d2 = j < DISTANCES.length - 1 ? DISTANCES[j + 1] : '';
+          let driversDJ = await userService.getProspectiveDrivers(trip.originCoordinates, d1, d2);
+          allDrivers.push(driversDJ);
+          candidates += driversDJ.length;
+        }
 
-        if (driversD1.length <= 0 && driversD2.length <= 0 && driversD3.length <= 0) {
+        if (candidates <= 0) {
           updatedTrip = await tripsService.updateTripStatus(trip.id, TripStatus.TRIP_CANCELLED);
         }
 
@@ -112,38 +118,43 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
 
 async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
   try {
-    while (drivers.length > 0) {
+    let tripCancelled = false;
+    while (!tripCancelled && drivers.length > 0) {
       const driver = drivers.shift();
       const driverId: string = driver.id;
       console.log(`New candidate driver: '${driverId}'`);
       try {
-        //assign driver to a trip:
+        //assign driver to a trip,
+        //this will fail if driver is not IDLE to accept trip
+        //or if trip was cancelled.
         await tripsService.assignDriverToTrip(trip.id, driverId);
       } catch (e) {
+        console.log(`Failed assigning driver to trip: '${e}'`);
         continue;
       }
       let timeoutReached = false;
       let timeout = setTimeout(function() {
         timeoutReached = true;
         console.log('Driver timeout reached!');
-      }, 20000);
+      }, 5000);
 
       let accepted = false;
       let rejected = false;
-      while (!accepted && !rejected && !timeoutReached) {
+      while (!accepted && !rejected && !timeoutReached && !tripCancelled) {
         console.log('Wating on driver...');
-        accepted = await tripsService.driverHasTripWithStatus(trip.id, TripStatus.DRIVER_GOING_ORIGIN);
-        rejected = await tripsService.driverHasTripWithStatus(trip.id, TripStatus.REJECTED_BY_DRIVER);
+        accepted = await tripsService.hasTripWithStatus(trip.id, TripStatus.DRIVER_GOING_ORIGIN);
+        rejected = await tripsService.hasTripWithStatus(trip.id, TripStatus.REJECTED_BY_DRIVER);
+        tripCancelled = await tripsService.hasTripWithStatus(trip.id, TripStatus.CANCELLED);
       }
 
       clearTimeout(timeout);
 
-      if (accepted) {
+      if (accepted && !tripCancelled) {
         console.log('Driver accepted trip!');
         return true;
       }
 
-      if (timeoutReached) {
+      if (timeoutReached && !tripCancelled) {
         //penalize driver for timeout.
         await userService.penalizeDriverIgnoredTrip(driverId, trip.id);
       }
@@ -174,6 +185,7 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
     const trip = await tripsService.driverAcceptTrip(tripId, driverId);
     return res.json(trip);
   } catch (e) {
+    console.log('Error accept trip: ' + e);
     res.status(500).send();
   }
 }
@@ -181,10 +193,16 @@ async function acceptTrip(req: Express.Request, res: Express.Response) {
 async function rejectTrip(req: Express.Request, res: Express.Response) {
   try {
     const tripId = req.params.id;
-    const driverId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
-    await tripsService.driverRejectTrip(tripId, driverId);
+    const userId = await usersController.getUserIdIfLoggedWithValidCredentials(req, res);
+    const userRole = await userService.getUserRole(userId);
+    if (userRole.userType == 'driver') {
+      await tripsService.driverRejectTrip(tripId, userId);
+    } else {
+      await tripsService.cancelTrip(tripId, userId);
+    }
     res.status(200).send();
   } catch (e) {
+    console.log('Error reject/cancel trip: ' + e);
     res.status(500).send();
   }
 }
