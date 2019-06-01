@@ -117,6 +117,10 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 LoginResponse loginResponse = response.body();
+                if(loginResponse == null){
+                    showMessage("Ha ocurrido un error. Intente luego.");
+                    return;
+                }
                 AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken(), loginResponse.getUser());
                 if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
                     Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
