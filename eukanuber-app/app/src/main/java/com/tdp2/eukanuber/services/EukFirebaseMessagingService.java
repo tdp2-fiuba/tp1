@@ -37,7 +37,6 @@ public class EukFirebaseMessagingService extends FirebaseMessagingService {
     private static final String NOTIFICATION_ID_EXTRA = "notificationId";
     private static final String ADMIN_CHANNEL_ID = "admin_channel";
     private NotificationManager notificationManager;
-    private Integer secondsPopup = 20;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -50,7 +49,7 @@ public class EukFirebaseMessagingService extends FirebaseMessagingService {
                 0 /* Request code */, notificationIntent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
