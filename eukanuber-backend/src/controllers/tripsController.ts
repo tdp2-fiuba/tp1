@@ -128,6 +128,17 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
         //this will fail if driver is not IDLE to accept trip
         //or if trip was cancelled.
         await tripsService.assignDriverToTrip(trip.id, driverId);
+        userService.notifyUser(driverId, {
+          title: 'Tienes un nuevo viaje disponible!',
+          type: 'new_trip',
+          driverName: driver.firstName + ' ' + driver.lastName,
+          driverScore: await userService.getUserRating(driverId),
+          pets: trip.pets.length,
+          distance: trip.distance,
+          duration: trip.duration,
+          price: trip.price,
+          tripId: trip.id,
+        });
       } catch (e) {
         console.log(`Failed assigning driver to trip: '${e}'`);
         continue;
@@ -150,12 +161,20 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
       clearTimeout(timeout);
 
       if (accepted && !tripCancelled) {
+        userService.notifyUser(trip.clientId, {
+          title: 'Tu chofer esta en camino!',
+          type: 'trip_accepted',
+        });
         console.log('Driver accepted trip!');
         return true;
       }
 
       if (timeoutReached && !tripCancelled) {
         //penalize driver for timeout.
+        userService.notifyUser(driverId, {
+          title: 'Se ha agotado el tiempo para aceptar el viaje!',
+          type: 'trip_accept_timeout',
+        });
         await userService.penalizeDriverIgnoredTrip(driverId, trip.id);
       }
 

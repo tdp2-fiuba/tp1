@@ -1,9 +1,9 @@
 import Express from 'express';
 import jwt from 'jsonwebtoken';
-import {IUser} from '../models';
+import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
-import {tripsService, userService} from '../services';
-import UserTypes from "../models/UserTypes";
+import { tripsService, userService } from '../services';
+import UserTypes from '../models/UserTypes';
 
 const secret = 'ALOHOMORA';
 
@@ -286,17 +286,38 @@ async function getDriverPendingTrips(req: Express.Request, res: Express.Response
 }
 
 async function getFinishedTrips(req: Express.Request, res: Express.Response) {
-    try {
-        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
-        const isDriver = await userIsDriver(userId);
-        const tripList = await tripsService.getFinishedTrips(userId, isDriver);
-        res.status(200).json(tripList);
-    } catch (e) {
-        res
-            .status(500)
-            .json({message: e.message})
-            .send();
+  try {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    const isDriver = await userIsDriver(userId);
+    const tripList = await tripsService.getFinishedTrips(userId, isDriver);
+    res.status(200).json(tripList);
+  } catch (e) {
+    res
+      .status(500)
+      .json({ message: `Failed to retrieve trips: '${e.message}'` })
+      .send();
+  }
+}
+
+async function newFirebaseToken(req: Express.Request, res: Express.Response) {
+  try {
+    const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+    const token = req.body.token;
+    if (!token) {
+      res
+        .status(400)
+        .json({ message: `Must provide a token!` })
+        .send();
     }
+    const user = await userService.updateUser(userId, { firebaseToken: token });
+
+    return res.status(200).json(user);
+  } catch (e) {
+    res
+      .status(500)
+      .json({ message: `Error attempting to set firebase token: '${e.message}'` })
+      .send();
+  }
 }
 
 export default {
@@ -316,5 +337,6 @@ export default {
   getUserIdIfLoggedWithValidCredentials,
   getDriverPendingTrips,
   userIsDriver,
-  getFinishedTrips
+  getFinishedTrips,
+  newFirebaseToken,
 };

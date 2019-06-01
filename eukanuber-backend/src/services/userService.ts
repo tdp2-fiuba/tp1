@@ -3,6 +3,7 @@ import Knex from 'knex';
 import db from '../db/db';
 import { IUser } from '../models';
 import ICreateUserData from '../models/ICreateUserData';
+import firebaseService from '../services/firebaseService';
 import facebookService from './facebookService';
 require('dotenv').config();
 
@@ -10,7 +11,6 @@ var moment = require('moment');
 const { raw } = require('objection');
 
 const MIN_FRIEND_COUNT = 0; //10;
-const REJECTION_TIME_LIMIT = 10;
 
 interface IPosition {
   lat: string;
@@ -91,6 +91,33 @@ async function getUserByFbId(fbId: string) {
   } catch (e) {
     return undefined;
   }
+}
+
+async function getUserFirebaseToken(userId: string) {
+  try {
+    const firebaseToken = await db
+      .table('users')
+      .where('id', userId)
+      .select('firebaseToken')
+      .first();
+
+    if (!firebaseToken) {
+      return undefined;
+    }
+
+    return firebaseToken.firebaseToken;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+async function notifyUser(userId: string, message: any) {
+  const registrationToken = await getUserFirebaseToken(userId);
+  if (!registrationToken || registrationToken == undefined) {
+    console.log(`No firebase token found for user '${userId}'`);
+    return;
+  }
+  firebaseService.sendNotificationPriorityNormal(registrationToken, message);
 }
 
 async function getUserRating(id: string) {
@@ -190,6 +217,7 @@ async function updateUser(id: string, userData: Partial<IUser>) {
     latitude: pos.length > 1 ? pos[0] : user.latitude,
     longitude: pos.length > 1 ? pos[1] : user.longitude,
     state: userData.state ? userData.state : user.state,
+    firebaseToken: userData.firebaseToken.length > 0 ? userData.firebaseToken : user.firebaseToken,
   };
 
   return await updateUserWithData(id, updateData);
@@ -380,4 +408,5 @@ export default {
   penalizeDriverIgnoredTrip,
   penalizeDriverRejectTrip,
   getUserRole,
+  notifyUser,
 };

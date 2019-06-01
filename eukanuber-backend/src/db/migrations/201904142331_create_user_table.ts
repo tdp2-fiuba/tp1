@@ -17,6 +17,7 @@ export async function up(knex: Knex): Promise<any> {
     tableBuilder.string('firstName').notNullable();
     tableBuilder.string('lastName').notNullable();
     tableBuilder.string('fbAccessToken').notNullable();
+    tableBuilder.string('firebaseToken').defaultTo('');
 
     tableBuilder.string('userType').notNullable();
     tableBuilder.integer('access').defaultTo(0);

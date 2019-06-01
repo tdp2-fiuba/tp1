@@ -10,5 +10,6 @@ export default interface IUser {
   position: string;
   access: UserValidationStatus;
   state: UserState;
+  firebaseToken?: string;
   userType: UserTypes;
 }
