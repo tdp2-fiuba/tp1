@@ -48,11 +48,7 @@ import retrofit2.Response;
 public class HomeDriverActivity extends SecureActivity implements OnMapReadyCallback, ShowMessageInterface {
     private GoogleMap mMap;
     private MapManager mapManager;
-    private List<String> tripsOpened;
     private Activity mActivity;
-    private Handler handlerRequestTrips;
-    private Runnable runnableRequestTrips;
-    private Integer delayRequestTrips;
     private Boolean popupOpen;
     private Integer secondsPopup;
     private Handler secondsCounterHandler;
@@ -61,7 +57,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        tripsOpened = new ArrayList<>();
         mActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_driver);
@@ -77,71 +72,61 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         super.onStart();
         this.userActive = true;
         updateUserStatus();
-        popupOpen = false;
-        UserService userService = new UserService(this);
-        Call<Trip> call = userService.getLastTrip();
-        String tripId = getIntent().getStringExtra("notificationTripId");
-        if(tripId != null){
-            Log.d("SARASSAAAAAAAAAAAAa", "notificationTripId: "+tripId);
+        String notificationTripId = getIntent().getStringExtra("notificationTripId");
+        if(notificationTripId != null){
+            initNewTrip(notificationTripId);
         }else{
-            Log.d("SARASSAAAAAAAAAAAAa", "SIN notificationTripId");
+            UserService userService = new UserService(this);
+            Call<Trip> call = userService.getLastTrip();
+            call.enqueue(new Callback<Trip>() {
+                @Override
+                public void onResponse(Call<Trip> call, Response<Trip> response) {
+                    Trip trip = response.body();
+                    if (trip != null && trip.getId() != null &&
+                            (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
+                                    trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
+                                    trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
+                        beginTrip(trip);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Trip> call, Throwable t) {
+                    System.out.print("Ha ocurrido un error al recuperar el viaje.");
+                }
+            });
         }
+    }
+
+
+    private void initNewTrip(String tripId) {
+        TripService tripService = new TripService(mActivity);
+        Call<Trip> call = tripService.get(tripId);
         call.enqueue(new Callback<Trip>() {
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
                 Trip trip = response.body();
                 if (trip != null && trip.getId() != null &&
-                        (trip.getStatus() == TripStatus.DRIVER_GOING_ORIGIN.ordinal() ||
-                                trip.getStatus() == TripStatus.IN_TRAVEL.ordinal() ||
-                                trip.getStatus() == TripStatus.ARRIVED_DESTINATION.ordinal())) {
-                    beginTrip(trip);
-                }else {
-                    initDriverHome();
+                        trip.getStatus() != TripStatus.CLIENT_ACCEPTED.ordinal()) {
+                    View view = mActivity.findViewById(R.id.layoutMap);
+                    openPopupNewTripDriver(view, trip);
+
+                } else {
+                    showMessage("El viaje ha caducado.");
+
                 }
+
             }
+
             @Override
             public void onFailure(Call<Trip> call, Throwable t) {
-                System.out.print("Ha ocurrido un error al recuperar el viaje.");
+                Log.v("TRIP", t.getMessage());
+                showMessage("El viaje ha caducado.");
             }
         });
-    }
 
-    private void initDriverHome() {
-        handlerRequestTrips = new Handler();
-        delayRequestTrips = 500;
-        runnableRequestTrips = new Runnable() {
-            @Override
-            public void run() {
-                if (!popupOpen) {
-                    UserService userService = new UserService(mActivity);
-                    Call<Trip> call = userService.getPendingTrips();
-                    call.enqueue(new Callback<Trip>() {
-                        @Override
-                        public void onResponse(Call<Trip> call, Response<Trip> response) {
-                            Trip trip = response.body();
-                            if (trip != null && trip.getId() != null) {
-                                if (!tripsOpened.contains(trip.getId())) {
-                                    tripsOpened.add(trip.getId());
-                                    View view = mActivity.findViewById(R.id.layoutMap);
-                                    openPopupNewTripDriver(view, trip);
-                                }
-                            }
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<Trip> call, Throwable t) {
-                            Log.v("TRIP", t.getMessage());
-                        }
-                    });
-                }
-                handlerRequestTrips.postDelayed(this, delayRequestTrips);
-
-            }
-        };
-        handlerRequestTrips.postDelayed(runnableRequestTrips, delayRequestTrips);
 
     }
+
 
     private void openPopupNewTripDriver(View v, Trip trip) {
         popupOpen = true;
@@ -241,7 +226,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         });
     }
 
-    private void beginTrip(Trip trip){
+    private void beginTrip(Trip trip) {
         Intent intentActiveTripDriver = new Intent(mActivity, ActiveTripDriverActivity.class);
         intentActiveTripDriver.putExtra("currentTrip", trip);
         intentActiveTripDriver.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -385,23 +370,20 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     @Override
     protected void onStop() {
         super.onStop();
-        if (handlerRequestTrips != null && runnableRequestTrips != null) {
-            handlerRequestTrips.removeCallbacks(runnableRequestTrips);
-        }
     }
 
-    private void updateUserStatus(){
+    private void updateUserStatus() {
         TextView status = findViewById(R.id.status);
         TextView labelStatus = findViewById(R.id.labelStatus);
         TextView labelButtonStatus = findViewById(R.id.labelButtonStatus);
         ImageView buttonStatus = findViewById(R.id.buttonStatus);
-        if(userActive){
+        if (userActive) {
             status.setText("Activo");
             status.setTextColor(getResources().getColor(R.color.colorSuccess));
             labelStatus.setText("En este estado puede recibir viajes");
             buttonStatus.setImageResource(R.drawable.icon_power_off);
             labelButtonStatus.setText("Ponerse como inactivo");
-        }else{
+        } else {
             status.setText("Inactivo");
             status.setTextColor(getResources().getColor(R.color.colorAccent));
             labelStatus.setText("En este estado no puede recibir viajes");

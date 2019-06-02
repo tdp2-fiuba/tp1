@@ -7,7 +7,10 @@ admin.initializeApp({
     databaseURL: 'https://eukanuber.firebaseio.com',
 });
 
-async function sendNotificationPriorityNormal(registrationToken: string, payload: any) {
+async function sendNotification(registrationToken: string, payload: any) {
+    console.log('sendNotification------------');
+    console.log(registrationToken);
+    console.log(payload);
     const data = {
         data: payload
     };
@@ -27,5 +30,5 @@ async function sendNotificationPriorityNormal(registrationToken: string, payload
 }
 
 export default {
-    sendNotificationPriorityNormal,
+    sendNotification,
 };

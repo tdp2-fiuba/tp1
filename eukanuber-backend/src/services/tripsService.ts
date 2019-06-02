@@ -112,16 +112,6 @@ async function cancelTrip(tripId: string, userId: string) {
     //else notify user that they cannot cancel trip at this point.
     await transaction.commit();
 
-    userService.notifyUser(trip[0].driverId, {
-      title: 'El viaje en curso ha sido cancelado!',
-      type: 'trip_cancelled',
-      client: trip[0].clientId,
-      destination: trip[0].destination,
-      pets: trip[0].pets.length,
-      price: trip[0].price,
-      tripId: trip[0].id,
-    });
-
     return getTripById(tripId);
   } catch (err) {
     transaction.rollback();

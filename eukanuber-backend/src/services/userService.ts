@@ -82,24 +82,27 @@ async function getUserByFbId(fbId: string) {
       .where('fbId', fbId)
       .select()
       .first();
-
+      console.log("user: ", user);
     if (!user) {
       return undefined;
     }
 
     return user.id;
   } catch (e) {
+    console.log("error: ", e);
     return undefined;
   }
 }
 
 async function getUserFirebaseToken(userId: string) {
+  console.log("getUserFirebaseToken: " + userId);
   try {
     const firebaseToken = await db
       .table('users')
       .where('id', userId)
       .select('firebaseToken')
       .first();
+    console.log(firebaseToken);
 
     if (!firebaseToken) {
       return undefined;
@@ -107,6 +110,7 @@ async function getUserFirebaseToken(userId: string) {
 
     return firebaseToken.firebaseToken;
   } catch (e) {
+    console.log(e);
     return undefined;
   }
 }
@@ -117,7 +121,7 @@ async function notifyUser(userId: string, message: any) {
     console.log(`No firebase token found for user '${userId}'`);
     return;
   }
-  firebaseService.sendNotificationPriorityNormal(registrationToken, message);
+  firebaseService.sendNotification(registrationToken, message);
 }
 
 async function getUserRating(id: string) {
@@ -128,8 +132,7 @@ async function getUserRating(id: string) {
       .sum({ sum: 'stars' })
       .count({ count: 'stars' })
       .groupBy('reviewee');
-
-    if (!rating || rating === undefined) {
+    if (!rating || rating === undefined || rating.length === 0) {
       return { sum: 0, count: 0 };
     }
 
@@ -208,18 +211,15 @@ async function updateUser(id: string, userData: Partial<IUser>) {
     .where('id', id)
     .select()
     .first();
-
   const pos = userData.position != undefined ? userData.position.split(',') : '';
-
   const updateData = {
     firstName: userData.firstName ? userData.firstName : user.firstName,
     lastName: userData.lastName ? userData.lastName : user.lastName,
     latitude: pos.length > 1 ? pos[0] : user.latitude,
     longitude: pos.length > 1 ? pos[1] : user.longitude,
     state: userData.state ? userData.state : user.state,
-    firebaseToken: userData.firebaseToken.length > 0 ? userData.firebaseToken : user.firebaseToken,
+    firebaseToken: userData.firebaseToken && userData.firebaseToken.length > 0 ? userData.firebaseToken : user.firebaseToken,
   };
-
   return await updateUserWithData(id, updateData);
 }
 
@@ -368,7 +368,6 @@ async function getProspectiveDrivers(tripOrigin: string, startDistance: string, 
 
   let distanceCond =
     distance + ' <' + (startDistance == '' ? '0' : startDistance) + (stopDistance == '' ? '' : ' and ' + distance + ' <=' + stopDistance);
-
   let query = `users.id, avg(stars) as rating, count(*) as count,` + distance + `as distance`;
   const args = [distance];
   try {
@@ -383,7 +382,6 @@ async function getProspectiveDrivers(tripOrigin: string, startDistance: string, 
       .orderBy(['distance', { column: 'rating', order: 'desc' }]); //order by distance then by rating
     return users;
   } catch (e) {
-    console.log(e);
     return [];
   }
 }

@@ -54,7 +54,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
         this.createMenu(userLogged);
-        timeSimulationStep = 10000;
+        timeSimulationStep = 5000;
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");

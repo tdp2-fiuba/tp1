@@ -20,6 +20,7 @@ import com.facebook.login.widget.LoginButton;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.FirebaseTokenRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.NewTripRequest;
 import com.tdp2.eukanuber.model.Trip;
@@ -103,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
 
         UserService userService = new UserService(this);
-
+    Log.d("FBUSERID", fbUserId);
         Call<LoginResponse> call = userService.login(fbUserId);
         ProgressDialog dialog = new ProgressDialog(LoginActivity.this);
         dialog.setMessage("Espere un momento por favor");
@@ -150,11 +151,22 @@ public class LoginActivity extends AppCompatActivity {
                         Log.w("FIREBASE TOKEN", "getInstanceId failed", task.getException());
                         return;
                     }
-                    // Get new Instance ID token
                     String token = task.getResult().getToken();
-                    System.out.print(token);
                     Log.d("TOKEN FIREBASE", token);
-                    Toast.makeText(LoginActivity.this, token, Toast.LENGTH_SHORT).show();
+                    UserService userService = new UserService(this);
+                    FirebaseTokenRequest firebaseTokenRequest = new FirebaseTokenRequest(token);
+                    Call<Void> call = userService.updateFirebaseToken(firebaseTokenRequest);
+                    call.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            response.body();
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.d("updateFirebaseToken Err", t.getMessage());
+                        }
+                    });
                 });
     }
 

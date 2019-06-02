@@ -36,10 +36,10 @@ async function updateUser(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
     const userData: Partial<IUser> = req.body;
-    const updatedUser = await userService.updateUser(userId, userData);
-    res.status(200).json(updatedUser);
+      const updatedUser = await userService.updateUser(userId, userData);
+      res.status(200).json(updatedUser);
   } catch (e) {
-    res
+      res
       .status(500)
       .json({ message: e.message })
       .send();
@@ -92,7 +92,6 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
     try {
       const signature = jwt.verify(token, secret);
       userId = (signature as any).id;
-      console.log('DECODE USER ID' + userId);
     } catch (e) {
       res
         .status(401)
@@ -101,7 +100,6 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
       return '';
     }
     const isUserLoggedIn = await userService.isUserLogged(userId);
-    console.log('CHECK USER LOGGED IN ' + isUserLoggedIn);
     if (!isUserLoggedIn) {
       res
         .status(403)
@@ -260,7 +258,6 @@ async function getUserLastTrip(req: Express.Request, res: Express.Response) {
       .json(trip)
       .send();
   } catch (e) {
-    console.log(e.message);
     res
       .status(500)
       .json({ message: e.message })
@@ -277,7 +274,6 @@ async function getDriverPendingTrips(req: Express.Request, res: Express.Response
       .json(trips)
       .send();
   } catch (e) {
-    console.log(e.message);
     res
       .status(500)
       .json({ message: e.message })

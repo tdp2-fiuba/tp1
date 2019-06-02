@@ -1,12 +1,12 @@
 package com.tdp2.eukanuber.services;
 
 import com.tdp2.eukanuber.model.FeedbackRequest;
-import com.tdp2.eukanuber.model.Rating;
-import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
+import com.tdp2.eukanuber.model.FirebaseTokenRequest;
 import com.tdp2.eukanuber.model.GetRouteRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.NewTripRequest;
+import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
@@ -26,9 +26,9 @@ import retrofit2.http.Query;
 
 public interface BackendService {
 
-    //String API_PATH = "http://192.168.0.27:3000/";
+    String API_PATH = "http://192.168.0.27:3000/";
     // String API_PATH = "http://10.0.2.2:3000/";
-    String API_PATH = "https://eukanuber-backend.herokuapp.com/";
+    //String API_PATH = "https://eukanuber-backend.herokuapp.com/";
 
     @GET("trips")
     Call<List<Trip>> getAll();
@@ -92,4 +92,7 @@ public interface BackendService {
 
     @GET("users/{userId}/rating")
     Call<Rating> getUserRating(@Path("userId") String userId);
+
+    @PUT("/users/firebase")
+    Call<Void> updateFirebaseToken(@Body FirebaseTokenRequest firebaseTokenRequest);
 }

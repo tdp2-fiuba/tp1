@@ -12,6 +12,8 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ClientService {
     Context context;
@@ -22,17 +24,39 @@ public class ClientService {
         SharedPreferences settings = context.getSharedPreferences(AppSecurityManager.USER_SECURITY_SETTINGS, 0);
         String appToken = settings.getString(AppSecurityManager.APP_TOKEN_KEY, null);
         client = null;
-        if(appToken != null){
+        if (appToken != null) {
             client = new OkHttpClient.Builder().addInterceptor(chain -> {
-                Request newRequest  = chain.request().newBuilder()
+                Request newRequest = chain.request().newBuilder()
                         .addHeader("Authorization", "Bearer " + appToken)
                         .build();
                 return chain.proceed(newRequest);
             })
-            .readTimeout(60, TimeUnit.SECONDS)
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .build();
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .build();
         }
+
+    }
+
+    protected Retrofit buildClient() {
+        return new Retrofit.Builder()
+                .baseUrl(BackendService.API_PATH)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
+    protected Retrofit buildClientSecured() {
+        Retrofit retrofit;
+        if (client != null) {
+            retrofit = new Retrofit.Builder()
+                    .client(client)
+                    .baseUrl(BackendService.API_PATH)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        } else {
+            retrofit = buildClient();
+        }
+        return retrofit;
 
     }
 }
