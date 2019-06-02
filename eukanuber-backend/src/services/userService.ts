@@ -288,6 +288,14 @@ async function getUserPosition(id: string) {
   };
   return position;
 }
+async function getUserStatus(id: string) {
+    const status = await db
+        .table('users')
+        .where('id', id)
+        .select('state')
+        .first();
+    return status;
+}
 
 async function updateUserPosition(id: string, pos: IPosition) {
   const newPos = { latitude: pos.lat, longitude: pos.lng };
@@ -398,6 +406,7 @@ export default {
   submitUserReview,
   getUserReviews,
   getUserPosition,
+  getUserStatus,
   getProspectiveDrivers,
   updateUserPosition,
   deleteUser,

@@ -48,7 +48,6 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private Runnable checkTripStatusRunnable;
     private Integer timeSimulationStep;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,7 +183,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
                 Intent intent = new Intent(mContext, FeedbackActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("currentTrip", currentTrip);
-                showMessage("Viaje finalizado con exito!");
+                intent.putExtra("showMessage", "Viaje finalizado con exito!");
                 startActivity(intent);
             }
 
@@ -201,8 +200,9 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     private void initTripCancelled() {
         Intent intent = new Intent(this, HomeClientActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        showMessage("No se encontraron conductores para su viaje.");
+        intent.putExtra("showMessage", "No se encontraron conductores para su viaje.");
         startActivity(intent);
+
     }
 
     @Override
@@ -239,12 +239,11 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
     public void showMessage(String message) {
         Toast.makeText(
-                this,
+                mContext,
                 message,
                 Toast.LENGTH_LONG
         ).show();
     }
-
 
 
     private void showCancelButton() {
@@ -277,9 +276,6 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     }
 
     public void cancelTrip(View view) {
-        
-
-
     }
 
     @Override

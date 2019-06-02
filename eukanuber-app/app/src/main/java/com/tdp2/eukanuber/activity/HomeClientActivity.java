@@ -38,10 +38,16 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
         initClientHome();
         getLastTrip();
-
-
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        String showMessageIntent = getIntent().getStringExtra("showMessage");
+        if(showMessageIntent != null){
+            showMessage(showMessageIntent);
+        }
+    }
 
     private void initClientHome() {
         LinearLayout layoutMap = findViewById(R.id.layoutMap);

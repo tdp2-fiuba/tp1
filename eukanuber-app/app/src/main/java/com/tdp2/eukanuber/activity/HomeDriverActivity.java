@@ -37,7 +37,10 @@ import com.tdp2.eukanuber.model.RefuseDriverTripRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.UpdateUserStatusRequest;
 import com.tdp2.eukanuber.model.User;
+import com.tdp2.eukanuber.model.UserStatus;
+import com.tdp2.eukanuber.model.UserStatusResponse;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
@@ -93,16 +96,33 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         LocalBroadcastManager.getInstance(this).registerReceiver((mMessageReceiver),
                 new IntentFilter("NewTrip")
         );
-        this.userActive = true;
+        UserService userService = new UserService(this);
+        Call<UserStatusResponse> callStatus = userService.getUserStatus(userLogged.getId());
+        callStatus.enqueue(new Callback<UserStatusResponse>() {
+            @Override
+            public void onResponse(Call<UserStatusResponse> UserStatusResponse, Response<UserStatusResponse> response) {
+                UserStatusResponse userStatusResponse = response.body();
+                userActive = true;
+                if (userStatusResponse != null && userStatusResponse.getState() == UserStatus.UNAVAILABLE.ordinal()) {
+                    userActive = false;
+                }
 
-        updateUserStatus();
+                updateUserStatus();
+            }
+
+            @Override
+            public void onFailure(Call<UserStatusResponse> call, Throwable t) {
+                System.out.print("Ha ocurrido un error al recuperar el viaje.");
+            }
+        });
+
+
         String notificationTripId = getIntent().getStringExtra("notificationTripId");
         if (notificationTripId != null) {
             if (!popupOpen) {
                 initNewTrip(notificationTripId, getIntent().getStringExtra("currentDateTime"));
             }
         } else {
-            UserService userService = new UserService(this);
             Call<Trip> call = userService.getLastTrip();
             call.enqueue(new Callback<Trip>() {
                 @Override
@@ -157,7 +177,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
     private void openPopupNewTripDriver(View v, Trip trip, String currentDateTime) {
         secondsPopup = 20;
-        if(currentDateTime != null){
+        if (currentDateTime != null) {
             try {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 Date dateNotification = dateFormat.parse(currentDateTime);
@@ -165,7 +185,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 long diff = currentDate.getTime() - dateNotification.getTime();
                 int diffSeconds = (int) (diff / 1000 % 60);
                 secondsPopup = 20 - diffSeconds;
-                if(secondsPopup<=0){
+                if (secondsPopup <= 0) {
                     return;
                 }
             } catch (ParseException e) {
@@ -435,6 +455,29 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     }
 
     public void toggleStatus(View view) {
+        UserService userService = new UserService(this);
+        String statusUser = String.valueOf(UserStatus.IDLE.ordinal());
+        if (userActive) {
+            statusUser = String.valueOf(UserStatus.UNAVAILABLE.ordinal());
+        }
+        UpdateUserStatusRequest updateUserStatusRequest = new UpdateUserStatusRequest(statusUser);
+        Call<User> call = userService.updateStatusUser(updateUserStatusRequest);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User userUpdated = response.body();
+                if (userUpdated != null) {
+                    Log.d("USER UPDATED", userUpdated.getId());
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d("UPDATE USER STATUS", t.getMessage());
+            }
+        });
         userActive = !userActive;
         updateUserStatus();
 

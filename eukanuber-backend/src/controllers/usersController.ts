@@ -62,6 +62,22 @@ async function getUserPosition(req: Express.Request, res: Express.Response) {
   }
 }
 
+async function getUserStatus(req: Express.Request, res: Express.Response) {
+    try {
+        const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
+        if (userId.length <= 0) {
+            return;
+        }
+        const userStatus = await userService.getUserStatus(req.params.userId);
+        res.status(200).json(userStatus);
+    } catch (e) {
+      console.log(e);
+        res
+            .status(409)
+            .json({ message: e.message })
+            .send();
+    }
+}
 async function updateUserPosition(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
@@ -323,6 +339,7 @@ export default {
   createUser,
   submitUserReview,
   getUserRating,
+  getUserStatus,
   updateUser,
   getUserPosition,
   updateUserPosition,

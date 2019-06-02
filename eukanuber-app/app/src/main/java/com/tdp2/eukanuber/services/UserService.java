@@ -8,9 +8,11 @@ import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.Rating;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.UpdateUserStatusRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.model.UserRegisterRequest;
+import com.tdp2.eukanuber.model.UserStatusResponse;
 
 import java.util.List;
 
@@ -45,6 +47,15 @@ public class UserService extends ClientService {
 
     }
 
+    public Call<UserStatusResponse> getUserStatus(String userId) {
+        Retrofit retrofit = buildClientSecured();
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.getUserStatus(userId);
+    }
+
+
+
+
     public Call<LoginResponse> login(String fbId) {
         Retrofit retrofit = buildClient();
         BackendService postService = retrofit.create(BackendService.class);
@@ -58,7 +69,12 @@ public class UserService extends ClientService {
         return postService.registerUser(userRegisterRequest);
 
     }
+    public Call<User> updateStatusUser(UpdateUserStatusRequest updateUserStatusRequest) {
+        Retrofit retrofit = buildClientSecured();
+        BackendService postService = retrofit.create(BackendService.class);
+        return postService.updateStatusUser(updateUserStatusRequest);
 
+    }
     public Call<Void> logout() {
         Retrofit retrofit = buildClientSecured();
         BackendService postService = retrofit.create(BackendService.class);

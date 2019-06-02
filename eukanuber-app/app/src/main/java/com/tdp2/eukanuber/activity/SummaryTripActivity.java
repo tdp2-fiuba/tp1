@@ -67,6 +67,7 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
                     showMessage("Viaje cancelado");
                     startActivity(intentHome);
                 }
+
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     dialog.dismiss();
@@ -93,6 +94,7 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
                     showMessage("Viaje confirmado");
                     startActivity(intentTrackingTrip);
                 }
+
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     dialog.dismiss();
@@ -100,7 +102,6 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
                     showMessage("Ha ocurrido un error. Intente luego.");
                 }
             });
-
 
 
         });
@@ -127,7 +128,7 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-      //  mapManager.setCurrentLocation();
+        //  mapManager.setCurrentLocation();
 
         drawSummaryPath();
 
