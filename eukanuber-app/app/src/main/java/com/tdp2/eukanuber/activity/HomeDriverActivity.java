@@ -3,7 +3,10 @@ package com.tdp2.eukanuber.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,6 +14,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,8 +41,12 @@ import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.TripService;
 import com.tdp2.eukanuber.services.UserService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -67,15 +75,33 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
     }
 
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String tripId = intent.getExtras().getString("tripId");
+            if (!popupOpen) {
+                initNewTrip(tripId, null);
+            }
+
+        }
+    };
+
     @Override
     protected void onStart() {
+        popupOpen = false;
         super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver((mMessageReceiver),
+                new IntentFilter("NewTrip")
+        );
         this.userActive = true;
+
         updateUserStatus();
         String notificationTripId = getIntent().getStringExtra("notificationTripId");
-        if(notificationTripId != null){
-            initNewTrip(notificationTripId);
-        }else{
+        if (notificationTripId != null) {
+            if (!popupOpen) {
+                initNewTrip(notificationTripId, getIntent().getStringExtra("currentDateTime"));
+            }
+        } else {
             UserService userService = new UserService(this);
             Call<Trip> call = userService.getLastTrip();
             call.enqueue(new Callback<Trip>() {
@@ -89,6 +115,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                         beginTrip(trip);
                     }
                 }
+
                 @Override
                 public void onFailure(Call<Trip> call, Throwable t) {
                     System.out.print("Ha ocurrido un error al recuperar el viaje.");
@@ -98,7 +125,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     }
 
 
-    private void initNewTrip(String tripId) {
+    private void initNewTrip(String tripId, String currentDateTime) {
         TripService tripService = new TripService(mActivity);
         Call<Trip> call = tripService.get(tripId);
         call.enqueue(new Callback<Trip>() {
@@ -108,7 +135,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 if (trip != null && trip.getId() != null &&
                         trip.getStatus() != TripStatus.CLIENT_ACCEPTED.ordinal()) {
                     View view = mActivity.findViewById(R.id.layoutMap);
-                    openPopupNewTripDriver(view, trip);
+                    openPopupNewTripDriver(view, trip, currentDateTime);
 
                 } else {
                     showMessage("El viaje ha caducado.");
@@ -128,14 +155,29 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     }
 
 
-    private void openPopupNewTripDriver(View v, Trip trip) {
+    private void openPopupNewTripDriver(View v, Trip trip, String currentDateTime) {
+        secondsPopup = 20;
+        if(currentDateTime != null){
+            try {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date dateNotification = dateFormat.parse(currentDateTime);
+                Date currentDate = new Date();
+                long diff = currentDate.getTime() - dateNotification.getTime();
+                int diffSeconds = (int) (diff / 1000 % 60);
+                secondsPopup = 20 - diffSeconds;
+                if(secondsPopup<=0){
+                    return;
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
         popupOpen = true;
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.new_trip_popup, null);
         final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setAnimationStyle(R.style.popup_window_animation);
         popupWindow.showAtLocation(v, Gravity.CENTER, 0, -100);
-        secondsPopup = 20;
         String escortText = trip.getEscort() ? "Si" : "No";
         trip.setDuration(trip.getDuration());
         trip.setPrice(trip.getPrice());
@@ -149,7 +191,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         ((TextView) popupView.findViewById(R.id.escortText)).setText(escortText);
 
         TextView secondsCounterView = popupView.findViewById(R.id.secondsCounter);
-        secondsPopup = 20;
         secondsCounterView.setText(String.valueOf(secondsPopup));
         secondsCounterHandler = new Handler();
         secondsCounterRunnable = new Runnable() {
@@ -370,6 +411,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     @Override
     protected void onStop() {
         super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     private void updateUserStatus() {
