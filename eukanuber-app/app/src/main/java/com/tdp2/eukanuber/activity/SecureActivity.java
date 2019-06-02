@@ -52,21 +52,7 @@ abstract class SecureActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         refreshRating(userLogged);
-        checkFirebaseToken();
     }
 
-    protected void checkFirebaseToken(){
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.w("FIREBASE TOKEN", "getInstanceId failed", task.getException());
-                        return;
-                    }
-                    // Get new Instance ID token
-                    String token = task.getResult().getToken();
-                    System.out.print(token);
-                    Log.d("TOKEN FIREBASE", token);
-                    Toast.makeText(SecureActivity.this, token, Toast.LENGTH_SHORT).show();
-                });
-    }
+
 }

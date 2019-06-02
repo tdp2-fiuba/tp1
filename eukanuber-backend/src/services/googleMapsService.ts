@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const googleMapsApiKey = "AIzaSyAmj1uQ_CG2WHbrUZs90Cmw7ZUrglIKQWM";
+const googleMapsApiKey = "AIzaSyDY_jxwUSfAz37AL8JpmTA9lJ3zzlhmkQY";
 
 /**
  * Returns geographic coordinates based on an address

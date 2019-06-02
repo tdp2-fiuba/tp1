@@ -17,6 +17,7 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
 import com.tdp2.eukanuber.model.LoginResponse;
@@ -122,6 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 AppSecurityManager.login(settings, fbTokenKey, fbUserId, loginResponse.getToken(), loginResponse.getUser());
+                updateFirebaseToken();
                 if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
                     Intent intent = new Intent(mLoginActivity, HomeDriverActivity.class);
                     startActivity(intent);
@@ -141,7 +143,20 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
-
+    protected void updateFirebaseToken(){
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FIREBASE TOKEN", "getInstanceId failed", task.getException());
+                        return;
+                    }
+                    // Get new Instance ID token
+                    String token = task.getResult().getToken();
+                    System.out.print(token);
+                    Log.d("TOKEN FIREBASE", token);
+                    Toast.makeText(LoginActivity.this, token, Toast.LENGTH_SHORT).show();
+                });
+    }
 
     public void showMessage(String message) {
         Toast.makeText(

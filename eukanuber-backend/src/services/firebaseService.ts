@@ -4,7 +4,7 @@ var serviceAccount = config.get("firebase");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://northern-hope-236009.firebaseio.com',
+    databaseURL: 'https://eukanuber.firebaseio.com',
 });
 
 async function sendNotificationPriorityNormal(registrationToken: string, payload: any) {
