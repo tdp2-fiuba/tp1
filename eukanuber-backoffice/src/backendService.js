@@ -15,6 +15,18 @@ async function loginUser(username, password) {
   }
 }
 
+async function getTrips() {
+  try {
+    const result = await axios.get(`${baseUri}/trips`);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
 export default {
-  loginUser
+  loginUser,
+  getTrips
 };
