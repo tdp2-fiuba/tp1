@@ -26,6 +26,7 @@ import com.tdp2.eukanuber.model.MapRoute;
 import com.tdp2.eukanuber.model.ReviewRequest;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
+import com.tdp2.eukanuber.model.UpdateStatusTripRequest;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserPositionResponse;
 import com.tdp2.eukanuber.services.TripService;
@@ -276,6 +277,29 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
     }
 
     public void cancelTrip(View view) {
+        UpdateStatusTripRequest updateStatusTripRequest = new UpdateStatusTripRequest(TripStatus.CANCELLED.ordinal());
+        TripService tripService = new TripService(mContext);
+        Call<Trip> call = tripService.updateStatusTrip(currentTrip.getId(), updateStatusTripRequest);
+        ProgressDialog dialog = new ProgressDialog(TrackingTripActivity.this);
+        dialog.setMessage("Espere un momento por favor");
+        dialog.show();
+        call.enqueue(new Callback<Trip>() {
+            @Override
+            public void onResponse(Call<Trip> call, Response<Trip> response) {
+                dialog.dismiss();
+                Intent intentHome = new Intent(mContext, HomeClientActivity.class);
+                intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                showMessage("Viaje cancelado");
+                startActivity(intentHome);
+            }
+
+            @Override
+            public void onFailure(Call<Trip> call, Throwable t) {
+                dialog.dismiss();
+                Log.d("UPDATE STATUS TRIP", t.getMessage());
+                showMessage("Ha ocurrido un error. Intente luego.");
+            }
+        });
     }
 
     @Override
