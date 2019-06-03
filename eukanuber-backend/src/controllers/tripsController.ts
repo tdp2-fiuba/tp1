@@ -135,16 +135,19 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
             console.log(drivers);
             const driver = drivers.shift();
             const driverId: string = driver.id;
-            const driverData = await userService.getUserById(driverId);
+            const clientId: string = trip.clientId;
+            const clientData = await userService.getUserById(clientId);
+
+
 
             console.log(`New candidate driver: '${driverId}'`);
             try {
                 await tripsService.assignDriverToTrip(trip.id, driverId);
-                const userRating = await userService.getUserRating(driverId);
+                const userRating = await userService.getUserRating(clientId);
                 const notificationData = {
                     title: 'Tienes un nuevo viaje disponible!',
                     type: 'new_trip',
-                    driverName: driverData.firstName + ' ' + driverData.lastName,
+                    driverName: clientData.firstName + ' ' + clientData.lastName,
                     driverScore: (parseFloat(userRating.sum) / parseFloat(userRating.count)).toFixed(2).toString(),
                     pets: trip.pets.length.toString(),
                     distance: trip.distance,
