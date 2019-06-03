@@ -1,10 +1,11 @@
 import Knex from 'knex';
 import db from '../db/db';
+import config from "config";
 import { ICreateTripData, ITrip, TripStatus, UserValidationStatus, UserTypes } from '../models';
 import googleMapsService from './googleMapsService';
 import UserState from '../models/UserState';
 import userService from './userService';
-
+const pricesConfig : any = config.get("prices");
 require('dotenv').config();
 
 async function getTrips(status: TripStatus) {
@@ -235,18 +236,18 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
   //const getPetSizeExtraCost = (petSize: string) => (petSize === 'S' ? 0 : petSize === 'M' ? 20 : 40);
 
   //Costo por mascota: 50 pesos por cada una, sin importar tamaño
-  const petSizeCost = pets.length * 50;
+  const petSizeCost = pets.length * pricesConfig.pricePet;
 
   //si hay acompañante son 100 pe mas
   var escortCost = 0;
   if (escort) {
-    escortCost = 100;
+    escortCost = pricesConfig.priceEscort;
   } else {
     escortCost = 0;
   }
 
   // Hay un costo por distancia: 25 pesos por km
-  const distanceCost = (distance / 1000) * 25;
+  const distanceCost = (distance / 1000) * pricesConfig.priceKm;
 
   //const getUtcTimeExtraCost = (utcHour: number) => (utcHour >= 0 && utcHour < 6 ? 50 : 0);
 
@@ -260,7 +261,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
   //const petsExtraCost = pets.reduce((acc, petSize) => (acc += getPetSizeExtraCost(petSize)), 0);
 
   //5 pesos por minuto
-  const durationCost = (duration / 60) * 5;
+  const durationCost = (duration / 60) * pricesConfig.priceMinute;
 
   //Deprecado por Alejandro
   // Si hay menos del 50% de los conductores disponibles, se agrega un recargo
@@ -269,7 +270,7 @@ async function calculateTripCost(distance: number, pets: string[], duration: num
   var totalCost = petSizeCost + escortCost + distanceCost + durationCost;
 
   if (isNocturneTime) {
-    totalCost = totalCost + totalCost * 0.5;
+    totalCost = totalCost + totalCost * pricesConfig.extraNocturnTime;
   }
 
   return totalCost;
