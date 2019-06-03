@@ -13,10 +13,19 @@ html, body, #root {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  height: 100%;
+}
+
+html {
+  height: 100vh;
+}
+
+body {
+  min-height: 100vh;
 }
 
 #root {
+  width: calc(100% - 200px);
+  height: calc(100% - 100px);
   margin: 0;
   padding: 50px 100px;
   background-color: rgba(0, 188, 212, 0.5); /* #00BCD4 */

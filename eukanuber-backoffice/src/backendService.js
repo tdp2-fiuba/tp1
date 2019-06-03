@@ -15,6 +15,43 @@ async function loginUser(username, password) {
   }
 }
 
+async function getTrips() {
+  try {
+    const result = await axios.get(`${baseUri}/trips`);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
+async function getUsers() {
+  try {
+    const result = await axios.get(`${baseUri}/users/all`);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
+async function updateUser(user, authToken) {
+  try {
+    const config = { headers: { authorization: authToken } };
+    const result = await axios.put(`${baseUri}/users`, user, config);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
 export default {
-  loginUser
+  loginUser,
+  getTrips,
+  getUsers,
+  updateUser
 };
