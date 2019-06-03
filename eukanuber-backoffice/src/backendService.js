@@ -37,8 +37,21 @@ async function getUsers() {
   }
 }
 
+async function updateUser(user, authToken) {
+  try {
+    const config = { headers: { authorization: authToken } };
+    const result = await axios.put(`${baseUri}/users`, user, config);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
 export default {
   loginUser,
   getTrips,
-  getUsers
+  getUsers,
+  updateUser
 };

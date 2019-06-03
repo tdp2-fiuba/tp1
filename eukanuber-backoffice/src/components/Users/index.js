@@ -1,12 +1,15 @@
 import React from "react";
-import { Grid, Button, Table, TableHead, TableBody, TableFooter, TableCell, TableRow, Paper, TextField } from "@material-ui/core";
+import { Link } from "react-router-dom";
+import { Grid, Button, Table, TableHead, TableBody, TableCell, TableRow, Paper, TextField, Modal, Typography, Select, MenuItem } from "@material-ui/core";
 import backendService from "../../backendService";
 import "./styles.css";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import userService from "../../userService";
 
 export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = { id: undefined, name: undefined, userType: undefined, state: undefined };
+    this.state = { id: undefined, name: undefined, userType: undefined, state: undefined, selectedUser: undefined };
   }
 
   componentDidMount() {
@@ -79,6 +82,17 @@ export default class Home extends React.PureComponent {
     }
   }
 
+  getAccess(access) {
+    switch (access) {
+      case 0:
+        return "Activo";
+      case 1:
+        return "Rechazado";
+      case 2:
+        return "Pendiente";
+    }
+  }
+
   getUserLocation(lat, lng) {
     if (!lat || !lng) {
       return null;
@@ -108,8 +122,10 @@ export default class Home extends React.PureComponent {
               <TableCell>Nombre</TableCell>
               <TableCell>Apellido</TableCell>
               <TableCell>Tipo de usuario</TableCell>
-              <TableCell>Estado</TableCell>
+              <TableCell>Estado del registro</TableCell>
+              <TableCell>Estado en la aplicación</TableCell>
               <TableCell>Ubicación</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -119,8 +135,14 @@ export default class Home extends React.PureComponent {
                 <TableCell>{row.firstName}</TableCell>
                 <TableCell>{row.lastName}</TableCell>
                 <TableCell>{this.getUserType(row.userType)}</TableCell>
+                <TableCell>{this.getAccess(row.access)}</TableCell>
                 <TableCell>{this.getState(row.state)}</TableCell>
                 <TableCell>{this.getUserLocation(row.latitude, row.longitude)}</TableCell>
+                <TableCell>
+                  <Link onClick={e => e.preventDefault() || this.setState({ selectedUser: row })} to={`/users?userId=${row.id}`}>
+                    Ver detalle
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -129,11 +151,59 @@ export default class Home extends React.PureComponent {
     );
   }
 
+  handleSelectedUserDataChange = (key, value) => {
+    const { selectedUser } = this.state;
+    selectedUser[key] = value;
+
+    this.setState({ selectedUser }, async () => {
+      const userInfo = userService.getUserInfo();
+      await backendService.updateUser(selectedUser, userInfo.token);
+    });
+
+    this.forceUpdate();
+  };
+
+  renderModal() {
+    const { selectedUser } = this.state;
+
+    if (!selectedUser) {
+      return undefined;
+    }
+
+    return (
+      <Modal open={selectedUser !== undefined} onClose={() => this.setState({ selectedUser: undefined })}>
+        <Paper className="users-modal" style={{ padding: "50px", width: 350 }}>
+          <div style={{ width: "100%", height: "150px", textAlign: "center" }}>
+            <AccountCircleIcon style={{ fontSize: 120 }} />
+          </div>
+          <Typography variant="h6" style={{ textAlign: "center", marginBottom: 5 }}>{`${selectedUser.firstName} ${selectedUser.lastName}`}</Typography>
+          <Typography variant="subtitle1">Tipo de usuario: {this.getUserType(selectedUser.userType)}</Typography>
+          <Typography variant="subtitle1">Estado en la aplicación: {this.getState(selectedUser.state)}</Typography>
+
+          <Typography variant="subtitle1">
+            Estado del registro:
+            <Select
+              style={{ marginLeft: 5 }}
+              value={selectedUser.access}
+              name="Estado del registro"
+              onChange={e => this.handleSelectedUserDataChange("access", e.target.value)}
+            >
+              <MenuItem value={0}>Activo</MenuItem>
+              <MenuItem value={1}>Rechazado</MenuItem>
+              <MenuItem value={2}>Pendiente</MenuItem>
+            </Select>
+          </Typography>
+        </Paper>
+      </Modal>
+    );
+  }
+
   render() {
     return (
       <Grid container direction="column" justify="center" alignItems="center">
         {this.renderSearchMenu()}
         {this.renderTableResults()}
+        {this.renderModal()}
       </Grid>
     );
   }
