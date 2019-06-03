@@ -1,4 +1,5 @@
 import Express from "express";
+import { base64encode } from "nodejs-base64";
 import dbRepository from "../db/db";
 
 interface ILoginData {
@@ -13,10 +14,11 @@ async function loginUser(req: Express.Request, res: Express.Response) {
     return res.status(400).json({ error: "You must provide a username and a password" });
   }
 
+  const encryptedPassword = base64encode(loginData.password);
   const userFound = await dbRepository
     .table("admins")
     .where("username", loginData.username)
-    .andWhere("password", loginData.password)
+    .andWhere("password", encryptedPassword)
     .select()
     .first();
 
