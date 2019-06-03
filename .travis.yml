@@ -2,18 +2,32 @@ language: node_js
 node_js: 10
 cache: npm
 
-before_install:
-  - cd eukanuber-backend
-
-install:
-  - npm ci
-
-script:
-  - npm run build
-  - npm run coverage
-
-deploy:
-  provider: heroku
-  app: eukanuber-backend
-  api_key:
-    secure: imVNCr8Alg0UYUK3V4FS3V/MDsJsqqxb4rq6tT6I8ZQxfUL7NikJh6cB+PXn4w+noDeXwGLAQhc/8rP1LegVAuDnI9T0mO6lNvDxP+0U8Juv8j5T4vlbi9mIkt78KQb9/p+KkALgRyPUUmIUM3uK/tZmQAko9XR+EKXNm9TSxBLG1g4xB5xaEhqeRUfftVKjFnoE82IX0kLU0op/RTABzlmifUbJeYHikjEBY/Jz4+N/9y768APfcO5YJ182BaHVBEF24g8N3LizN9ZhYytQQ5GsaZA/2NND/zl1p1ltTV78sEJeN1VMxQLZ9Vpf/B4T0pv/dpW3CNyXgSRyZbPVEH8K5/+Sk1/InFMpapb0P9h0vUoc5UNeAT/p7u6nXpphMweVzePiUzL53LhxyaFdVBJMScQsFj548HlsXFfmuVX3GrADNK0wMFsaw6B0xT4aB9ZLt1qqhuKWekvzqc0pVBvTUH3hVwZQyAJFOm9/pNkKQKt016oUHDMZINP155feZS6e7NNqglQFJDQwoBLAF0qSe/WK4mzd8hS4uarlpc6dLhothtTij/3BsNK+iXpLGBwEpqLI00WPmIJP9DHdmw09ILqe0YUE9IgvNN1so5k6spLGpLlgY1CYXsqD/gZ3JdOSHJR17c3Rfti+6PLmEz/7bTMB4X5EwUB+0mCxzj0=
+jobs:
+  include:
+    - stage: build
+      env: "Build eukanuber-backend"
+      before_install:
+        - cd eukanuber-backend
+      install:
+        - npm ci
+      script:
+        - npm run build
+        - npm run coverage
+      deploy:
+        provider: heroku
+        app: eukanuber-backend
+        api_key:
+          secure: imVNCr8Alg0UYUK3V4FS3V/MDsJsqqxb4rq6tT6I8ZQxfUL7NikJh6cB+PXn4w+noDeXwGLAQhc/8rP1LegVAuDnI9T0mO6lNvDxP+0U8Juv8j5T4vlbi9mIkt78KQb9/p+KkALgRyPUUmIUM3uK/tZmQAko9XR+EKXNm9TSxBLG1g4xB5xaEhqeRUfftVKjFnoE82IX0kLU0op/RTABzlmifUbJeYHikjEBY/Jz4+N/9y768APfcO5YJ182BaHVBEF24g8N3LizN9ZhYytQQ5GsaZA/2NND/zl1p1ltTV78sEJeN1VMxQLZ9Vpf/B4T0pv/dpW3CNyXgSRyZbPVEH8K5/+Sk1/InFMpapb0P9h0vUoc5UNeAT/p7u6nXpphMweVzePiUzL53LhxyaFdVBJMScQsFj548HlsXFfmuVX3GrADNK0wMFsaw6B0xT4aB9ZLt1qqhuKWekvzqc0pVBvTUH3hVwZQyAJFOm9/pNkKQKt016oUHDMZINP155feZS6e7NNqglQFJDQwoBLAF0qSe/WK4mzd8hS4uarlpc6dLhothtTij/3BsNK+iXpLGBwEpqLI00WPmIJP9DHdmw09ILqe0YUE9IgvNN1so5k6spLGpLlgY1CYXsqD/gZ3JdOSHJR17c3Rfti+6PLmEz/7bTMB4X5EwUB+0mCxzj0=
+    - stage: build
+      env: "Build eukanuber-backoffice"
+      before_install:
+        - cd eukanuber-backoffice
+      install:
+        - npm ci
+      script:
+        - npm run build
+      deploy:
+        provider: heroku
+        app: eukanuber-backoffice
+        api_key:
+          secure: imVNCr8Alg0UYUK3V4FS3V/MDsJsqqxb4rq6tT6I8ZQxfUL7NikJh6cB+PXn4w+noDeXwGLAQhc/8rP1LegVAuDnI9T0mO6lNvDxP+0U8Juv8j5T4vlbi9mIkt78KQb9/p+KkALgRyPUUmIUM3uK/tZmQAko9XR+EKXNm9TSxBLG1g4xB5xaEhqeRUfftVKjFnoE82IX0kLU0op/RTABzlmifUbJeYHikjEBY/Jz4+N/9y768APfcO5YJ182BaHVBEF24g8N3LizN9ZhYytQQ5GsaZA/2NND/zl1p1ltTV78sEJeN1VMxQLZ9Vpf/B4T0pv/dpW3CNyXgSRyZbPVEH8K5/+Sk1/InFMpapb0P9h0vUoc5UNeAT/p7u6nXpphMweVzePiUzL53LhxyaFdVBJMScQsFj548HlsXFfmuVX3GrADNK0wMFsaw6B0xT4aB9ZLt1qqhuKWekvzqc0pVBvTUH3hVwZQyAJFOm9/pNkKQKt016oUHDMZINP155feZS6e7NNqglQFJDQwoBLAF0qSe/WK4mzd8hS4uarlpc6dLhothtTij/3BsNK+iXpLGBwEpqLI00WPmIJP9DHdmw09ILqe0YUE9IgvNN1so5k6spLGpLlgY1CYXsqD/gZ3JdOSHJR17c3Rfti+6PLmEz/7bTMB4X5EwUB+0mCxzj0=

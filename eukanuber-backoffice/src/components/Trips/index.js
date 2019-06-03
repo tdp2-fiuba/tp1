@@ -32,6 +32,8 @@ export default class Home extends React.PureComponent {
         return "Viaje rechazado por conductor";
       case 9:
         return "Viaje cancelado por cliente";
+      default:
+        return "";
     }
   }
 
