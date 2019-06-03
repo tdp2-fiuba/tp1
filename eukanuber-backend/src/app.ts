@@ -18,6 +18,7 @@ app.use(requestLoggerMiddleware);
 app.get("/users/all", usersController.getUsers);
 app.post("/users/register", usersController.createUser);
 app.get("/users", usersController.getUserById);
+app.get("/users/:userId", usersController.getUserById);
 app.put("/users", usersController.updateUser);
 app.post("/users/review", usersController.submitUserReview);
 app.get("/users/:userId/rating", usersController.getUserRating);

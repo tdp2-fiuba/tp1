@@ -37,8 +37,23 @@ async function getUsers() {
   }
 }
 
+async function getUser(userId, authToken) {
+  try {
+    const config = { headers: { authorization: authToken } };
+    const result = await axios.get(`${baseUri}/users/${userId}`, config);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+    const dataError = error.response && error.response.data && error.response.data.error;
+    return { error: dataError || error.message };
+  }
+}
+
 async function updateUser(user, authToken) {
   try {
+    // delete images from user to reduce payload size
+    delete user.images;
+
     const config = { headers: { authorization: authToken } };
     const result = await axios.put(`${baseUri}/users`, user, config);
     return result.data;
@@ -53,5 +68,6 @@ export default {
   loginUser,
   getTrips,
   getUsers,
+  getUser,
   updateUser
 };

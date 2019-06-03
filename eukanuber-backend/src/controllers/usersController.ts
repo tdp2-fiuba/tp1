@@ -106,7 +106,7 @@ async function getUserIdIfLoggedWithValidCredentials(req: Express.Request, res: 
 
     // from login
     if (req.headers.authorization === "31bf9cabd66545538edd8d2c2ca8f0e3") {
-      return req.body.id;
+      return req.params.userId || req.body.id;
     }
 
     const token = req.headers.authorization.replace("Bearer ", "");

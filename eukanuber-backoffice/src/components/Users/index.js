@@ -9,7 +9,7 @@ import userService from "../../userService";
 export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = { id: undefined, name: undefined, userType: undefined, state: undefined, selectedUser: undefined };
+    this.state = { id: undefined, name: undefined, userType: undefined, state: undefined, selectedUser: undefined, selectedImage: undefined };
   }
 
   componentDidMount() {
@@ -29,7 +29,8 @@ export default class Home extends React.PureComponent {
 
   handleButtonClick = async () => {
     const { id, name, userType, state } = this.state;
-    const results = await backendService.getUsers();
+    const userInfo = userService.getUserInfo();
+    const results = await backendService.getUsers(userInfo.token);
     console.log(results);
 
     if (!results.length) {
@@ -43,6 +44,21 @@ export default class Home extends React.PureComponent {
       .filter(item => !state || this.getState(item.state).toLowerCase() === state.toLowerCase());
 
     this.setState({ results: filteredResults });
+  };
+
+  handleViewDetailsClick = async (e, selectedUser) => {
+    e.preventDefault();
+    this.setState({ selectedUser });
+    const userInfo = userService.getUserInfo();
+
+    await backendService.getUser(selectedUser.id, userInfo.token).then(result => {
+      if (result.error) {
+        return console.error(result.error);
+      }
+
+      console.log(result);
+      this.setState({ selectedUser: result });
+    });
   };
 
   renderSearchMenu() {
@@ -139,7 +155,7 @@ export default class Home extends React.PureComponent {
                 <TableCell>{this.getState(row.state)}</TableCell>
                 <TableCell>{this.getUserLocation(row.latitude, row.longitude)}</TableCell>
                 <TableCell>
-                  <Link onClick={e => e.preventDefault() || this.setState({ selectedUser: row })} to={`/users?userId=${row.id}`}>
+                  <Link onClick={e => this.handleViewDetailsClick(e, row)} to={`/users?userId=${row.id}`}>
                     Ver detalle
                   </Link>
                 </TableCell>
@@ -163,6 +179,64 @@ export default class Home extends React.PureComponent {
     this.forceUpdate();
   };
 
+  renderUserImages = images => {
+    const { selectedImage } = this.state;
+    if (!images || images.length === 0) {
+      return;
+    }
+
+    const handleImageLinkClick = (e, imageBase64) => {
+      e.preventDefault();
+      this.setState({ selectedImage: imageBase64 });
+    };
+
+    const profileImageFile = images.find(item => item.fileName === "profileImage");
+    const carPictureFile = images.find(item => item.fileName === "carPicture");
+    const licensePictureFile = images.find(item => item.fileName === "licensePicture");
+    const insurancePictureFile = images.find(item => item.fileName === "insurancePicture");
+
+    return (
+      <Grid container direction="column" style={{ marginTop: 10 }}>
+        <Typography variant="h6">Imágenes</Typography>
+        {profileImageFile && (
+          <Typography variant="subtitle1">
+            Imagen de perfil:
+            <Link onClick={e => handleImageLinkClick(e, profileImageFile.fileContent)} to="/" style={{ marginLeft: 5 }}>
+              Ver
+            </Link>
+          </Typography>
+        )}
+        {carPictureFile && (
+          <Typography variant="subtitle1">
+            Imagen del auto:
+            <Link onClick={e => handleImageLinkClick(e, carPictureFile.fileContent)} to="/" style={{ marginLeft: 5 }}>
+              Ver
+            </Link>
+          </Typography>
+        )}
+        {licensePictureFile && (
+          <Typography variant="subtitle1">
+            Licencia de conducir:
+            <Link onClick={e => handleImageLinkClick(e, licensePictureFile.fileContent)} to="/" style={{ marginLeft: 5 }}>
+              Ver
+            </Link>
+          </Typography>
+        )}
+        {insurancePictureFile && (
+          <Typography variant="subtitle1">
+            Carnet de seguro:
+            <Link onClick={e => handleImageLinkClick(e, insurancePictureFile.fileContent)} to="/" style={{ marginLeft: 5 }}>
+              Ver
+            </Link>
+          </Typography>
+        )}
+        <Modal open={selectedImage} onClose={() => this.setState({ selectedImage: undefined })}>
+          <img className="users-modal" src={`data:image/png;base64,${selectedImage}`} alt="Red dot" />
+        </Modal>
+      </Grid>
+    );
+  };
+
   renderModal() {
     const { selectedUser } = this.state;
 
@@ -176,10 +250,15 @@ export default class Home extends React.PureComponent {
           <div style={{ width: "100%", height: "150px", textAlign: "center" }}>
             <AccountCircleIcon style={{ fontSize: 120 }} />
           </div>
+
           <Typography variant="h6" style={{ textAlign: "center", marginBottom: 5 }}>{`${selectedUser.firstName} ${selectedUser.lastName}`}</Typography>
           <Typography variant="subtitle1">Tipo de usuario: {this.getUserType(selectedUser.userType)}</Typography>
+          {selectedUser.userType === "driver" && (
+            <Typography variant="subtitle1">
+              Tipo de auto: {selectedUser.car && `${selectedUser.car.brand} ${selectedUser.car.model} (Patente ${selectedUser.car.plateNumber})`}
+            </Typography>
+          )}
           <Typography variant="subtitle1">Estado en la aplicación: {this.getState(selectedUser.state)}</Typography>
-
           <Typography variant="subtitle1">
             Estado del registro:
             <Select
@@ -193,6 +272,7 @@ export default class Home extends React.PureComponent {
               <MenuItem value={2}>Pendiente</MenuItem>
             </Select>
           </Typography>
+          {this.renderUserImages(selectedUser.images)}
         </Paper>
       </Modal>
     );
