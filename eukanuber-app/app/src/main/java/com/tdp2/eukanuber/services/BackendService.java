@@ -28,9 +28,9 @@ import retrofit2.http.Query;
 
 public interface BackendService {
 
-    //String API_PATH = "http://192.168.0.27:3000/";
+    String API_PATH = "http://192.168.0.27:3000/";
     // String API_PATH = "http://10.0.2.2:3000/";
-    String API_PATH = "https://eukanuber-backend.herokuapp.com/";
+    //String API_PATH = "https://eukanuber-backend.herokuapp.com/";
 
     @GET("trips")
     Call<List<Trip>> getAll();
@@ -77,7 +77,7 @@ public interface BackendService {
     Call<Void> logoutUser();
 
 
-    @GET("users/lastTrip")
+    @GET("users/trip/lastTrip")
     Call<Trip> getLastTrip();
 
     @GET("users/drivers/pendingTrips")

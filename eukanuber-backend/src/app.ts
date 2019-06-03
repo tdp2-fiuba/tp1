@@ -23,7 +23,7 @@ app.put("/users", usersController.updateUser);
 app.post("/users/review", usersController.submitUserReview);
 app.get("/users/:userId/rating", usersController.getUserRating);
 app.get("/users/:userId/reviews", usersController.getUserReviews);
-app.get("/users/lastTrip", usersController.getUserLastTrip);
+app.get("/users/trip/lastTrip", usersController.getUserLastTrip);
 app.get("/users/:userId/status", usersController.getUserStatus);
 app.get("/users/position/:userId", usersController.getUserPosition);
 app.put("/users/position", usersController.updateUserPosition);
