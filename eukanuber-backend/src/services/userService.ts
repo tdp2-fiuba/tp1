@@ -23,23 +23,24 @@ async function getUsers() {
 }
 
 async function getUserById(id: string) {
-  const users = await db("users")
-    .leftJoin("cars", "users.id", "=", "cars.userId")
-    .innerJoin("userMedia", "users.id", "=", "userMedia.userId")
+  const userData = await db("users")
     .where("users.id", id)
-    .select();
+    .first();
 
-  if (!users) {
+  if (!userData) {
     return undefined;
   }
 
-  const userData = users[0];
-  const userImages = users.map((u: any) => ({
+  const userCarsResult = await db("cars").where("userId", id);
+  const userCar = userCarsResult && userCarsResult[0];
+
+  const userImagesResult = await db("userMedia").where("userId", id);
+  const userImages = userImagesResult.map((u: any) => ({
     fileName: u.fileName,
     fileContent: Buffer.from(u.fileContent).toString("base64")
   }));
 
-  const user = {
+  return {
     id,
     userType: userData.userType,
     firstName: userData.firstName,
@@ -48,14 +49,9 @@ async function getUserById(id: string) {
     access: userData.access,
     state: userData.state,
     images: userImages,
+    car: userCar,
     loggedIn: userData.loggedIn
   };
-
-  if (user.userType.toLowerCase() === "driver") {
-    return { ...user, car: { model: userData.model, brand: userData.brand, plateNumber: userData.plateNumber } };
-  }
-
-  return user;
 }
 
 async function getUserReviews(id: string) {

@@ -25,7 +25,7 @@ async function getUserById(req: Express.Request, res: Express.Response) {
     const user = await userService.getUserById(userId);
     res.json(user);
   } catch (e) {
-    res.sendStatus(409).json({ message: e });
+    res.status(409).json({ message: e });
   }
 }
 

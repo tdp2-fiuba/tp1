@@ -256,7 +256,8 @@ export default class Home extends React.PureComponent {
           {selectedUser.userType && <Typography variant="subtitle1">Tipo de usuario: {this.getUserType(selectedUser.userType)}</Typography>}
           {selectedUser.userType === "driver" && (
             <Typography variant="subtitle1">
-              Tipo de auto: {selectedUser.car && `${selectedUser.car.brand} ${selectedUser.car.model} (Patente ${selectedUser.car.plateNumber})`}
+              Tipo de auto:{" "}
+              {selectedUser.car ? `${selectedUser.car.brand} ${selectedUser.car.model} (${selectedUser.car.plateNumber})` : "No tiene auto asignado"}
             </Typography>
           )}
           {selectedUser.state !== undefined && <Typography variant="subtitle1">Estado en la aplicación: {this.getState(selectedUser.state)}</Typography>}
