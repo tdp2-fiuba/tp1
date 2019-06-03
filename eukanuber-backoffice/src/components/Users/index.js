@@ -48,8 +48,8 @@ export default class Home extends React.PureComponent {
 
   handleViewDetailsClick = async (e, selectedUser) => {
     e.preventDefault();
-    this.setState({ selectedUser });
     const userInfo = userService.getUserInfo();
+    this.setState({ selectedUser: { id: -1, firstName: selectedUser.firstName, lastName: selectedUser.lastName } });
 
     await backendService.getUser(selectedUser.id, userInfo.token).then(result => {
       if (result.error) {
@@ -117,7 +117,7 @@ export default class Home extends React.PureComponent {
     const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
     return (
       <a href={url} target="_blank">
-        Ver en Google Maps
+        Ver ubicación
       </a>
     );
   }
@@ -174,9 +174,8 @@ export default class Home extends React.PureComponent {
     this.setState({ selectedUser }, async () => {
       const userInfo = userService.getUserInfo();
       await backendService.updateUser(selectedUser, userInfo.token);
+      this.handleButtonClick();
     });
-
-    this.forceUpdate();
   };
 
   renderUserImages = images => {
@@ -230,7 +229,7 @@ export default class Home extends React.PureComponent {
             </Link>
           </Typography>
         )}
-        <Modal open={selectedImage} onClose={() => this.setState({ selectedImage: undefined })}>
+        <Modal open={selectedImage !== undefined} onClose={() => this.setState({ selectedImage: undefined })}>
           <img className="users-modal" src={`data:image/png;base64,${selectedImage}`} alt="Red dot" />
         </Modal>
       </Grid>
@@ -250,28 +249,32 @@ export default class Home extends React.PureComponent {
           <div style={{ width: "100%", height: "150px", textAlign: "center" }}>
             <AccountCircleIcon style={{ fontSize: 120 }} />
           </div>
-
-          <Typography variant="h6" style={{ textAlign: "center", marginBottom: 5 }}>{`${selectedUser.firstName} ${selectedUser.lastName}`}</Typography>
-          <Typography variant="subtitle1">Tipo de usuario: {this.getUserType(selectedUser.userType)}</Typography>
+          {selectedUser.firstName && (
+            <Typography variant="h6" style={{ textAlign: "center", marginBottom: 5 }}>{`${selectedUser.firstName} ${selectedUser.lastName}`}</Typography>
+          )}
+          {selectedUser.id === -1 && <Typography variant="subtitle1">Cargando datos..</Typography>}
+          {selectedUser.userType && <Typography variant="subtitle1">Tipo de usuario: {this.getUserType(selectedUser.userType)}</Typography>}
           {selectedUser.userType === "driver" && (
             <Typography variant="subtitle1">
               Tipo de auto: {selectedUser.car && `${selectedUser.car.brand} ${selectedUser.car.model} (Patente ${selectedUser.car.plateNumber})`}
             </Typography>
           )}
-          <Typography variant="subtitle1">Estado en la aplicación: {this.getState(selectedUser.state)}</Typography>
-          <Typography variant="subtitle1">
-            Estado del registro:
-            <Select
-              style={{ marginLeft: 5 }}
-              value={selectedUser.access}
-              name="Estado del registro"
-              onChange={e => this.handleSelectedUserDataChange("access", e.target.value)}
-            >
-              <MenuItem value={0}>Activo</MenuItem>
-              <MenuItem value={1}>Rechazado</MenuItem>
-              <MenuItem value={2}>Pendiente</MenuItem>
-            </Select>
-          </Typography>
+          {selectedUser.state !== undefined && <Typography variant="subtitle1">Estado en la aplicación: {this.getState(selectedUser.state)}</Typography>}
+          {selectedUser.access !== undefined && (
+            <Typography variant="subtitle1">
+              Estado del registro:
+              <Select
+                style={{ marginLeft: 5 }}
+                value={selectedUser.access}
+                name="Estado del registro"
+                onChange={e => this.handleSelectedUserDataChange("access", e.target.value)}
+              >
+                <MenuItem value={0}>Activo</MenuItem>
+                <MenuItem value={1}>Rechazado</MenuItem>
+                <MenuItem value={2}>Pendiente</MenuItem>
+              </Select>
+            </Typography>
+          )}
           {this.renderUserImages(selectedUser.images)}
         </Paper>
       </Modal>

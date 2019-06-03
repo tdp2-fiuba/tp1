@@ -23,10 +23,7 @@ async function getUserById(req: Express.Request, res: Express.Response) {
   try {
     const userId = await getUserIdIfLoggedWithValidCredentials(req, res);
     const user = await userService.getUserById(userId);
-    res
-      .status(200)
-      .json(user)
-      .send();
+    res.json(user);
   } catch (e) {
     res.sendStatus(409).json({ message: e });
   }
