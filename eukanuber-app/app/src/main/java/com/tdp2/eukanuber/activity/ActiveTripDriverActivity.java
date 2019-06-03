@@ -53,6 +53,8 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
     private Marker markerCar;
     private Activity mActivity;
     private Integer timeSimulationStep;
+    private Handler checkTripStatusHandler;
+    private Runnable checkTripStatusRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +105,7 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
                 Log.v("TRIP", t.getMessage());
             }
         });
+        checkTripStatus();
     }
 
     private void stepGoToOrigin(MapRoute route){
@@ -284,5 +287,47 @@ public class ActiveTripDriverActivity extends SecureActivity implements OnMapRea
         ).show();
     }
 
+
+    private void checkTripStatus() {
+        checkTripStatusHandler = new Handler();
+        checkTripStatusRunnable = new Runnable() {
+            @Override
+            public void run() {
+                TripService tripService = new TripService(mActivity);
+                Call<Trip> call = tripService.get(currentTrip.getId());
+                call.enqueue(new Callback<Trip>() {
+                    @Override
+                    public void onResponse(Call<Trip> call, Response<Trip> response) {
+                        currentTrip = response.body();
+                        if (currentTrip != null &&
+                                currentTrip.getStatus() == TripStatus.CANCELLED.ordinal()) {
+                            Intent intentHome = new Intent(mActivity, HomeDriverActivity.class);
+                            intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            showMessage("Viaje cancelado por el cliente");
+                            startActivity(intentHome);
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Trip> call, Throwable t) {
+                        Log.v("TRIP", t.getMessage());
+                    }
+                });
+                checkTripStatusHandler.postDelayed(this, 5000);
+
+
+            }
+        };
+        checkTripStatusHandler.postDelayed(checkTripStatusRunnable, 3000);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (checkTripStatusHandler != null && checkTripStatusRunnable != null) {
+            checkTripStatusHandler.removeCallbacks(checkTripStatusRunnable);
+        }
+    }
 
 }

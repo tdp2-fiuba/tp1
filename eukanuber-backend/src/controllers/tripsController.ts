@@ -1,5 +1,5 @@
 import Express from 'express';
-import {ICreateTripData, ILocation, ITrip, IUser, TripStatus} from '../models';
+import {ICreateTripData, ILocation, ITrip, TripStatus} from '../models';
 import {tripsService, userService} from '../services';
 import usersController from './usersController';
 import UserState from '../models/UserState';
@@ -104,6 +104,9 @@ async function updateTrip(req: Express.Request, res: Express.Response) {
                     updatedTrip.clientDetail = await userService.getUserById(updatedTrip.clientId);
                     updatedTrip.driverDetail = await userService.getUserById(updatedTrip.driverId);
                     updatedTrip.driverDetail.images = [updatedTrip.driverDetail.images[0]];
+                }
+                if (updatedTrip.status === TripStatus.CANCELLED){
+                    await userService.updateUserState(updatedTrip.driverId, UserState.IDLE);
                 }
                 res
                     .status(200)
