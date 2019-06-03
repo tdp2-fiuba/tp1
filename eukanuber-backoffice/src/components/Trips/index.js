@@ -159,7 +159,7 @@ export default class Home extends React.PureComponent {
                   <Link to={`/users?userId=${row.clientId}`}>{row.clientId}</Link>
                 </TableCell>
                 <TableCell>
-                  <Link to={`/users?userId=${row.clientId}`}>{row.driverId}</Link>
+                  <Link to={`/users?userId=${row.driverId}`}>{row.driverId}</Link>
                 </TableCell>
                 <TableCell>{row.pets}</TableCell>
                 <TableCell>{row.escort === true ? "Si" : "No"}</TableCell>
