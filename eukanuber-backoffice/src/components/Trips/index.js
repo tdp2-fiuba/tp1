@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Grid, Button, Table, TableHead, TableBody, TableFooter, TableCell, TableRow, Paper, TextField } from "@material-ui/core";
 import backendService from "../../backendService";
 import "./styles.css";
@@ -154,8 +155,12 @@ export default class Home extends React.PureComponent {
             {results.map(row => (
               <TableRow key={row.id}>
                 <TableCell>{row.createdDate && new Date(row.createdDate).toLocaleString()}</TableCell>
-                <TableCell>{row.clientId}</TableCell>
-                <TableCell>{row.driverId}</TableCell>
+                <TableCell>
+                  <Link to={`/users?userId=${row.clientId}`}>{row.clientId}</Link>
+                </TableCell>
+                <TableCell>
+                  <Link to={`/users?userId=${row.clientId}`}>{row.driverId}</Link>
+                </TableCell>
                 <TableCell>{row.pets}</TableCell>
                 <TableCell>{row.escort === true ? "Si" : "No"}</TableCell>
                 <TableCell>{row.origin}</TableCell>

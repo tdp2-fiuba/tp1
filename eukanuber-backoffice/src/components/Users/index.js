@@ -9,6 +9,21 @@ export default class Home extends React.PureComponent {
     this.state = { id: undefined, name: undefined, userType: undefined, state: undefined };
   }
 
+  componentDidMount() {
+    const queryString = window.location.search.substring(1);
+    if (!queryString) {
+      return;
+    }
+
+    const userIdQueryString = queryString.split("&").find(item => item.indexOf("userId=") !== -1);
+    if (!userIdQueryString) {
+      return;
+    }
+
+    const userId = userIdQueryString.substring("userId=".length);
+    this.setState({ id: userId }, this.handleButtonClick);
+  }
+
   handleButtonClick = async () => {
     const { id, name, userType, state } = this.state;
     const results = await backendService.getUsers();
