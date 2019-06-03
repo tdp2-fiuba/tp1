@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const baseUri = "http://localhost:3000";
+const baseUri = "https://eukanuber-backend.herokuapp.com";
+// const baseUri = "http://localhost:3000";
 
 async function loginUser(username, password) {
   const userInfo = { username, password };
