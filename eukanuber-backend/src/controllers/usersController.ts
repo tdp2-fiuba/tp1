@@ -12,10 +12,7 @@ async function getUsers(req: Express.Request, res: Express.Response) {
     const users = await userService.getUsers();
     res.json(users);
   } catch (e) {
-    res
-      .status(409)
-      .json({ message: e.message })
-      .send();
+    res.status(409).json({ message: e.message });
   }
 }
 
