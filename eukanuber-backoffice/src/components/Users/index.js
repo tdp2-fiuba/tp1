@@ -95,6 +95,8 @@ export default class Home extends React.PureComponent {
         return "Esperando confirmación de viaje";
       case 3:
         return "En un viaje";
+      default:
+        return "";
     }
   }
 
@@ -106,6 +108,8 @@ export default class Home extends React.PureComponent {
         return "Rechazado";
       case 2:
         return "Pendiente";
+      default:
+        return "";
     }
   }
 
@@ -116,7 +120,7 @@ export default class Home extends React.PureComponent {
 
     const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
     return (
-      <a href={url} target="_blank">
+      <a href={url} target="_blank" rel="noopener noreferrer">
         Ver ubicación
       </a>
     );
