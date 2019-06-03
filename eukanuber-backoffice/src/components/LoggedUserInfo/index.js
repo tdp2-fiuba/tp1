@@ -24,7 +24,7 @@ class LoggedUserInfo extends React.PureComponent {
           {userInfo.username}
         </Typography>
         <Button variant="outlined" onClick={this.handleLogoutClick}>
-          Logout
+          Salir
         </Button>
       </Grid>
     );

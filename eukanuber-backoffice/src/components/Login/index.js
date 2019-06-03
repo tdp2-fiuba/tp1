@@ -33,7 +33,7 @@ class Login extends React.PureComponent {
 
     return (
       <Grid container direction="column" justify="center" alignItems="center" style={{ marginBottom: 25 }}>
-        <Typography variant="h5">Sign in</Typography>
+        <Typography variant="h5">Ingreso a la aplicación</Typography>
         <form className="login-form" noValidate autoComplete="off">
           <TextField
             variant="outlined"
@@ -63,7 +63,7 @@ class Login extends React.PureComponent {
             onChange={evt => this.setState({ password: evt.target.value })}
           />
           <Button disabled={!username || !password} type="submit" fullWidth variant="contained" color="primary" onClick={this.handleLoginClicked}>
-            Log In
+            Ingresar
           </Button>
           {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
         </form>
