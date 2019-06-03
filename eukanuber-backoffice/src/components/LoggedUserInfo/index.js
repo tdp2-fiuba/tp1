@@ -4,7 +4,7 @@ import userService from "../../userService";
 import { Grid, Typography, Button } from "@material-ui/core";
 import "./styles.css";
 
-class UserInfo extends React.PureComponent {
+class LoggedUserInfo extends React.PureComponent {
   handleLogoutClick = () => {
     const { history } = this.props;
     userService.logout();
@@ -31,4 +31,4 @@ class UserInfo extends React.PureComponent {
   }
 }
 
-export default withRouter(UserInfo);
+export default withRouter(LoggedUserInfo);

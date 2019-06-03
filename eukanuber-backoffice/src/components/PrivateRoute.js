@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Redirect, Link } from "react-router-dom";
 import { Grid } from "@material-ui/core";
-import UserInfo from "./UserInfo";
+import LoggedUserInfo from "./LoggedUserInfo";
 import userService from "../userService";
 
 export default ({ component: Component, ...rest }) => (
@@ -16,7 +16,7 @@ export default ({ component: Component, ...rest }) => (
 
       return (
         <>
-          <UserInfo />
+          <LoggedUserInfo />
           <Grid container direction="row" justify="center" alignItems="center" style={{ marginBottom: 25 }}>
             <Link to="/trips" style={{ marginRight: 25 }}>
               Viajes
