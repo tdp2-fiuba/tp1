@@ -17,10 +17,12 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.JsonObject;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.manager.AppSecurityManager;
+import com.tdp2.eukanuber.model.FirebaseTokenRequest;
 import com.tdp2.eukanuber.model.LoginResponse;
 import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.model.UserImage;
@@ -151,6 +153,8 @@ public class RegisterClientActivity extends BaseActivity {
                 }
                 LoginResponse loginResponse = response.body();
                 AppSecurityManager.login(settings, userRegisterRequest.getFbAccessToken(), userRegisterRequest.getFbId(), loginResponse.getToken(), loginResponse.getUser());
+                updateFirebaseToken();
+
                 if (loginResponse.getUser().getUserType().equals(User.USER_TYPE_DRIVER)) {
                     Intent intent = new Intent(mActivity, HomeDriverActivity.class);
                     startActivity(intent);
@@ -179,4 +183,32 @@ public class RegisterClientActivity extends BaseActivity {
                 Toast.LENGTH_LONG
         ).show();
     }
+
+
+    protected void updateFirebaseToken(){
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FIREBASE TOKEN", "getInstanceId failed", task.getException());
+                        return;
+                    }
+                    String token = task.getResult().getToken();
+                    Log.d("TOKEN FIREBASE", token);
+                    UserService userService = new UserService(this);
+                    FirebaseTokenRequest firebaseTokenRequest = new FirebaseTokenRequest(token);
+                    Call<Void> call = userService.updateFirebaseToken(firebaseTokenRequest);
+                    call.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            response.body();
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.d("updateFirebaseToken Err", t.getMessage());
+                        }
+                    });
+                });
+    }
+
 }
