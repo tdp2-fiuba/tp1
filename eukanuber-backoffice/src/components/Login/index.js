@@ -43,7 +43,7 @@ class Login extends React.PureComponent {
             autoFocus
             id="username"
             name="username"
-            label="Username"
+            label="Usuario"
             placeholder="admin"
             value={username}
             onChange={evt => this.setState({ username: evt.target.value })}
@@ -55,7 +55,7 @@ class Login extends React.PureComponent {
             fullWidth
             id="password"
             name="password"
-            label="Password"
+            label="Clave"
             type="password"
             placeholder="admin"
             autoComplete="current-password"

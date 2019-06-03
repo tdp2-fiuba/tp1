@@ -64,6 +64,19 @@ export default class Home extends React.PureComponent {
     }
   }
 
+  getUserLocation(lat, lng) {
+    if (!lat || !lng) {
+      return null;
+    }
+
+    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    return (
+      <a href={url} target="_blank">
+        Ver en Google Maps
+      </a>
+    );
+  }
+
   renderTableResults() {
     const { results } = this.state;
 
@@ -92,7 +105,7 @@ export default class Home extends React.PureComponent {
                 <TableCell>{row.lastName}</TableCell>
                 <TableCell>{this.getUserType(row.userType)}</TableCell>
                 <TableCell>{this.getState(row.state)}</TableCell>
-                <TableCell>{`${row.latitude},${row.longitude}`}</TableCell>
+                <TableCell>{this.getUserLocation(row.latitude, row.longitude)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
