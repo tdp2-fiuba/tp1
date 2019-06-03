@@ -92,7 +92,7 @@ export default class Home extends React.PureComponent {
   };
 
   renderSearchMenu() {
-    const { fromDate, toDate, clientId, driverId } = this.state;
+    const { fromDate, toDate, clientId, driverId, status } = this.state;
 
     const handleChange = name => event => {
       this.setState({ [name]: event.target.value });
@@ -122,7 +122,7 @@ export default class Home extends React.PureComponent {
         />
         <TextField label="ID Cliente" value={clientId} onChange={handleChange("clientId")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
         <TextField label="ID Conductor" value={driverId} onChange={handleChange("driverId")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
-        <TextField label="Estado" value={driverId} onChange={handleChange("status")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
+        <TextField label="Estado" value={status} onChange={handleChange("status")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
         <Button variant="contained" color="primary" size="large" onClick={this.handleButtonClick}>
           Buscar
         </Button>
