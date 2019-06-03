@@ -31,7 +31,7 @@ app.post("/users/login/:fbId", usersController.userLogin);
 app.delete("/users/:fbId", usersController.deleteUser);
 app.post("/users/logout", usersController.userLogout);
 app.get("/users/drivers/pendingTrips", usersController.getDriverPendingTrips);
-app.get("/users/finishedTrips", usersController.getFinishedTrips);
+app.get("/users/trip/finishedTrips", usersController.getFinishedTrips);
 app.put("/users/firebase", usersController.newFirebaseToken);
 
 // Trips endpoints

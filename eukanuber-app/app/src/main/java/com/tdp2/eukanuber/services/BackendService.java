@@ -92,7 +92,7 @@ public interface BackendService {
     @POST("users/review")
     Call<Void> sendFeedback(@Body FeedbackRequest feedbackRequest);
 
-    @GET("users/finishedTrips")
+    @GET("users/trip/finishedTrips")
     Call<List<Trip>> getFinishedTrips();
 
     @GET("users/{userId}/rating")
