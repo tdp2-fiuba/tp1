@@ -7,7 +7,7 @@ import "./styles.css";
 export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = { fromDate: undefined, toDate: undefined, clientId: undefined, driverId: undefined, results: undefined };
+    this.state = { fromDate: undefined, toDate: undefined, clientId: undefined, driverId: undefined, status: undefined, results: undefined };
   }
 
   getStatus(status) {
@@ -38,7 +38,7 @@ export default class Home extends React.PureComponent {
   }
 
   handleButtonClick = async () => {
-    const { fromDate, toDate, clientId, driverId } = this.state;
+    const { fromDate, toDate, clientId, driverId, status } = this.state;
     const results = await backendService.getTrips();
     console.log(results);
 
@@ -78,13 +78,21 @@ export default class Home extends React.PureComponent {
         to.setSeconds(59);
 
         return to >= new Date(item.createdDate);
+      })
+      .filter(item => {
+        if (!status) {
+          return true;
+        }
+
+        const itemStatus = this.getStatus(item.status);
+        return itemStatus.toLowerCase() === status.toLowerCase();
       });
 
     this.setState({ results: filteredResults });
   };
 
   renderSearchMenu() {
-    const { fromDate, toDate, clientId, driverId } = this.state;
+    const { fromDate, toDate, clientId, driverId, status } = this.state;
 
     const handleChange = name => event => {
       this.setState({ [name]: event.target.value });
@@ -114,6 +122,7 @@ export default class Home extends React.PureComponent {
         />
         <TextField label="ID Cliente" value={clientId} onChange={handleChange("clientId")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
         <TextField label="ID Conductor" value={driverId} onChange={handleChange("driverId")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
+        <TextField label="Estado" value={status} onChange={handleChange("status")} margin="normal" variant="outlined" style={{ marginRight: 10 }} />
         <Button variant="contained" color="primary" size="large" onClick={this.handleButtonClick}>
           Buscar
         </Button>

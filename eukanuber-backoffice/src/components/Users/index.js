@@ -9,7 +9,15 @@ import userService from "../../userService";
 export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = { id: undefined, name: undefined, userType: undefined, state: undefined, selectedUser: undefined, selectedImage: undefined };
+    this.state = {
+      results: undefined,
+      id: undefined,
+      name: undefined,
+      userType: undefined,
+      state: undefined,
+      selectedUser: undefined,
+      selectedImage: undefined
+    };
   }
 
   componentDidMount() {
@@ -172,13 +180,23 @@ export default class Home extends React.PureComponent {
   }
 
   handleSelectedUserDataChange = (key, value) => {
-    const { selectedUser } = this.state;
-    selectedUser[key] = value;
+    const { selectedUser, results } = this.state;
 
-    this.setState({ selectedUser }, async () => {
+    const newSelectedUser = {
+      ...selectedUser,
+      [key]: value
+    };
+
+    const newResults = results.map(item => {
+      if (item.id === newSelectedUser.id) {
+        item[key] = value;
+      }
+      return item;
+    });
+
+    this.setState({ selectedUser: newSelectedUser, results: newResults }, async () => {
       const userInfo = userService.getUserInfo();
-      await backendService.updateUser(selectedUser, userInfo.token);
-      this.handleButtonClick();
+      await backendService.updateUser(newSelectedUser, userInfo.token);
     });
   };
 
