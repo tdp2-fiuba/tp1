@@ -3,7 +3,10 @@ package com.tdp2.eukanuber.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -12,11 +15,14 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.tdp2.eukanuber.R;
 import com.tdp2.eukanuber.activity.interfaces.ShowMessageInterface;
 import com.tdp2.eukanuber.manager.MapManager;
 import com.tdp2.eukanuber.model.Trip;
 import com.tdp2.eukanuber.model.TripStatus;
+import com.tdp2.eukanuber.model.UpdateUserPositionRequest;
+import com.tdp2.eukanuber.model.User;
 import com.tdp2.eukanuber.services.UserService;
 
 import retrofit2.Call;
@@ -94,7 +100,6 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
         switch (requestCode) {
             case MapManager.PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mapManager.setCurrentLocation();
 
                 } else {
                     Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
@@ -109,11 +114,32 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        mapManager.setCurrentLocation();
-      /*  LocationListener locationListener = new LocationListener() {
+        LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
+                mapManager.setCurrentLocation(location);
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                mapManager.moveCamera(currentPosition);
+                if (mMap != null) {
+                    UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(currentPosition.latitude), String.valueOf(currentPosition.longitude));
+                    UserService userService = new UserService(mActivity);
+                    Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
+                    call.enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, Response<User> response) {
+                            User userUpdated = response.body();
+                            if (userUpdated != null) {
+                                Log.d("USER UPDATED", userUpdated.getId());
+                            }
+
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {
+                            Log.d("UPDATE USER POSITION", t.getMessage());
+                        }
+                    });
+
+                }
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -125,7 +151,7 @@ public class HomeClientActivity extends SecureActivity implements OnMapReadyCall
             public void onProviderDisabled(String provider) {
             }
         };
-        mapManager.setListener(locationListener);*/
+        mapManager.setListener(locationListener);
     }
 
     public void showMessage(String message) {

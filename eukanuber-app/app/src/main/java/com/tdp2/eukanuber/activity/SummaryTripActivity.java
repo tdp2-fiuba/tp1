@@ -113,8 +113,6 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
         switch (requestCode) {
             case MapManager.PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mapManager.setCurrentLocation();
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
                             Toast.LENGTH_SHORT).show();
@@ -128,8 +126,6 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        //  mapManager.setCurrentLocation();
-
         drawSummaryPath();
 
     }

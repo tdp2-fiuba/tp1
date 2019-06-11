@@ -75,19 +75,19 @@ public class MapManager {
         }
     }
 
-    public void setCurrentLocation() {
-        if (ContextCompat.checkSelfPermission(mContext,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
-        mMap.setMinZoomPreference(10.0f);
-        mMap.setMaxZoomPreference(20.0f);
-        Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+    public void setCurrentLocation(Location location) {
         if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             moveCamera(position);
         }
+    }
+
+    public Location getCurrentLocation(){
+        if (ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        return mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
     }
 
     public void moveCamera(LatLng position) {
@@ -117,7 +117,7 @@ public class MapManager {
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
     }
 
     public void drawPath(MapRoutePolyline mapRoutePolyline) {

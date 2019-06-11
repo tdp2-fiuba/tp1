@@ -340,18 +340,18 @@ async function getUserTripReview(tripId: string, userId: string) {
 async function getFinishedTrips(userId: string, isDriver: boolean) {
   try {
     let finishedTrips = [];
-    console.log('isDriver: ', isDriver);
+    console.log(userId.trim());
     if (isDriver) {
       finishedTrips = await db
         .table('trips')
-        .where('driverId', userId)
+        .where('driverId', userId.trim())
         .andWhere('status', TripStatus.COMPLETED)
         .orderBy('createdDate', 'desc')
         .select();
     } else {
       finishedTrips = await db
         .table('trips')
-        .where('clientId', userId)
+        .where('clientId', userId.trim())
         .andWhere('status', TripStatus.COMPLETED)
         .orderBy('createdDate', 'desc')
         .select();
@@ -359,6 +359,7 @@ async function getFinishedTrips(userId: string, isDriver: boolean) {
     if (finishedTrips === undefined) {
       return [];
     }
+    console.log(finishedTrips);
     for (const trip of finishedTrips) {
       trip.clientDetail = await userService.getUserById(trip.clientId);
       trip.driverDetail = await userService.getUserById(trip.driverId);

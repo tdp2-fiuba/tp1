@@ -211,8 +211,6 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         switch (requestCode) {
             case MapManager.PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mapManager.setCurrentLocation();
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
                             Toast.LENGTH_SHORT).show();

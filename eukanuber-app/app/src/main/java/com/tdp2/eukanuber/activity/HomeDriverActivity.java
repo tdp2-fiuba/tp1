@@ -336,8 +336,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
         switch (requestCode) {
             case MapManager.PERMISSION_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mapManager.setCurrentLocation();
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Sin permisos necesarios para utilizar la aplicacion",
                             Toast.LENGTH_SHORT).show();
@@ -351,38 +349,31 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapManager = new MapManager(mMap, this);
-        mapManager.setCurrentLocation();
-        Location location = this.getLastKnownLocation();
-
-        if (location == null) {
-            return;
-        }
-
-        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(position.latitude), String.valueOf(position.longitude));
-        UserService userService = new UserService(this);
-        Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
-        call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                User userUpdated = response.body();
-                if (userUpdated != null) {
-                    Log.d("USER UPDATED", userUpdated.getId());
-                }
-
-
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.d("UPDATE USER POSITION", t.getMessage());
-            }
-        });
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
+                mapManager.setCurrentLocation(location);
                 LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 if (mMap != null) {
-                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                    UpdateUserPositionRequest updateUserPositionRequest = new UpdateUserPositionRequest(String.valueOf(currentPosition.latitude), String.valueOf(currentPosition.longitude));
+                    UserService userService = new UserService(mActivity);
+                    Call<User> call = userService.updatePositionUser(updateUserPositionRequest);
+                    call.enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, Response<User> response) {
+                            User userUpdated = response.body();
+                            if (userUpdated != null) {
+                                Log.d("USER UPDATED", userUpdated.getId());
+                            }
+
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {
+                            Log.d("UPDATE USER POSITION", t.getMessage());
+                        }
+                    });
+
                 }
             }
 
@@ -396,31 +387,6 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
             }
         };
         mapManager.setListener(locationListener);
-    }
-
-    private Location getLastKnownLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return null;
-        }
-
-        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-
-        for (String provider : providers) {
-            Location location = locationManager.getLastKnownLocation(provider);
-
-            if (location == null) {
-                continue;
-            }
-
-            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = location;
-            }
-        }
-
-        return bestLocation;
     }
 
     @Override
