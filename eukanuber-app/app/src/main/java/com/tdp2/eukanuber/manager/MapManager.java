@@ -61,11 +61,6 @@ public class MapManager {
                 new LatLng(-34.594404, -58.424455),
                 new LatLng(-34.586650, -58.375858));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.getCenter(), 12));
-
-        checkPermissionsLocation();
-    }
-
-    public void checkPermissionsLocation() {
         if (ContextCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -73,27 +68,29 @@ public class MapManager {
                     PERMISSION_FINE_LOCATION);
             return;
         }
+        mMap.setMyLocationEnabled(true);
+
     }
 
     public void setCurrentLocation(Location location) {
+        if (ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_FINE_LOCATION);
+            return;
+        }
         if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             moveCamera(position);
         }
     }
 
-    public Location getCurrentLocation(){
-        if (ContextCompat.checkSelfPermission(mContext,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return null;
-        }
-        return mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-    }
 
     public void moveCamera(LatLng position) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(position)
-                .zoom(18)
+                .zoom(16)
                 .tilt(40).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
     }
@@ -117,7 +114,7 @@ public class MapManager {
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 300, locationListener);
     }
 
     public void drawPath(MapRoutePolyline mapRoutePolyline) {

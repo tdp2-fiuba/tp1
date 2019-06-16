@@ -176,7 +176,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
 
 
     private void openPopupNewTripDriver(View v, Trip trip, String currentDateTime) {
-        secondsPopup = 20;
+        secondsPopup = 40;
         if (currentDateTime != null) {
             try {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -184,7 +184,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                 Date currentDate = new Date();
                 long diff = currentDate.getTime() - dateNotification.getTime();
                 int diffSeconds = (int) (diff / 1000 % 60);
-                secondsPopup = 20 - diffSeconds;
+                secondsPopup = 40 - diffSeconds;
                 if (secondsPopup <= 0) {
                     return;
                 }
@@ -273,6 +273,7 @@ public class HomeDriverActivity extends SecureActivity implements OnMapReadyCall
                     popupWindow.dismiss();
                     Trip trip = response.body();
                     showMessage("El viaje ha sido confirmado.");
+                    popupOpen = false;
                     beginTrip(trip);
                 }
 

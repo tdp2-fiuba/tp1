@@ -54,7 +54,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_trip);
         this.createMenu(userLogged);
-        timeSimulationStep = 5000;
+        timeSimulationStep = 7000;
         mContext = this;
         Intent intent = getIntent();
         currentTrip = (Trip) intent.getSerializableExtra("currentTrip");
@@ -108,7 +108,7 @@ public class TrackingTripActivity extends SecureActivity implements OnMapReadyCa
 
                 });
                 if (currentTrip.getStatus() != TripStatus.COMPLETED.ordinal()) {
-                    checkDriverPositionHandler.postDelayed(this, timeSimulationStep/2);
+                    checkDriverPositionHandler.postDelayed(this, 7000);
                 }
             }
         };

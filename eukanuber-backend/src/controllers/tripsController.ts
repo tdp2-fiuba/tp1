@@ -164,7 +164,7 @@ async function assignDriverToTrip(trip: ITrip, drivers: Array<any>) {
             let timeout = setTimeout(function () {
                 timeoutReached = true;
                 console.log('Driver timeout reached!');
-            }, 30000);
+            }, 50000);
 
             let accepted = false;
             let rejected = false;

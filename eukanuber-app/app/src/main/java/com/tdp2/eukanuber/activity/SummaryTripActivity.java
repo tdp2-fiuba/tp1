@@ -91,7 +91,6 @@ public class SummaryTripActivity extends SecureActivity implements OnMapReadyCal
                     Intent intentTrackingTrip = new Intent(mContext, TrackingTripActivity.class);
                     intentTrackingTrip.putExtra("currentTrip", currentTrip);
                     intentTrackingTrip.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    showMessage("Viaje confirmado");
                     startActivity(intentTrackingTrip);
                 }
 

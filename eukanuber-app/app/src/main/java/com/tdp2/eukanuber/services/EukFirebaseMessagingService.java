@@ -90,7 +90,7 @@ public class EukFirebaseMessagingService extends FirebaseMessagingService {
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent)
                         .setContent(contentView)
-                        .setTimeoutAfter(20000);
+                        .setTimeoutAfter(40000);
 
         notificationManager.notify(notificationId, notificationBuilder.build());
         Intent intent = new Intent("NewTrip");

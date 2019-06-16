@@ -31,8 +31,8 @@ public class ClientService {
                         .build();
                 return chain.proceed(newRequest);
             })
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(120, TimeUnit.SECONDS)
+                    .connectTimeout(120, TimeUnit.SECONDS)
                     .build();
         }
 
