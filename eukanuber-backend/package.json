@@ -25,7 +25,7 @@
     "express": "^4.17.1",
     "firebase-admin": "^8.0.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.16.5",
+    "knex": "^0.19.5",
     "knex-migrate": "^1.7.2",
     "knex-postgis": "^0.8.0",
     "moment": "^2.24.0",
