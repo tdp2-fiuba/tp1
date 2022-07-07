@@ -28,7 +28,7 @@
     "knex": "^0.16.5",
     "knex-migrate": "^1.7.2",
     "knex-postgis": "^0.8.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "multer": "^1.4.1",
     "nodejs-base64": "^1.0.3",
     "objection": "^1.6.9",
